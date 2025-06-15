@@ -1,0 +1,8 @@
+{
+  "name": "AI Awareness: Face & Voice",
+  "description": "An interactive web application to educate users about AI-generated content like deepfakes and voice cloning, and how to identify potential scams.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "prompt": ""
+}
