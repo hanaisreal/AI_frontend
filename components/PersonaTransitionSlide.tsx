@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Button from './Button';
 import NarrationPlayer from './NarrationPlayer';
 import { Page, UserData } from '../types';
@@ -21,6 +21,7 @@ const PersonaTransitionSlide: React.FC<PersonaTransitionSlideProps> = ({
   script,
 }) => {
   const [canContinue, setCanContinue] = useState(false);
+  const narrationPlayerRef = useRef<any>(null);
 
   useEffect(() => {
     // Allows continuing after a short delay, to encourage listening
@@ -31,16 +32,20 @@ const PersonaTransitionSlide: React.FC<PersonaTransitionSlideProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
+  const handleNext = () => {
+    // Stop audio immediately when user clicks continue
+    if (narrationPlayerRef.current && narrationPlayerRef.current.stopAudio) {
+      narrationPlayerRef.current.stopAudio();
+    }
+    onNext();
+  };
+
   return (
     <div className="text-center">
-      <h2 className="text-3xl font-bold mb-4">이제, AI 아바타가 되어 교육을 진행합니다.</h2>
-      <p className="text-lg text-slate-600 mb-8">
-        생성된 AI 아바타가 여러분의 목소리로 교육 내용을 설명합니다.
-      </p>
-
       <div className="max-w-md mx-auto mb-8">
         {caricatureUrl && talkingPhotoUrl && voiceId && (
           <NarrationPlayer
+            ref={narrationPlayerRef}
             script={script}
             voiceId={voiceId}
             imageUrl={caricatureUrl}
@@ -52,7 +57,7 @@ const PersonaTransitionSlide: React.FC<PersonaTransitionSlideProps> = ({
       </div>
 
       <Button
-        onClick={onNext}
+        onClick={handleNext}
         disabled={!canContinue}
         size="lg"
         variant="primary"

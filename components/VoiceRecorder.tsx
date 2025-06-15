@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import useAudioRecorder, { RecordingState } from '../hooks/useAudioRecorder.ts';
 import Button from './Button.tsx';
@@ -10,7 +9,9 @@ interface VoiceRecorderProps {
   maxDuration?: number; // in seconds, e.g., 30
 }
 
-const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scriptToRead, maxDuration = 30 }) => {
+const MIN_DURATION = 20; // Minimum 20 seconds for better voice cloning
+
+const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scriptToRead, maxDuration = 60 }) => {
   const {
     recordingState,
     startRecording,
@@ -21,12 +22,18 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scri
     duration,
     resetRecorder
   } = useAudioRecorder();
+  const [isTooShort, setIsTooShort] = React.useState(false);
 
   useEffect(() => {
     if (audioBlob && recordingState === RecordingState.STOPPED) {
-      onRecordingComplete(audioBlob);
+      if (duration < MIN_DURATION) {
+        setIsTooShort(true);
+      } else {
+        setIsTooShort(false);
+        onRecordingComplete(audioBlob);
+      }
     }
-  }, [audioBlob, recordingState, onRecordingComplete]);
+  }, [audioBlob, recordingState, onRecordingComplete, duration]);
 
   useEffect(() => {
     if (recordingState === RecordingState.RECORDING && duration >= maxDuration) {
@@ -38,6 +45,11 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scri
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = timeInSeconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleReset = () => {
+    setIsTooShort(false);
+    resetRecorder();
   };
 
   return (
@@ -82,7 +94,12 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scri
           <div className="text-center w-full">
             <p className="text-green-600 text-lg mb-3">녹음 완료! 길이: {formatTime(duration)}</p>
             <audio controls src={audioUrl} className="w-full mb-4"></audio>
-            <Button onClick={resetRecorder} variant="secondary" size="md">다시 녹음</Button>
+            {isTooShort && (
+              <p className="text-red-600 text-base mb-4 bg-red-100 p-3 rounded-lg">
+                더 나은 음성 복제를 위해 최소 {MIN_DURATION}초 이상 녹음해주세요.
+              </p>
+            )}
+            <Button onClick={handleReset} variant="secondary" size="md">다시 녹음</Button>
           </div>
         )}
         

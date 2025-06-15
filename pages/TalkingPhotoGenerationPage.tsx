@@ -56,7 +56,7 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
 
     const generate = async () => {
       try {
-        setStatusMessage("캐릭터가 말하는 비디오를 생성하고 있어요... (최대 2분 소요)");
+        setStatusMessage("캐릭터가 말하는 비디오를 생성하고 있어요... (최대 4분 소요)");
         const result = await apiService.generateTalkingPhoto(caricatureUrl, userData?.name || "사용자", voiceId!);
         
         setTalkingPhotoUrl(result.videoUrl);
@@ -81,9 +81,10 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
           <div className="text-center py-10">
             <LoadingSpinner size="lg" />
             <p className="mt-6 text-xl text-orange-600">{statusMessage}</p>
-            <p className="mt-4 text-slate-500">이 작업은 최대 2분까지 소요될 수 있습니다. 페이지를 나가지 마세요.</p>
+            <p className="mt-4 text-slate-500">이 작업은 최대 4분까지 소요될 수 있습니다. 페이지를 나가지 마세요.</p>
           </div>
         )}
+        
         {!isLoading && error && (
           <div className="text-center py-10">
             <p className="text-red-600 text-2xl mb-4 font-semibold">오류</p>
@@ -105,7 +106,6 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
                         controls
                         autoPlay
                         loop
-                        muted
                         playsInline
                         crossOrigin="anonymous"
                         preload="metadata"
@@ -154,8 +154,8 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
             </div>
             <p className="text-base text-slate-600 mb-10">(어떤가요? 말하는 캐릭터가 생겼어요!)</p>
 
-            <Button onClick={() => setCurrentPage(Page.IntroductionEducation)} variant="primary" size="lg">
-              다음: 더 알아보기
+            <Button onClick={() => setCurrentPage(Page.DeepfakeIntroduction)} variant="primary" size="lg">
+              다음: 딥페이크 기술 이해하기
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
               </svg>

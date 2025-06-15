@@ -4,25 +4,35 @@ import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PageLayout from '../components/PageLayout.tsx';
-import * as caricatureService from '../services/apiService.ts'; 
+import BackButton from '../components/BackButton.tsx';
+import ProgressTracker from '../components/ProgressTracker.tsx';
+import * as apiService from '../services/apiService.ts'; 
 import { Page } from '../types.ts';
 import { SCRIPTS } from '../constants.tsx';
 
 interface CaricatureGenerationPageProps {
   setCurrentPage: (page: Page) => void;
   userImageUrl: string | null;
+  caricatureUrl: string | null;
   setCaricatureUrl: (url: string) => void;
+  onGoBack: () => void;
+  canGoBack: boolean;
 }
 
 const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
   setCurrentPage,
   userImageUrl,
+  caricatureUrl,
   setCaricatureUrl,
+  onGoBack,
+  canGoBack,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState("이미지 분석 중...");
   const [generatedCaricature, setGeneratedCaricature] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const [showProgress, setShowProgress] = useState(false);
 
   useEffect(() => {
     if (!userImageUrl) {
@@ -31,21 +41,31 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
       return;
     }
 
+    // If caricature already exists, show it instead of regenerating
+    if (caricatureUrl) {
+      setGeneratedCaricature(caricatureUrl);
+      setStatusMessage(SCRIPTS.caricatureGenerated);
+      setIsLoading(false);
+      setShowProgress(false);
+      return;
+    }
+
     const generate = async () => {
       try {
         setStatusMessage("이미지에서 얼굴 특징 분석 중...");
         await new Promise(resolve => setTimeout(resolve, 1500)); 
-        const analysis = await caricatureService.analyzeFace(userImageUrl);
+        const analysis = await apiService.analyzeFace(userImageUrl);
         console.log("얼굴 분석 결과:", analysis.facialFeatures);
 
         setStatusMessage("캐릭터 생성 중...");
-        await new Promise(resolve => setTimeout(resolve, 2500));
-        const caricaturePrompt = `흑백 라인 아트 캐리커처 초상화를 만드세요. 과장된 특징, 단순한 선, 음영 없음, 배경 없음, 특징: ${analysis.facialFeatures.uniqueFeatures?.join(', ') || '설명된 대로'} 사람과 유사하게.`;
-        const caricatureResult = await caricatureService.generateCaricature(analysis.facialFeatures, caricaturePrompt);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const caricaturePrompt = `Create a black and white line art caricature portrait of a SINGLE PERSON ONLY. Exaggerated features, simple lines, no shading, no background, solo portrait. Features: ${analysis.facialFeatures.uniqueFeatures?.join(', ') || 'as described'}. ONE PERSON PORTRAIT ONLY - no multiple people, no groups, just one individual.`;
+        const caricatureResult = await apiService.generateCaricature(analysis.facialFeatures, caricaturePrompt);
         
-        setCaricatureUrl(caricatureResult.caricatureUrl);
-        setGeneratedCaricature(caricatureResult.caricatureUrl);
-        setStatusMessage(SCRIPTS.caricatureGenerated); // Already translated in constants
+        // Show progress tracker
+        setTaskId(caricatureResult.taskId);
+        setShowProgress(true);
+        setIsLoading(false);
       } catch (err) {
         console.error("캐리커처 생성 오류:", err);
         setError("캐리커처 생성에 실패했습니다. 네트워크 문제 또는 백엔드 서비스 사용 불가 때문일 수 있습니다. 다시 시도하거나, 가능하다면 이 단계를 건너뛰세요.");
@@ -56,18 +76,50 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
     };
 
     generate();
-  }, [userImageUrl, setCaricatureUrl]); 
+  }, [userImageUrl, caricatureUrl, setCaricatureUrl]);
+
+  const handleProgressComplete = (result: any) => {
+    setGeneratedCaricature(result.caricatureUrl || result.videoUrl);
+    setCaricatureUrl(result.caricatureUrl || result.videoUrl);
+    setStatusMessage(SCRIPTS.caricatureGenerated);
+    setShowProgress(false);
+  };
+
+  const handleProgressError = (error: string) => {
+    setError(error);
+    setShowProgress(false);
+  }; 
 
   return (
-    <PageLayout title="캐리커처 만들기">
+    <PageLayout title="나만의 캐릭터 만들기">
       <Card>
+        {/* Back Button */}
+        {canGoBack && (
+          <div className="mb-6">
+            <BackButton onClick={onGoBack} />
+          </div>
+        )}
+        
         {isLoading && (
           <div className="text-center py-10">
             <LoadingSpinner size="lg" />
             <p className="mt-6 text-xl text-orange-600">{statusMessage}</p>
           </div>
         )}
-        {!isLoading && error && (
+        
+        {showProgress && taskId && (
+          <div className="py-10">
+            <ProgressTracker
+              taskId={taskId}
+              onComplete={handleProgressComplete}
+              onError={handleProgressError}
+              title="캐릭터 생성 중..."
+              className="mx-auto max-w-lg"
+            />
+          </div>
+        )}
+        
+        {!isLoading && !showProgress && error && (
           <div className="text-center py-10">
             <p className="text-red-600 text-2xl mb-4 font-semibold">오류</p>
             <p className="text-slate-700 text-lg mb-8">{error}</p>
@@ -76,7 +128,7 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
             </Button>
           </div>
         )}
-        {!isLoading && !error && generatedCaricature && (
+        {!isLoading && !showProgress && !error && generatedCaricature && (
           <div className="text-center">
             <h2 className="text-3xl font-semibold text-green-600 mb-6">캐리커처 준비 완료!</h2>
             <p className="text-slate-700 text-lg mb-8">{statusMessage}</p>

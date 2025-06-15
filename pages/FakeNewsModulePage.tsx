@@ -10,7 +10,12 @@ interface FakeNewsModulePageProps {
   userData: UserData | null;
   userImageUrl: string | null;
   caricatureUrl: string | null;
+  talkingPhotoUrl: string | null;
   voiceId: string | null;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  onGoBack: () => void;
+  canGoBack: boolean;
 }
 
 const FakeNewsModulePage: React.FC<FakeNewsModulePageProps> = (props) => {

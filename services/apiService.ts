@@ -1,5 +1,4 @@
 import { UserData, QuizAnswerData } from '../types.ts';
-import { PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
 
 // Base URL for your backend API
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -17,7 +16,7 @@ const handleApiResponse = async (response: Response) => {
 // These functions call the actual backend APIs
 // ===================================================================================
 
-export const generateNarration = async (script: string, voiceId: string | null): Promise<{ audioUrl: string }> => {
+export const generateNarration = async (script: string, voiceId: string | null): Promise<{ audioData: string; audioType: string }> => {
   console.log(`FRONTEND: Calling /api/generate-narration with voiceId: ${voiceId}, script: "${script.substring(0,30)}..."`);
   
   const response = await fetch(`${API_BASE_URL}/api/generate-narration`, {
@@ -29,7 +28,7 @@ export const generateNarration = async (script: string, voiceId: string | null):
   });
   
   const result = await handleApiResponse(response);
-  return { audioUrl: result.audioUrl };
+  return { audioData: result.audioData, audioType: result.audioType };
 };
 
 export const generateFaceswapImage = async (baseImageUrl: string, userImageUrl: string): Promise<{ resultUrl: string }> => {
@@ -47,65 +46,44 @@ export const generateFaceswapImage = async (baseImageUrl: string, userImageUrl: 
   return { resultUrl: result.resultUrl };
 };
 
-export const generateFaceswapVideo = async (baseVideoUrl: string, userImageUrl: string): Promise<{ resultUrl: string }> => {
-  console.log(`FRONTEND: Calling /api/generate-faceswap-video. Base: ${baseVideoUrl}, User: ${userImageUrl}`);
-  
-  const response = await fetch(`${API_BASE_URL}/api/generate-faceswap-video`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ baseVideoUrl, userImageUrl }),
-  });
-  
-  const result = await handleApiResponse(response);
-  return { resultUrl: result.resultUrl };
-};
 
-export const saveUserInfo = async (userData: UserData): Promise<{ success: boolean; userId: string }> => {
-  console.log('FRONTEND: Calling /user-info to save user data', userData);
-  
-  const response = await fetch(`${API_BASE_URL}/api/user-info`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData),
-  });
-  
-  const createdUser = await handleApiResponse(response);
-  return { success: createdUser.success, userId: createdUser.userId };
-};
-
-export const uploadUserImage = async (imageFile: File): Promise<{ imageUrl: string }> => {
-  console.log(`FRONTEND: Uploading /user-image: ${imageFile.name}`);
+export const completeOnboarding = async (
+  userData: Omit<UserData, 'userId'>, 
+  imageFile: File, 
+  audioBlob: Blob
+): Promise<{ 
+  success: boolean; 
+  userId: string; 
+  user: any;
+  imageUrl: string; 
+  voiceId: string; 
+  voiceName: string;
+}> => {
+  console.log('FRONTEND: Calling /complete-onboarding with all user data');
   
   const formData = new FormData();
-  formData.append('file', imageFile);
+  formData.append('name', userData.name);
+  formData.append('age', userData.age.toString());
+  formData.append('gender', userData.gender);
+  formData.append('image', imageFile);
+  formData.append('voice', audioBlob, 'voice_recording.wav');
   
-  const response = await fetch(`${API_BASE_URL}/api/user-image`, {
+  const response = await fetch(`${API_BASE_URL}/api/complete-onboarding`, {
     method: 'POST',
     body: formData,
   });
   
   const result = await handleApiResponse(response);
-  return { imageUrl: result.imageUrl };
+  return {
+    success: result.success,
+    userId: result.userId,
+    user: result.user,
+    imageUrl: result.imageUrl,
+    voiceId: result.voiceId,
+    voiceName: result.voiceName
+  };
 };
 
-export const uploadUserVoice = async (audioBlob: Blob): Promise<{ voiceId: string }> => {
-  console.log(`FRONTEND: Uploading /user-voice, size: ${audioBlob.size}`);
-  
-  const formData = new FormData();
-  formData.append('file', audioBlob, 'voice_recording.wav');
-  
-  const response = await fetch(`${API_BASE_URL}/api/user-voice`, {
-    method: 'POST',
-    body: formData,
-  });
-  
-  const result = await handleApiResponse(response);
-  return { voiceId: result.voiceId };
-};
 
 export const analyzeFace = async (imageUrl: string): Promise<{ facialFeatures: Record<string, any> }> => {
   console.log(`FRONTEND: Calling /analyze-face for image: ${imageUrl}`);
@@ -122,7 +100,7 @@ export const analyzeFace = async (imageUrl: string): Promise<{ facialFeatures: R
   return { facialFeatures: result.facialFeatures };
 };
 
-export const generateCaricature = async (facialFeatures: Record<string, any>, promptDetails: string): Promise<{ caricatureUrl: string }> => {
+export const generateCaricature = async (facialFeatures: Record<string, any>, promptDetails: string): Promise<{ caricatureUrl: string; taskId: string }> => {
   console.log(`FRONTEND: Calling /generate-caricature. Prompt: "${promptDetails.substring(0,50)}..."`, facialFeatures);
   
   const response = await fetch(`${API_BASE_URL}/api/generate-caricature`, {
@@ -134,11 +112,11 @@ export const generateCaricature = async (facialFeatures: Record<string, any>, pr
   });
   
   const result = await handleApiResponse(response);
-  return { caricatureUrl: result.caricatureUrl };
+  return { caricatureUrl: result.caricatureUrl, taskId: result.taskId };
 };
 
 
-export const generateTalkingPhoto = async (caricatureUrl: string, userName: string, voiceId: string): Promise<{ videoUrl: string }> => {
+export const generateTalkingPhoto = async (caricatureUrl: string, userName: string, voiceId: string): Promise<{ videoUrl: string; taskId: string }> => {
   console.log(`FRONTEND: Calling /api/generate-talking-photo`);
   console.log(`  - Caricature URL: ${caricatureUrl}`);
   console.log(`  - User Name: ${userName}`);
@@ -150,37 +128,45 @@ export const generateTalkingPhoto = async (caricatureUrl: string, userName: stri
     body: JSON.stringify({ caricatureUrl, userName, voiceId }),
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ detail: 'Failed to generate talking photo' }));
-    throw new Error(errorData.detail || 'Unknown error generating talking photo');
-  }
-  return response.json();
+  const result = await handleApiResponse(response);
+  return { videoUrl: result.videoUrl, taskId: result.taskId };
 };
 
-export const generateVoiceDub = async (mediaUrl: string, voiceId: string): Promise<{ dubbedMediaUrl: string }> => {
-  console.log(`FRONTEND: Calling /api/generate-voice-dub with voiceId: ${voiceId} for media: ${mediaUrl}`);
+export const getProgress = async (taskId: string): Promise<{
+  progress: number;
+  message: string;
+  completed: boolean;
+  timestamp: number;
+}> => {
+  const response = await fetch(`${API_BASE_URL}/api/progress/${taskId}`);
+  return await handleApiResponse(response);
+};
+
+
+export const updateUserProgress = async (userId: number, progress: {
+  currentPage?: string;
+  currentStep?: number;
+  caricatureUrl?: string;
+  talkingPhotoUrl?: string;
+  completedModules?: string[];
+}) => {
+  console.log(`FRONTEND: Updating user ${userId} progress:`, progress);
   
-  const response = await fetch(`${API_BASE_URL}/api/generate-voice-dub`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ mediaUrl, voiceId }),
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}/progress`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(progress)
   });
   
-  const result = await handleApiResponse(response);
-  return { dubbedMediaUrl: result.dubbedMediaUrl };
+  return handleApiResponse(response);
 };
 
-export const saveQuizAnswers = async (answerData: QuizAnswerData): Promise<any> => {
-  console.log('FRONTEND: Calling /quiz-answers to save data', answerData);
+export const getUserProgress = async (userId: number) => {
+  console.log(`FRONTEND: Getting user ${userId} progress`);
   
-  const response = await fetch(`${API_BASE_URL}/api/quiz-answers`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(answerData),
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
   });
   
   return handleApiResponse(response);

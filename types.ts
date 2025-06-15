@@ -4,6 +4,7 @@ export enum Page {
   UserOnboarding,
   CaricatureGeneration,
   TalkingPhotoGeneration,
+  DeepfakeIntroduction, // New page for the introduction to deepfake technology
   ModuleSelection,
   FakeNewsModule,
   IdentityTheftModule,
@@ -11,6 +12,7 @@ export enum Page {
 }
 
 export interface UserData {
+  userId: string;
   name: string;
   age: string; // Keeping as string for form input simplicity
   gender: string;
@@ -24,27 +26,26 @@ export interface QuizQuestion {
   explanation?: string;
 }
 
-export interface CaseStudy {
-  id: string;
-  title: string;
-  type: 'image' | 'video' | 'text' | 'instagram';
-  description: string | React.ReactNode;
-  contentUrl?: string;
-  instagramUrl?: string;
-  narrationScript?: string;
-}
+// CaseStudy interface removed - all content now uses ModuleStep with direct properties
 
 export interface ModuleStep {
   id: string;
   title: string;
-  type: 'info' | 'caseStudy' | 'quiz' | 'interactive' | 'narration' | 'video_identification_quiz';
+  type: 'info' | 'caseStudy' | 'quiz' | 'interactive' | 'narration' | 'video_identification_quiz' | 'video_case_study' | 'faceswap_scenario' | 'voice_call_scenario' | 'video_call_scenario';
   content?: string | React.ReactNode;
   caseStudyId?: string;
   quizId?: string; // For traditional quizzes
   videoQuizData?: PersonIdentificationData[]; // For the new video identification quiz
-  videoUrl?: string; // For the video identification quiz
+  videoUrl?: string; // For case study videos
   narrationScript?: string;
   requires?: Array<'userImage' | 'userVoice' | 'userCaricature'>;
+  
+  // New properties for scenario steps
+  baseImageMale?: string; // Base image for male users in faceswap scenarios
+  baseImageFemale?: string; // Base image for female users in faceswap scenarios
+  audioScript?: string; // Audio script for voice/video scenarios
+  scenarioType?: 'lottery' | 'crime' | 'investment_call' | 'accident_call'; // Type of scenario
+  callType?: 'voice' | 'video'; // Type of call simulation
 }
 
 export enum NarrationSpeed {

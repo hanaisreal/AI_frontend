@@ -11,7 +11,7 @@ import { PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
 
 interface UserOnboardingPageProps {
   setCurrentPage: (page: Page) => void;
-  setUserData: (data: UserData) => void;
+  setUserData: (data: UserData | any) => void;
   setUserImageUrl: (url: string) => void;
   setUserAudioBlob: (blob: Blob) => void; 
   setVoiceId: (id: string) => void;
@@ -63,16 +63,23 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
     setIsLoading(true);
 
     try {
-      const userData: UserData = { name, age, gender };
-      await apiService.saveUserInfo(userData);
-      setUserData(userData);
-
-      const { imageUrl } = await apiService.uploadUserImage(imageFile);
-      setUserImageUrl(imageUrl);
-
-      const { voiceId } = await apiService.uploadUserVoice(audioBlob);
-      setVoiceId(voiceId);
+      const userData = { name, age, gender };
+      
+      // Complete onboarding in one atomic operation
+      const result = await apiService.completeOnboarding(userData, imageFile, audioBlob);
+      
+      // Set all the data from the single response
+      setUserData({ ...userData, userId: result.userId, success: result.success });
+      setUserImageUrl(result.imageUrl);
+      setVoiceId(result.voiceId);
       setUserAudioBlob(audioBlob);
+
+      console.log("✅ Complete onboarding successful:", {
+        userId: result.userId,
+        imageUrl: result.imageUrl,
+        voiceId: result.voiceId,
+        voiceName: result.voiceName
+      });
 
       setCurrentPage(Page.CaricatureGeneration);
     } catch (err) {
@@ -112,7 +119,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
           
           <FileUpload onFileSelect={handleImageSelect} label="사진 업로드" previewUrl={imagePreviewUrl} />
           
-          <VoiceRecorder onRecordingComplete={handleRecordingComplete} scriptToRead={scriptForVoiceRecording} maxDuration={30} />
+          <VoiceRecorder onRecordingComplete={handleRecordingComplete} scriptToRead={scriptForVoiceRecording} maxDuration={60} />
 
           {error && <p className="text-lg text-red-600 bg-red-100 p-4 rounded-lg border border-red-300">{error}</p>}
 

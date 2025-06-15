@@ -97,12 +97,11 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
   }
 
   return (
-    <Card title={`${title} (${peopleData.length}명 중 ${currentPersonIndex + 1}명)`}>
+    <Card title={currentPerson?.name || title}>
       {currentPhase === 'observing' && currentPerson && (
         <div className="text-center">
-          <h3 className="text-xl font-semibold text-slate-800 mb-4">관찰: {currentPerson.name}</h3>
           <p className="text-slate-700 text-lg mb-4">
-            아래 <span className="font-semibold">{currentPerson.name}</span> 영상을 주의 깊게 관찰해주세요. 이 영상이 진짜인지 AI로 생성된 가짜인지 판단해보세요.
+            영상을 주의 깊게 관찰해주세요. 이 영상이 진짜인지 AI로 생성된 가짜인지 판단해보세요.
           </p>
           {currentPerson.videoUrl ? (
             <video 
@@ -122,9 +121,8 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
 
       {currentPhase === 'judging' && currentPerson && (
         <div className="text-center">
-          <h3 className="text-xl font-semibold text-slate-800 mb-2">판별: {currentPerson.name}</h3>
           <p className="text-slate-700 text-lg mb-8">
-            <span className="font-semibold">{currentPerson.name}</span>을 "관찰"한 결과, 이 사람이 진짜라고 생각하시나요, 아니면 AI 생성(가짜)이라고 생각하시나요?
+            영상을 관찰한 결과, 이 영상이 진짜라고 생각하시나요, 아니면 AI로 생성된 가짜라고 생각하시나요?
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
             <Button onClick={() => handleJudgement('fake')} variant="primary" size="lg" className="min-w-[150px]">
@@ -141,9 +139,6 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
           </div>
         </div>
       )}
-       <p className="text-sm text-slate-500 mt-10 text-center">
-          전체 {peopleData.length}명 중 {currentPersonIndex + 1}번째 인물
-        </p>
     </Card>
   );
 };

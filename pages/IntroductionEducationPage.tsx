@@ -6,22 +6,17 @@ import VideoIdentificationQuiz from '../components/VideoIdentificationQuiz.tsx';
 import PageLayout from '../components/PageLayout.tsx';
 import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
-import { SCRIPTS, CASE_STUDIES, DEEPFAKE_IDENTIFICATION_VIDEO_URL, DEEPFAKE_PEOPLE_DATA, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
+import BackButton from '../components/BackButton.tsx';
+import { SCRIPTS, DEEPFAKE_IDENTIFICATION_VIDEO_URL, DEEPFAKE_PEOPLE_DATA, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
 import { Page, ModuleStep, UserAnswerForVideoQuiz, UserData } from '../types.ts';
 
 const INTRO_STEPS: ModuleStep[] = [
   {
     id: 'intro_explanation',
-    title: "기술 설명",
+    title: "딥페이크 기술 이해하기",
     type: 'info',
-    content: SCRIPTS.introDeepfake, 
+    content: "딥페이크 기술이 어떻게 작동하는지 이해해보겠습니다. 이 기술이 얼마나 정교해질 수 있는지 확인해보세요.",
     narrationScript: SCRIPTS.introDeepfake, 
-  },
-  {
-    id: 'intro_case_study',
-    title: "딥페이크 사례",
-    type: 'caseStudy',
-    caseStudyId: 'humorousDeepfake',
   },
   {
     id: 'intro_video_quiz_challenge',
@@ -39,6 +34,10 @@ interface IntroductionEducationPageProps {
   caricatureUrl: string | null;
   voiceId: string | null;
   talkingPhotoUrl: string | null;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  onGoBack: () => void;
+  canGoBack: boolean;
 }
 
 const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({ 
@@ -46,9 +45,13 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
   userData,
   caricatureUrl,
   voiceId,
-  talkingPhotoUrl 
+  talkingPhotoUrl,
+  currentStep: globalCurrentStep,
+  setCurrentStep: setGlobalCurrentStep,
+  onGoBack,
+  canGoBack
 }) => {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(globalCurrentStep || 0);
   const [isLoadingStep, setIsLoadingStep] = useState(false);
   // const [keyForContentNarration, setKeyForContentNarration] = useState(0); // Not currently used.
   const [quizCompletedForCurrentStep, setQuizCompletedForCurrentStep] = useState(false);
@@ -56,6 +59,20 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
   const [scriptForPersona, setScriptForPersona] = useState<string>("");
 
   const currentStep = INTRO_STEPS[currentStepIndex];
+
+  // Sync local step with global step tracking
+  useEffect(() => {
+    if (currentStepIndex !== globalCurrentStep) {
+      setGlobalCurrentStep(currentStepIndex);
+    }
+  }, [currentStepIndex, globalCurrentStep, setGlobalCurrentStep]);
+
+  // Sync global step changes to local step
+  useEffect(() => {
+    if (globalCurrentStep !== currentStepIndex && globalCurrentStep < INTRO_STEPS.length) {
+      setCurrentStepIndex(globalCurrentStep);
+    }
+  }, [globalCurrentStep, currentStepIndex]);
 
   useEffect(() => {
     if (!currentStep) return;
@@ -66,11 +83,6 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
     let personaScript = SCRIPTS.personaIntroDefault || "다음 내용을 살펴보겠습니다.";
     if (currentStep.narrationScript) {
       personaScript = currentStep.narrationScript;
-    } else if (currentStep.type === 'caseStudy') {
-      const cs = currentStep.caseStudyId ? CASE_STUDIES[currentStep.caseStudyId] : null;
-      personaScript = cs?.narrationScript ? 
-        `${SCRIPTS.personaIntroCaseStudy || "다음 사례 연구는"} "${cs.title}"에 관한 것입니다. ${cs.narrationScript}` : 
-        `${SCRIPTS.personaIntroCaseStudy || "다음 사례 연구를 살펴보겠습니다."}: "${cs?.title || '사례 연구'}"`;
     } else if (currentStep.type === 'video_identification_quiz') {
       personaScript = SCRIPTS.videoQuizIntro; // Already specific
     } else if (currentStep.type === 'info') {
@@ -112,33 +124,8 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
       case 'info':
         return <div className="text-slate-700 text-lg leading-relaxed space-y-4">{currentStep.content}</div>;
       case 'caseStudy':
-        const cs = currentStep.caseStudyId ? CASE_STUDIES[currentStep.caseStudyId] : null;
-        if (!cs) return <p className="text-red-500 text-lg">사례 연구를 찾을 수 없습니다.</p>;
-        return (
-          <div>
-            {cs.type === 'image' && cs.contentUrl && (
-              <img src={cs.contentUrl} alt={cs.title} className="rounded-lg mb-4 w-full max-w-md mx-auto shadow-lg border border-slate-200" />
-            )}
-            {cs.type === 'video' && cs.contentUrl && (
-              <video 
-                src={cs.contentUrl} 
-                controls 
-                className="rounded-lg mb-4 w-full max-w-2xl mx-auto shadow-lg border border-slate-200"
-                onError={(e) => console.error('Case study video load error:', e)}
-              />
-            )}
-            <div className="text-slate-600 text-base leading-relaxed mb-4">{cs.description}</div>
-            {/* Optional NarrationPlayer for content-specific replay, if persona already introduced it */}
-            {/* {cs.narrationScript && (
-              <NarrationPlayer 
-                script={cs.narrationScript} 
-                voiceId={voiceId} 
-                autoPlay={false} 
-                showControls={true} 
-              />
-            )} */}
-          </div>
-        );
+        // Legacy case study support - now handled by 'info' type
+        return <div className="text-slate-700 text-lg leading-relaxed space-y-4">{currentStep.content}</div>;
       case 'video_identification_quiz':
         if (!currentStep.videoUrl || !currentStep.videoQuizData) {
           return <p className="text-red-500 text-lg">비디오 퀴즈 데이터가 설정되지 않았습니다.</p>;
@@ -165,7 +152,13 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
 
   return (
     <PageLayout title="기술 이해하기" showAppTitle={true}>
-      <Card title={`${currentStep.title} (${INTRO_STEPS.length}단계 중 ${currentStepIndex + 1}단계)`}>
+      <Card title={currentStep.title}>
+        {/* Back Button */}
+        {canGoBack && (
+          <div className="mb-6">
+            <BackButton onClick={onGoBack} />
+          </div>
+        )}
         
         {currentView === 'personaTransition' ? (
           <PersonaTransitionSlide

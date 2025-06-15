@@ -1,5 +1,5 @@
-import React from 'react';
-import { QuizQuestion, CaseStudy, ModuleStep, PersonIdentificationData } from './types.ts';
+
+import { QuizQuestion, ModuleStep, PersonIdentificationData } from './types.ts';
 
 export const APP_TITLE = "AI 기술(딥페이크, 딥보이스)란?";
 
@@ -30,6 +30,40 @@ export const SCRIPTS = {
   personaIntroCaseStudy: "다음 사례 연구를 함께 살펴보겠습니다.",
   personaIntroQuizGeneral: "이제 배운 내용을 확인해 볼 시간입니다. 다음 퀴즈를 풀어보세요.",
   personaIntroInteractive: "다음은 당신과 관련된 예제입니다!",
+  
+  // New scripts for deepfake introduction flow
+  deepfakeIntroStart: "먼저, 딥페이크, 딥보이스 어떻게 만들어지는지 영상을 통해 확인해볼게요.",
+  deepfakeQuizIntro: "좋습니다. 요즘에는 가짜 얼굴 합성과 더불어서 가짜 영상을 만들수도 있어요. 다음 퀴즈를 통해 알아볼까요? 가짜 영상인지 아닌지 맞춰보세요!",
+  deepfakeQuizComplete: "전부 만들어진 영상입니다! 이제 다음으로 딥페이크, 딥보이스가 어떻게 악용될 수 있는지 자세히 살펴볼게요.",
+
+  // Module 1 (Fake News) - Updated detailed flow
+  fakeNewsIntroDetailed: "가짜 뉴스는, 거짓말인데 진짜처럼 보이는 소식이에요. 예를 들어, '이 약 먹으면 3일 만에 치매가 낫는다' 이런 말을 들으면 혹하죠. 하지만 알고 보면 사기인 경우가 많아요.",
+  fakeNewsCaseStudyIntro: "이제 사례 영상들을 통해 딥페이크가 어떻게 악용될 수 있는지, 그리고 우리가 어떻게 주의해야 하는지 알아보세요.",
+  fakeNewsCase1: "젤렌스키가 트럼프를 때리는 가짜 영상.",
+  fakeNewsCase2: "에펠타워가 불에 타는 영상이에요~",
+  fakeNewsExperienceIntro: "이제 직접 딥페이크를 만들어보는 체험을 해볼 거예요.",
+  fakeNewsScenario1Audio: "1등 당첨돼서 정말 기뻐요!",
+  fakeNewsScenario1to2: "이런 기사가 주변 지인들에게 퍼진다면 재미로 넘길수도 있겠지만, 만약 나쁜쪽으로 이어진다면 어떨까요?",
+  fakeNewsScenario2Audio: "찍지 마세요. 죄송합니다…",
+  fakeNewsWrapUp: "이런식으로 뉴스 기사가 난다고 생각하니 정말 무섭네요. 이제 딥페이크 영상에 대한 대응방안을 함께 알아볼까요?",
+  fakeNewsDetectionIntro: "딥페이크 영상은 이제 정교하게 만들어져서 실제로 구분하기 정말 어려워졌어요. 그래도 딥페이크 영상을 분별할 수 있는 몇가지 팁들을 알아볼게요.",
+  fakeNewsDetectionTips: "누가 영상이나 뉴스를 보내줬다고 해서, 다 믿으면 안 돼요. 누가 만든 건지, 진짜 뉴스에 나왔는지, 그 사람 공식 계정에 올라온 건지 꼭 출처를 확인하는 습관이 필요해요. 영상을 봤을 때 바로 확인해야 할 요소들로는 블러나 어색한 경계 등이 있어요.",
+  fakeNewsModuleEnd: "첫 번째 체험이 모두 끝났어요. 딥페이크 기술의 위험성과 가능성에 대해 조금이나마 이해가 되셨기를 바라요. 다음 파트로 이동해볼까요?",
+
+  // Module 2 (Identity Theft) - Updated detailed flow
+  identityTheftCaseStudyIntro: "각 사례를 통해 이 기술이 우리 생활에 어떤 영향을 미칠 수 있는지 알아보세요.",
+  identityTheftCase1: "유명 연예인을 사칭해서 투자를 하라는 영상 소개",
+  identityTheftCase2: "유명한 축구선수가 주식 종목을 추천해주는 영상.",
+  identityTheftExperienceIntro: "이제 일상생활에서 신원 도용이 일어나는 체험을 해볼 거예요.",
+  identityTheftScenario1Intro: "본인이 투자 사기를 시도하는 상황을 체험해보겠습니다. 목소리 변조로 본인의 목소리가 사용되다면 어떨까요?",
+  identityTheftScenario1Audio: "요즘 투자 정보 하나 알아낸 게 있는데, 친구들 다 2~3배씩 수익 났다고 하더라. 내가 링크 하나 보낼 테니까 한번 들어가서 확인해봐.",
+  identityTheftVoiceModulation: "이 목소리가 실시간으로 변조돼서 전화에 사용될 수 있어요!",
+  identityTheftScenario2Intro: "사고 상황을 가장하여 긴급한 돈을 요구하는 사기 상황을 체험해보겠습니다.",
+  identityTheftScenario2Audio: "나 지금 교통사고가 났어. 보험 부르지 말고 그냥 적당히 합의보는 게 좋을 것 같아. 혹시 지금 50만 원만 보내줄 수 있을까?",
+  identityTheftWrapUp: "이제는 실시간으로 얼굴 변조랑 목소리 변조까지 가능하니, 이런식으로 가족한테 연락이 간다면 속을 수 있을거 같아요.",
+  identityTheftDetectionIntro: "딥페이크 영상은 이제 정교하게 만들어져서 실제로 구분하기 정말 어려워졌어요. 신원도용에 맞서기 위해 알아야할 몇가지 팁들을 알아볼게요.",
+  identityTheftDetectionTips: "걸려온 전화의 경우 가족간의 암호를 물어봄으로써 상대방이 가족이 맞는지 확인하기. 온라인에 사진 올리지 말기. 가족들 포함해서. 가족을 저장할때 '딸, 아들'이라고 저장하지 말고 이름으로 저장하기. 본인의 핸드폰이 해킹되었을 경우 가족들의 신분이 노출되지 않기 위해.",
+  identityTheftModuleEnd: "신원도용에 대한 체험이 끝났어요. 앞으로 이런 상황들을 조심해서 대처하시길 바라요.",
 };
 
 export const QUIZZES: { [key: string]: QuizQuestion[] } = {
@@ -47,76 +81,327 @@ export const QUIZZES: { [key: string]: QuizQuestion[] } = {
   ],
 };
 
-export const CASE_STUDIES: { [key: string]: CaseStudy } = {
-  humorousDeepfake: {
-    id: 'cs1',
-    title: "딥페이크 기술 개념 소개",
-    type: 'video',
-    contentUrl: 'https://d3srmxrzq4dz1v.cloudfront.net/video-url/deepfake_concept.m4v',
-    description: "딥페이크와 딥보이스 기술이 무엇인지, 어떻게 작동하는지 보여주는 개념 영상입니다. 이 기술들이 어떻게 현실적인 가짜 콘텐츠를 만들어낼 수 있는지 확인해보세요.",
-    narrationScript: "이제 많은 애플리케이션들이 AI 캐릭터, 이미지, 비디오를 쉽게 만들 수 있게 해줍니다. 하지만 과연 우리는 무엇이 진짜이고 가짜인지 구별할 수 있을까요?", // This script can be part of the persona's intro to this case study.
-  },
-  fakeNewsImage: {
-    id: 'cs_fn1',
-    title: "가짜 뉴스 사례 연구 1: AI 생성 인물 사례",
-    type: 'instagram',
-    instagramUrl: 'https://www.instagram.com/p/C-JxJxJJxJx/', // Example - replace with real deepfake awareness post
-    description: "AI로 생성된 가짜 인물이 실제 사람처럼 소셜미디어에 등장하는 사례를 살펴보겠습니다. 이런 가짜 계정들이 어떻게 잘못된 정보를 퍼뜨리는지 확인해보세요.",
-    narrationScript: "이런 AI 생성 인물들은 점점 더 정교해지고 있으며, 실제 사람과 구별하기 어려워지고 있습니다. 소셜미디어에서 이런 가짜 계정들을 조심해야 합니다.",
-  },
-  fakeNewsVideo: {
-    id: 'cs_fn2',
-    title: "가짜 뉴스 사례 연구 2: 딥페이크 영상 사례",
-    type: 'instagram',
-    instagramUrl: 'https://www.instagram.com/p/C9AbCdEfGhI/', // Example - replace with deepfake educational content
-    description: "유명인이나 정치인의 모습과 목소리를 AI로 조작한 딥페이크 영상이 소셜미디어에서 어떻게 퍼지는지 보여주는 사례입니다. (이것이 당신의 얼굴과 복제된 목소리가 있는 비디오라고 상상해 보십시오.)",
-    narrationScript: "이런 딥페이크 기술은 점점 발전하고 있어서, 누구나 쉽게 가짜 영상을 만들 수 있게 되었습니다. 이것이 당신의 얼굴과 목소리로 만들어진다면 어떨까요?",
-  },
-  phishingCall: {
-    id: 'cs_it1',
-    title: "사기 사례 연구 1: '손주' 사칭 전화",
-    type: 'text',
-    description: (
-      <div>
-        <p>한 노인이 전화를 받습니다. 상대방의 목소리는 손주와 똑같이 들리며, 곤경에 처해 긴급하게 돈이 필요하다고 주장합니다. 목소리는 AI 복제품입니다.</p>
-        <p className="mt-2 italic">(이 시나리오를 상상해 보십시오: 당신이 전화를 받고, 당신의 목소리가 사랑하는 사람에게 돈을 요구합니다.)</p>
-      </div>
-    ),
-    narrationScript: "이것은 흔한 사기입니다. 당신의 복제된 목소리는 이 도움 요청을 가족에게 믿을 수 없을 정도로 현실적으로 들리게 할 수 있습니다.",
-  },
-  CEOPhishing: {
-    id: 'cs_it2',
-    title: "사기 사례 연구 2: 음성을 통한 CEO 사기",
-    type: 'text',
-    description: "한 직원이 CEO로부터 온 것처럼 보이는 음성 메시지를 받습니다. 긴급한 송금을 지시하는 내용입니다. CEO의 목소리는 AI에 의해 완벽하게 복제되었습니다.",
-    narrationScript: "기업 환경에서 복제된 임원 목소리는 사기 거래를 승인하여 상당한 재정적 손실을 초래할 수 있습니다.",
-  }
-};
+// NOTE: CASE_STUDIES removed - all content now uses direct step definitions and real-time AI generation
 
 export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
-  { id: 'fn_intro', title: "모듈 소개", type: 'narration', narrationScript: SCRIPTS.fakeNewsIntro }, // Persona will say this
-  { id: 'fn_tech', title: "가짜 뉴스 기술", type: 'info', content: "AI 도구는 현실적인 텍스트, 이미지 및 비디오를 만들 수 있습니다. 예를 들어, 생성적 적대 신경망(GAN)은 이미지를 생성할 수 있고, 대규모 언어 모델은 기사를 작성할 수 있습니다. 딥페이크 기술은 얼굴을 바꾸거나 정적 이미지를 애니메이션화합니다.", narrationScript: SCRIPTS.fakeNewsTech }, // Persona will introduce this content
-  { id: 'fn_cs1', title: "사례 연구: 조작된 이미지", type: 'caseStudy', caseStudyId: 'fakeNewsImage', requires: ['userImage'] },
-  { id: 'fn_cs2', title: "사례 연구: 조작된 비디오", type: 'caseStudy', caseStudyId: 'fakeNewsVideo', requires: ['userImage', 'userVoice'] },
-  { id: 'fn_quiz1', title: "간단 퀴즈", type: 'quiz', quizId: 'fakeNewsQuiz1' },
-  { id: 'fn_risk', title: "개인화된 위험", type: 'narration', narrationScript: SCRIPTS.fakeNewsRisk },
-  { id: 'fn_interactive', title: "개인화된 가짜 뉴스", type: 'interactive', content: "뉴스 헤드라인을 상상해 보세요: '[Your Name] 충격적인 사건에 연루!' 당신의 캐리커처가 등장합니다. (이것은 당신의 이미지가 어떻게 사용될 수 있는지 보여줍니다.)", requires: ['userCaricature', 'userVoice'] },
-  { id: 'fn_share', title: "공유 (시뮬레이션)", type: 'info', content: "실제 시나리오에서는 이 가짜 뉴스가 공유될 수 있습니다. 여기서는 공유 버튼을 시뮬레이션했습니다. (이 데모에서는 공유가 비활성화되어 있습니다)" },
-  { id: 'fn_counter', title: "대응 및 대책", type: 'narration', narrationScript: SCRIPTS.fakeNewsCountermeasures },
-  { id: 'fn_quiz2', title: "최종 퀴즈", type: 'quiz', quizId: 'fakeNewsQuiz2' },
+  // 1. Narrator explains fake news concept
+  { 
+    id: 'fn_intro', 
+    title: "가짜 뉴스 개념 설명", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsIntroDetailed,
+    requires: ['userCaricature']
+  },
+  
+  // 2. Narrator introduces case studies
+  { 
+    id: 'fn_case_intro', 
+    title: "사례 영상 소개", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsCaseStudyIntro,
+    requires: ['userCaricature'] 
+  },
+  
+  // 3. Case 1: Zelensky vs Trump narration
+  { 
+    id: 'fn_case1_narration', 
+    title: "사례 1 설명", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsCase1,
+    requires: ['userCaricature']
+  },
+  
+  // 4. Case 1: Show video
+  { 
+    id: 'fn_case1_video', 
+    title: "사례 1: 젤렌스키 가짜 영상", 
+    type: 'video_case_study', 
+    videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/part1_case3.mov" 
+    // 🎥 VIDEO NEEDED: Fake video of Zelensky hitting Trump (가짜 영상: 젤렌스키가 트럼프를 때리는 영상)
+  },
+  
+  // 5. Case 2: Eiffel Tower narration  
+  { 
+    id: 'fn_case2_narration', 
+    title: "사례 2 설명", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsCase2, // Says: "에펠타워가 불에 타는 영상이에요~"
+    requires: ['userCaricature']
+  },
+  
+  // 6. Case 2: Show video
+  { 
+    id: 'fn_case2_video', 
+    title: "사례 2: 에펠타워 화재 영상", 
+    type: 'video_case_study', 
+    videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-eiffel-on-fire.mp4" 
+    // 🎥 VIDEO NEEDED: Fake video of Eiffel Tower on fire (가짜 영상: 에펠타워가 불에 타는 영상)
+    // This should be a deepfake video showing Eiffel Tower burning (fake news example)
+  },
+  
+  // 7. Experience introduction
+  { 
+    id: 'fn_experience_intro', 
+    title: "체험 소개", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsExperienceIntro,
+    requires: ['userCaricature']
+  },
+  
+  // 8. Scenario 1: Lottery winner faceswap + talking photo
+  { 
+    id: 'fn_scenario1', 
+    title: "시나리오 1: 복권 당첨", 
+    type: 'faceswap_scenario', 
+    scenarioType: 'lottery',
+    baseImageMale: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-case1-male.png", 
+    // 🖼️ IMAGE NEEDED (MALE): Photo of man holding lottery winning certificate/ticket, happy expression
+    // This will be used to faceswap the user's face onto, user will say: "1등 당첨돼서 정말 기뻐요!"
+    baseImageFemale: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-case1-female.png", 
+    // 🖼️ IMAGE NEEDED (FEMALE): Photo of woman holding lottery winning certificate/ticket, happy expression  
+    // This will be used to faceswap the user's face onto, user will say: "1등 당첨돼서 정말 기뻐요!"
+    audioScript: SCRIPTS.fakeNewsScenario1Audio, // "1등 당첨돼서 정말 기뻐요!"
+    requires: ['userImage', 'userVoice']
+  },
+  
+  // 9. Transition to negative scenario
+  { 
+    id: 'fn_scenario_transition', 
+    title: "시나리오 전환", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsScenario1to2,
+    requires: ['userCaricature']
+  },
+  
+  // 10. Scenario 2: Crime suspect faceswap + talking photo
+  { 
+    id: 'fn_scenario2', 
+    title: "시나리오 2: 범죄 용의자", 
+    type: 'faceswap_scenario', 
+    scenarioType: 'crime',
+    baseImageMale: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-case2-male.png", 
+    // 🖼️ IMAGE NEEDED (MALE): Photo of man being arrested/interrogated (news photo style)
+    // User's face will be swapped here, saying: "찍지 마세요. 죄송합니다…" (like crime suspect)
+    baseImageFemale: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-case2-female.png", 
+    // 🖼️ IMAGE NEEDED (FEMALE): Photo of woman being arrested/interrogated (news photo style)  
+    // User's face will be swapped here, saying: "찍지 마세요. 죄송합니다…" (like crime suspect)
+    audioScript: SCRIPTS.fakeNewsScenario2Audio, // "찍지 마세요. 죄송합니다…"
+    requires: ['userImage', 'userVoice']
+  },
+  
+  // 11. Wrap up scenarios
+  { 
+    id: 'fn_wrap_up', 
+    title: "사례 정리", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsWrapUp,
+    requires: ['userCaricature']
+  },
+  
+  // 12. Detection tips introduction
+  { 
+    id: 'fn_detection_intro', 
+    title: "대응 방안 소개", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsDetectionIntro,
+    requires: ['userCaricature']
+  },
+  
+  // 13. Detection tips content
+  { 
+    id: 'fn_detection_tips', 
+    title: "딥페이크 분별 팁", 
+    type: 'info', 
+    content: `
+      <div class="space-y-4">
+        <h3 class="text-xl font-bold mb-4">딥페이크 영상 분별 방법</h3>
+        <div class="space-y-3">
+          <p><strong>1. 출처 확인:</strong> 누가 만든 건지, 진짜 뉴스에 나왔는지, 공식 계정에 올라온 건지 확인</p>
+          <p><strong>2. 시각적 단서:</strong> 블러나 어색한 경계선 확인</p>
+          <p><strong>3. 부자연스러운 움직임:</strong> 입술 동기화나 눈 깜빡임 패턴 확인</p>
+          <p><strong>4. MIT 딥페이크 탐지 가이드:</strong> <a href="https://www.media.mit.edu/projects/detect-fakes/overview/" target="_blank" class="text-blue-600 underline">자세한 정보 확인</a></p>
+        </div>
+      </div>
+    `,
+    narrationScript: SCRIPTS.fakeNewsDetectionTips
+  },
+  
+  // 14. Module conclusion
+  { 
+    id: 'fn_conclusion', 
+    title: "모듈 마무리", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsModuleEnd,
+    requires: ['userCaricature']
+  }
 ];
 
 export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
-  { id: 'it_intro', title: "모듈 소개", type: 'narration', narrationScript: SCRIPTS.identityTheftIntro },
-  { id: 'it_tech', title: "피싱 기술", type: 'info', content: "음성 복제 AI는 단 몇 초의 오디오만으로 합성 음성을 만들 수 있습니다. 이것은 사회 공학 기술과 결합되어 피싱 전화를 매우 효과적으로 만들 수 있습니다.", narrationScript: SCRIPTS.identityTheftTech },
-  { id: 'it_cs1', title: "사례 연구: '손주' 사칭 사기", type: 'caseStudy', caseStudyId: 'phishingCall', requires: ['userVoice'] },
-  { id: 'it_cs2', title: "사례 연구: CEO 사기", type: 'caseStudy', caseStudyId: 'CEOPhishing', requires: ['userVoice'] },
-  { id: 'it_quiz1', title: "간단 퀴즈", type: 'quiz', quizId: 'identityTheftQuiz1' },
-  { id: 'it_risk', title: "개인화된 위험", type: 'narration', narrationScript: SCRIPTS.identityTheftRisk },
-  { id: 'it_interactive', title: "개인화된 사기 시나리오", type: 'interactive', content: "사랑하는 사람이 전화를 받는다고 상상해 보세요. 당신의 복제된 목소리가 괴로워하며 당신의 캐리커처를 화상 통화 아바타로 사용하여 긴급한 재정 지원을 요청합니다. (이것은 당신의 목소리와 이미지가 어떻게 사용될 수 있는지 보여줍니다.)", requires: ['userCaricature', 'userVoice'] },
-  { id: 'it_share', title: "공유 (시뮬레이션)", type: 'info', content: "사기꾼들은 이러한 전술을 사용할 수 있습니다. 이러한 콘텐츠가 얼마나 쉽게 퍼질 수 있는지 보여주기 위해 여기서는 공유 버튼을 시뮬레이션했습니다. (공유 비활성화됨)" },
-  { id: 'it_counter', title: "대응 및 대책", type: 'narration', narrationScript: SCRIPTS.identityTheftCountermeasures },
-  { id: 'it_quiz2', title: "최종 퀴즈", type: 'quiz', quizId: 'identityTheftQuiz2' },
+  // 1. Narrator explains identity theft concept
+  { 
+    id: 'it_intro', 
+    title: "신원 도용 개념 설명", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftIntro,
+    requires: ['userCaricature']
+  },
+  
+  // 2. Narrator introduces case studies
+  { 
+    id: 'it_case_intro', 
+    title: "사례 영상 소개", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftCaseStudyIntro,
+    requires: ['userCaricature'] 
+  },
+  
+  // 3. Case 1: Celebrity investment scam narration
+  { 
+    id: 'it_case1_narration', 
+    title: "사례 1 설명", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftCase1,
+    requires: ['userCaricature']
+  },
+  
+  // 4. Case 1: Show video
+  { 
+    id: 'it_case1_video', 
+    title: "사례 1: 연예인 투자 사기 영상", 
+    type: 'video_case_study', 
+    videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/identitytheft_case1.m4v" 
+    // 🎥 VIDEO NEEDED: Celebrity (actor/singer) promoting fake investment scheme using deepfake
+    // 유명 연예인을 사칭해서 투자를 하라는 영상 (deepfake celebrity investment scam video)
+  },
+  
+  // 5. Case 2: Soccer player stock recommendation narration  
+  { 
+    id: 'it_case2_narration', 
+    title: "사례 2 설명", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftCase2, // Says: "유명한 축구선수가 주식 종목을 추천해주는 영상."
+    requires: ['userCaricature']
+  },
+  
+  // 6. Case 2: Show video
+  { 
+    id: 'it_case2_video', 
+    title: "사례 2: 축구선수 주식 추천 영상", 
+    type: 'video_case_study', 
+    videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/identitytheft-case2.m4v" 
+    // 🎥 VIDEO NEEDED: Famous soccer player recommending stocks using deepfake technology
+    // 유명한 축구선수가 주식 종목을 추천해주는 영상 (deepfake soccer player stock recommendation)
+  },
+  
+  // 7. Experience introduction
+  { 
+    id: 'it_experience_intro', 
+    title: "체험 소개", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftExperienceIntro,
+    requires: ['userCaricature']
+  },
+  
+  // 8. Scenario 1: Investment scam voice call introduction
+  { 
+    id: 'it_scenario1_intro', 
+    title: "시나리오 1 소개", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftScenario1Intro,
+    requires: ['userCaricature']
+  },
+  
+  // 9. Scenario 1: Investment scam voice call simulation
+  { 
+    id: 'it_scenario1', 
+    title: "시나리오 1: 투자 사기 전화", 
+    type: 'voice_call_scenario', 
+    scenarioType: 'investment_call',
+    callType: 'voice',
+    audioScript: SCRIPTS.identityTheftScenario1Audio,
+    requires: ['userVoice']
+  },
+  
+  // 10. Voice modulation explanation
+  { 
+    id: 'it_voice_modulation', 
+    title: "음성 변조 설명", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftVoiceModulation,
+    requires: ['userCaricature']
+  },
+  
+  // 11. Scenario 2: Car accident emergency introduction
+  { 
+    id: 'it_scenario2_intro', 
+    title: "시나리오 2 소개", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftScenario2Intro,
+    requires: ['userCaricature']
+  },
+  
+  // 12. Scenario 2: Car accident emergency video call
+  { 
+    id: 'it_scenario2', 
+    title: "시나리오 2: 사고 긴급 전화", 
+    type: 'video_call_scenario', 
+    scenarioType: 'accident_call',
+    callType: 'video',
+    audioScript: SCRIPTS.identityTheftScenario2Audio, // "나 지금 교통사고가 났어. 보험 부르지 말고 그냥 적당히 합의보는 게 좋을 것 같아. 혹시 지금 50만 원만 보내줄 수 있을까?"
+    baseImageMale: "https://example.com/video-call-male.mp4", 
+    // 🎥 VIDEO NEEDED (MALE): Video of man on video call (face visible, talking), emergency/stressed expression
+    // User's face will be swapped onto this person for video call simulation
+    baseImageFemale: "https://example.com/video-call-female.mp4", 
+    // 🎥 VIDEO NEEDED (FEMALE): Video of woman on video call (face visible, talking), emergency/stressed expression  
+    // User's face will be swapped onto this person for video call simulation
+    requires: ['userImage', 'userVoice']
+  },
+  
+  // 13. Wrap up scenarios
+  { 
+    id: 'it_wrap_up', 
+    title: "사례 정리", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftWrapUp,
+    requires: ['userCaricature']
+  },
+  
+  // 14. Detection tips introduction
+  { 
+    id: 'it_detection_intro', 
+    title: "대응 방안 소개", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftDetectionIntro,
+    requires: ['userCaricature']
+  },
+  
+  // 15. Detection tips content
+  { 
+    id: 'it_detection_tips', 
+    title: "신원 도용 방지 팁", 
+    type: 'info', 
+    content: `
+      <div class="space-y-4">
+        <h3 class="text-xl font-bold mb-4">신원 도용 방지 방법</h3>
+        <div class="space-y-3">
+          <p><strong>1. 가족 암호:</strong> 걸려온 전화의 경우 가족간의 암호를 물어봄으로써 확인</p>
+          <p><strong>2. 온라인 사진 주의:</strong> 온라인에 사진 올리지 말기 (가족들 포함)</p>
+          <p><strong>3. 연락처 저장:</strong> 가족을 '딸, 아들'이 아닌 이름으로 저장하기</p>
+          <p><strong>4. 즉시 확인:</strong> 의심스러운 요청 시 다른 방법으로 본인 확인</p>
+        </div>
+      </div>
+    `,
+    narrationScript: SCRIPTS.identityTheftDetectionTips
+  },
+  
+  // 16. Module conclusion
+  { 
+    id: 'it_conclusion', 
+    title: "모듈 마무리", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.identityTheftModuleEnd,
+    requires: ['userCaricature']
+  }
 ];
 
 export const MOCK_VOICE_ID = "mock_voice_123";
@@ -136,27 +421,27 @@ export const DEEPFAKE_PEOPLE_DATA: PersonIdentificationData[] = [
     name: 'Case 1', 
     isFake: true, 
     videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/case1.mp4",
-    explanation: "이 영상은 AI로 생성된 딥페이크입니다. 얼굴의 미묘한 왜곡과 부자연스러운 표정 변화를 주목해보세요." 
+    explanation: "이 영상은 AI로 생성된 영상일까요? 아니면 진짜 영상일까요?" 
   },
   { 
     id: 'p2', 
     name: 'Case 2', 
     isFake: true, 
     videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/case2.mp4",
-    explanation: "이 영상도 AI로 생성된 딥페이크입니다. 입술 동기화와 눈의 움직임이 부자연스러운 점을 확인할 수 있습니다." 
+    explanation: "이 영상은 AI로 생성된 영상일까요? 아니면 진짜 영상일까요?" 
   },
   { 
     id: 'p3', 
     name: 'Case 3', 
     isFake: true, 
     videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/case3.mp4",
-    explanation: "이 영상 역시 AI로 생성된 딥페이크입니다. 배경과 얼굴의 경계가 흐릿하고 일관성이 없는 부분을 주목하세요." 
+    explanation: "이 영상은 AI로 생성된 영상일까요? 아니면 진짜 영상일까요?" 
   },
   { 
     id: 'p4', 
     name: 'Case 4', 
     isFake: true, 
     videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/case4.mov",
-    explanation: "이 영상도 AI로 생성된 딥페이크입니다. 전체적으로 너무 완벽해 보이는 얼굴과 부자연스러운 조명을 확인할 수 있습니다." 
+    explanation: "이 영상은 AI로 생성된 영상일까요? 아니면 진짜 영상일까요?" 
   },
 ];
