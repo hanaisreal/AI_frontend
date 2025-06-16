@@ -24,12 +24,8 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
   const narrationPlayerRef = useRef<any>(null);
 
   useEffect(() => {
-    // Allows continuing after a short delay, to encourage listening
-    const timer = setTimeout(() => {
-      setCanContinue(true);
-    }, 4000); // 4 seconds
-
-    return () => clearTimeout(timer);
+    // Allow continuing immediately for faster interaction
+    setCanContinue(true);
   }, []);
 
   const handleNext = () => {

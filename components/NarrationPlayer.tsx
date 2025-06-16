@@ -37,7 +37,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [videoLoading, setVideoLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastGeneratedScriptRef = useRef<string | null>(null);
   const hasAutoPlayed = useRef(false); // Track if auto-play has already happened
@@ -245,7 +244,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     if (audioUrl && !isPlaying && !isLoading && !hasAutoPlayed.current) {
       console.log('NarrationPlayer: Auto-playing generated audio');
       hasAutoPlayed.current = true;
-      setTimeout(() => handlePlayPause(), 100); // Small delay to ensure audio element is ready
+      handlePlayPause(); // Play immediately without delay
     }
   }, [audioUrl, isPlaying, isLoading, handlePlayPause]);
 
@@ -353,30 +352,10 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                   className="rounded-lg w-64 h-64 object-cover mx-auto border-4 border-orange-500"
                   autoPlay
                   muted
-                  onLoadStart={() => {
-                    console.log('NarrationPlayer: Video loading started');
-                    setVideoLoading(true);
-                  }}
-                  onCanPlay={() => {
-                    console.log('NarrationPlayer: Video can play');
-                    setVideoLoading(false);
-                  }}
-                  onLoadedData={() => {
-                    console.log('NarrationPlayer: Video data loaded');
-                    setVideoLoading(false);
-                  }}
+                  preload="metadata"
+                  playsInline
                   style={{ background: '#f8f9fa' }}
                 />
-                {/* Loading overlay for video */}
-                {videoLoading && (
-                  <div className="absolute inset-0 bg-gray-100 rounded-lg border-4 border-orange-500 flex items-center justify-center"
-                       style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
-                    <div className="text-center">
-                      <LoadingSpinner size="md" />
-                      <p className="text-sm text-slate-600 mt-2">영상 로딩 중...</p>
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <img 

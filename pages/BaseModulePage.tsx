@@ -83,10 +83,20 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     
     console.log(`🎨 Setting up step: ${currentStep.title} (type: ${currentStep.type})`);
     setIsLoadingStep(true);
-    setCurrentView('personaTransition');
-
-    // Use the narrationScript directly from the step
-    setScriptForPersona(currentStep.narrationScript || '');
+    
+    // Video case studies and some other types should skip persona transition
+    if (currentStep.type === 'video_case_study' || 
+        currentStep.type === 'faceswap_scenario' || 
+        currentStep.type === 'voice_call_scenario' || 
+        currentStep.type === 'video_call_scenario' ||
+        currentStep.type === 'quiz') {
+      setCurrentView('content');
+    } else {
+      setCurrentView('personaTransition');
+      // Use the narrationScript directly from the step
+      setScriptForPersona(currentStep.narrationScript || '');
+    }
+    
     setIsLoadingStep(false); 
 
   }, [currentStepIndex, steps]); // Removed currentStep to prevent duplicate dependency
@@ -323,9 +333,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   }, [currentStepIndex, steps.length, onModuleComplete, setCurrentPage, isChangingStep]);
 
   const handlePersonaNarrationEnd = useCallback(() => {
-    console.log('Persona narration ended');
+    console.log('Persona narration ended for step:', currentStep?.id, 'type:', currentStep?.type, 'content:', currentStep?.content);
     // For pure narration steps with no additional content, go directly to next step
-    if (currentStep?.type === 'narration' && !currentStep.content) {
+    if (currentStep?.type === 'narration' && (!currentStep.content || (typeof currentStep.content === 'string' && currentStep.content.trim() === ''))) {
       console.log('Pure narration step - advancing directly to next step');
       handleNext();
     } else {
@@ -421,10 +431,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       return (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-700">
-            {currentStep.title.includes('사례') ? 
-              `이 영상은 ${currentStep.title.split(':')[1]?.trim() || currentStep.title}에 대한 실제 사례를 보여줍니다.` :
-              currentStep.title
-            }
+            
           </h3>
           <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
             <video 
@@ -438,7 +445,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             </video>
           </div>
           <p className="text-sm text-slate-600 italic">
-            이는 AI 기술을 사용한 교육용 시뮬레이션입니다.
+            이 영상은 AI 기술로 만들어진 가짜 영상입니다.
           </p>
         </div>
       );
