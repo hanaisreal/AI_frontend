@@ -16,15 +16,31 @@ const INTRO_STEPS: ModuleStep[] = [
     title: "딥페이크 기술 이해하기",
     type: 'info',
     content: "딥페이크 기술이 어떻게 작동하는지 이해해보겠습니다. 이 기술이 얼마나 정교해질 수 있는지 확인해보세요.",
-    narrationScript: SCRIPTS.introDeepfake, 
+    narrationScript: SCRIPTS.deepfakeIntroStart, 
   },
   {
     id: 'intro_video_quiz_challenge',
-    title: "딥페이크 탐지 챌린지",
+    title: "무엇이 딥페이크 영상일까요?",
     type: 'video_identification_quiz',
     videoUrl: DEEPFAKE_IDENTIFICATION_VIDEO_URL,
     videoQuizData: DEEPFAKE_PEOPLE_DATA,
-    narrationScript: SCRIPTS.videoQuizIntro, 
+    narrationScript: SCRIPTS.deepfakeQuizIntro, 
+  },
+  {
+    id: 'intro_quiz_results',
+    title: "퀴즈 결과",
+    type: 'info',
+    content: `
+      <div class="text-center space-y-6">
+        <h3 class="text-2xl font-bold text-orange-600">퀴즈 결과</h3>
+        <p class="text-lg">놀랍게도 <strong>모든 영상이 AI로 생성된 가짜 영상</strong>이었습니다!</p>
+        <div class="bg-orange-50 p-6 rounded-lg border border-orange-200">
+          <p class="text-gray-700">이처럼 딥페이크 기술은 매우 정교해져서 실제와 구분하기 어려워졌습니다.</p>
+          <p class="text-gray-600 mt-3">이제 딥페이크 기술이 어떻게 악용될 수 있는지 알아보겠습니다.</p>
+        </div>
+      </div>
+    `,
+    narrationScript: SCRIPTS.deepfakeQuizComplete,
   },
 ];
 
@@ -60,19 +76,21 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
 
   const currentStep = INTRO_STEPS[currentStepIndex];
 
-  // Sync local step with global step tracking
+  // Sync local step with global step tracking (one-way sync to prevent loops)
   useEffect(() => {
     if (currentStepIndex !== globalCurrentStep) {
+      console.log(`🔄 Syncing step: local ${currentStepIndex} → global ${globalCurrentStep}`);
       setGlobalCurrentStep(currentStepIndex);
     }
   }, [currentStepIndex, globalCurrentStep, setGlobalCurrentStep]);
 
-  // Sync global step changes to local step
+  // Initialize local step from global step only once
   useEffect(() => {
-    if (globalCurrentStep !== currentStepIndex && globalCurrentStep < INTRO_STEPS.length) {
+    if (globalCurrentStep !== currentStepIndex && globalCurrentStep < INTRO_STEPS.length && currentStepIndex === 0) {
+      console.log(`🔄 Initializing local step from global: ${globalCurrentStep}`);
       setCurrentStepIndex(globalCurrentStep);
     }
-  }, [globalCurrentStep, currentStepIndex]);
+  }, [globalCurrentStep, INTRO_STEPS.length]); // Removed currentStepIndex to prevent loop
 
   useEffect(() => {
     if (!currentStep) return;
@@ -98,8 +116,13 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
   }, [currentStepIndex, currentStep]);
 
   const handlePersonaNarrationEnd = useCallback(() => {
-    setCurrentView('content');
-  }, []); // Empty dependency array as setCurrentView is stable
+    // If this is the quiz results step, go directly to module selection after narration
+    if (currentStep?.id === 'intro_quiz_results') {
+      setCurrentPage(Page.ModuleSelection);
+    } else {
+      setCurrentView('content');
+    }
+  }, [currentStep?.id, setCurrentPage]); // Added dependencies
 
   const handleNext = () => {
     setQuizCompletedForCurrentStep(false);
@@ -112,7 +135,13 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
   
   const handleVideoQuizComplete = (score: number, total: number, answers: UserAnswerForVideoQuiz[]) => {
     console.log(`Intro Video Identification Quiz Complete: Score ${score}/${total}`, answers);
-    setQuizCompletedForCurrentStep(true); 
+    setQuizCompletedForCurrentStep(true);
+  };
+
+  const handleReviewVideos = () => {
+    // Go back to the video quiz step
+    setCurrentStepIndex(1);
+    setQuizCompletedForCurrentStep(false);
   };
   
   const renderContentStep = () => {
@@ -122,10 +151,22 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
     
     switch (currentStep.type) {
       case 'info':
+        // Special handling for quiz results page
+        if (currentStep.id === 'intro_quiz_results') {
+          return (
+            <div className="space-y-6">
+              <div dangerouslySetInnerHTML={{ __html: currentStep.content || "" }} />
+            </div>
+          );
+        }
+        
+        // Regular info content
         return <div className="text-slate-700 text-lg leading-relaxed space-y-4">{currentStep.content}</div>;
+        
       case 'caseStudy':
         // Legacy case study support - now handled by 'info' type
         return <div className="text-slate-700 text-lg leading-relaxed space-y-4">{currentStep.content}</div>;
+        
       case 'video_identification_quiz':
         if (!currentStep.videoUrl || !currentStep.videoQuizData) {
           return <p className="text-red-500 text-lg">비디오 퀴즈 데이터가 설정되지 않았습니다.</p>;
@@ -176,9 +217,9 @@ const IntroductionEducationPage: React.FC<IntroductionEducationPageProps> = ({
             </div>
             
             {showNextButton && (
-              <div className="mt-10">
+              <div className="mt-10 flex justify-center">
                 <Button onClick={handleNext} variant="primary" size="lg">
-                  이해했으며, 계속 진행합니다
+                  계속하기
                 </Button>
               </div>
             )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import Button from './Button';
 import NarrationPlayer from './NarrationPlayer';
 import { Page, UserData } from '../types';
@@ -12,14 +12,14 @@ interface PersonaTransitionSlideProps {
   script: string;
 }
 
-const PersonaTransitionSlide: React.FC<PersonaTransitionSlideProps> = ({
+const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
   onNext,
   userData,
   caricatureUrl,
   talkingPhotoUrl,
   voiceId,
   script,
-}) => {
+}, ref) => {
   const [canContinue, setCanContinue] = useState(false);
   const narrationPlayerRef = useRef<any>(null);
 
@@ -40,10 +40,29 @@ const PersonaTransitionSlide: React.FC<PersonaTransitionSlideProps> = ({
     onNext();
   };
 
+  // Cleanup audio when component unmounts
+  useEffect(() => {
+    return () => {
+      if (narrationPlayerRef.current && narrationPlayerRef.current.stopAudio) {
+        console.log('PersonaTransitionSlide: Cleaning up audio on unmount');
+        narrationPlayerRef.current.stopAudio();
+      }
+    };
+  }, []);
+
+  // Expose stopAudio method to parent components
+  useImperativeHandle(ref, () => ({
+    stopAudio: () => {
+      if (narrationPlayerRef.current && narrationPlayerRef.current.stopAudio) {
+        narrationPlayerRef.current.stopAudio();
+      }
+    },
+  }), []);
+
   return (
     <div className="text-center">
       <div className="max-w-md mx-auto mb-8">
-        {caricatureUrl && talkingPhotoUrl && voiceId && (
+        {caricatureUrl && talkingPhotoUrl && voiceId ? (
           <NarrationPlayer
             ref={narrationPlayerRef}
             script={script}
@@ -51,8 +70,17 @@ const PersonaTransitionSlide: React.FC<PersonaTransitionSlideProps> = ({
             imageUrl={caricatureUrl}
             talkingImageUrl={talkingPhotoUrl}
             autoPlay={true}
-            onNarrationComplete={() => setCanContinue(true)}
+            onEnd={() => setCanContinue(true)} // Enable continue button when narration ends
           />
+        ) : (
+          <div className="text-center">
+            <div className="text-slate-600 mb-4">
+              {script || "준비 중..."}
+            </div>
+            <div className="text-sm text-slate-500">
+              캐릭터 데이터 로딩 중... (caricature: {caricatureUrl ? '✓' : '✗'}, talkingPhoto: {talkingPhotoUrl ? '✓' : '✗'}, voice: {voiceId ? '✓' : '✗'})
+            </div>
+          </div>
         )}
       </div>
 
@@ -72,6 +100,8 @@ const PersonaTransitionSlide: React.FC<PersonaTransitionSlideProps> = ({
       </div>
     </div>
   );
-};
+});
+
+PersonaTransitionSlide.displayName = 'PersonaTransitionSlide';
 
 export default PersonaTransitionSlide;

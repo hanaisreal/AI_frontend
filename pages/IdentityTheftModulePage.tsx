@@ -21,7 +21,7 @@ interface IdentityTheftModulePageProps {
 const IdentityTheftModulePage: React.FC<IdentityTheftModulePageProps> = (props) => {
   return (
     <BaseModulePage
-      moduleTitle="모듈 2: 신원 도용 및 음성 피싱" // Translated title
+      moduleTitle="모듈 2: 신원 도용" // Translated title
       steps={IDENTITY_THEFT_MODULE_STEPS}
       moduleCompletionMessage={SCRIPTS.module2Complete} // Already translated in constants
       {...props}

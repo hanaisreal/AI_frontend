@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import NarrationPlayer from '../components/NarrationPlayer.tsx';
@@ -50,61 +50,46 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   const [interactiveContent, setInteractiveContent] = useState<React.ReactNode | null>(null);
   const [currentView, setCurrentView] = useState<'personaTransition' | 'content'>('personaTransition');
   const [scriptForPersona, setScriptForPersona] = useState<string>("");
+  const [isChangingStep, setIsChangingStep] = useState(false);
+  const personaTransitionRef = useRef<any>(null);
 
   const currentStep = steps[currentStepIndex];
 
-  // Sync local step with global step tracking
+  // Sync local step with global step tracking (one-way sync to prevent loops)
   useEffect(() => {
     if (currentStepIndex !== globalCurrentStep) {
+      console.log(`🔄 Syncing step: local ${currentStepIndex} → global ${globalCurrentStep}`);
       setGlobalCurrentStep(currentStepIndex);
     }
   }, [currentStepIndex, globalCurrentStep, setGlobalCurrentStep]);
 
-  // Sync global step changes to local step
+  // Initialize local step from global step only once
   useEffect(() => {
-    if (globalCurrentStep !== currentStepIndex && globalCurrentStep < steps.length) {
+    if (globalCurrentStep !== currentStepIndex && globalCurrentStep < steps.length && currentStepIndex === 0) {
+      console.log(`🔄 Initializing local step from global: ${globalCurrentStep}`);
       setCurrentStepIndex(globalCurrentStep);
     }
-  }, [globalCurrentStep, currentStepIndex, steps.length]);
+  }, [globalCurrentStep, steps.length]); // Removed currentStepIndex to prevent loop
 
   useEffect(() => {
+    console.log(`🔄 Step changed to index ${currentStepIndex}: ${currentStep?.title || 'No step'}`);
     setInteractiveContent(null); 
     setStepError(null);
 
-    if (!currentStep) return;
+    if (!currentStep) {
+      console.log('⚠️ No current step found');
+      return;
+    }
     
+    console.log(`🎨 Setting up step: ${currentStep.title} (type: ${currentStep.type})`);
     setIsLoadingStep(true);
     setCurrentView('personaTransition');
 
-    let personaScript = currentStep.narrationScript || SCRIPTS.personaIntroDefault || `다음 단계는 '${currentStep.title}'입니다.`;
-    if (currentStep.type === 'quiz') {
-        personaScript = SCRIPTS.personaIntroQuizGeneral || `이제 '${currentStep.title}' 퀴즈를 풀어보겠습니다.`;
-    } else if (currentStep.type === 'interactive') {
-        personaScript = SCRIPTS.personaIntroInteractive || `다음 대화형 예제를 살펴보겠습니다: '${currentStep.title}'.`;
-    } else if (currentStep.type === 'info' && currentStep.narrationScript) {
-        // For info steps with explicit narrationScript, persona can introduce it or say it directly.
-        // If persona says it directly, the content display might not need it again.
-        // For now, let's assume persona introduces it:
-        personaScript = `${SCRIPTS.personaIntroInfo || "다음 정보를 안내해 드리겠습니다:"} "${currentStep.title}"`;
-    } else if (currentStep.type === 'info' && typeof currentStep.content === 'string' && currentStep.content.length < 150) { // Keep intro short
-        personaScript = `${SCRIPTS.personaIntroInfo || "다음 내용을 살펴보겠습니다:"} ${currentStep.title}.`;
-    } else if (currentStep.type === 'narration' && currentStep.narrationScript) {
-        personaScript = currentStep.narrationScript; // Persona directly says the narration content
-    } else if (currentStep.type === 'video_case_study') {
-        personaScript = `다음 사례 영상을 시청해 주세요: "${currentStep.title}"`;
-    } else if (currentStep.type === 'faceswap_scenario') {
-        personaScript = `${currentStep.title} 시나리오를 생성하고 있습니다. 잠시만 기다려 주세요.`;
-    } else if (currentStep.type === 'voice_call_scenario') {
-        personaScript = `음성 통화 시나리오를 준비하고 있습니다: "${currentStep.title}"`;
-    } else if (currentStep.type === 'video_call_scenario') {
-        personaScript = `영상 통화 시나리오를 생성하고 있습니다: "${currentStep.title}"`;
-    }
-
-
-    setScriptForPersona(personaScript);
+    // Use the narrationScript directly from the step
+    setScriptForPersona(currentStep.narrationScript || '');
     setIsLoadingStep(false); 
 
-  }, [currentStepIndex, steps, currentStep]);
+  }, [currentStepIndex, steps]); // Removed currentStep to prevent duplicate dependency
 
   // Scenario processing functions
   const processFaceswapScenario = async (step: ModuleStep) => {
@@ -124,8 +109,8 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       const faceswapResult = await apiService.generateFaceswapImage(baseImage, userImageUrl);
       
       
-      // Generate talking photo
-      const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId);
+      // Generate talking photo with scenario-specific audio script
+      const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript);
 
       return (
         <div className="text-center">
@@ -145,7 +130,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               </video>
             </div>
             <p className="text-sm text-slate-600 italic">
-              이는 AI 기술을 사용한 교육용 시뮬레이션입니다.
+              이는 AI 기술을 사용해 생성된 영상입니다. 
             </p>
           </div>
         </div>
@@ -310,22 +295,58 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     }
   }, [currentView, currentStep, userData, userImageUrl, caricatureUrl, voiceId]);
 
-  const handlePersonaNarrationEnd = useCallback(() => {
-    setCurrentView('content');
-  }, []); // Empty dependency array as setCurrentView is stable
-
-  const handleNext = () => {
-    if (currentStepIndex < steps.length - 1) {
-      setCurrentStepIndex(prev => prev + 1);
-    } else {
-      onModuleComplete();
-      setCurrentPage(Page.ModuleSelection); 
+  const handleNext = useCallback(() => {
+    if (isChangingStep) {
+      console.log('⚠️ Step change already in progress, ignoring');
+      return;
     }
-  };
+    
+    console.log(`🔄 handleNext called - Current step: ${currentStepIndex}, Total steps: ${steps.length}`);
+    setIsChangingStep(true);
+    
+    // Small delay to prevent rapid step changes
+    setTimeout(() => {
+      if (currentStepIndex < steps.length - 1) {
+        console.log(`➡️ Advancing from step ${currentStepIndex} to ${currentStepIndex + 1}`);
+        setCurrentStepIndex(prev => prev + 1);
+      } else {
+        console.log('✅ Module completed, returning to module selection');
+        // Stop any playing audio before completing module
+        if (personaTransitionRef.current && personaTransitionRef.current.stopAudio) {
+          personaTransitionRef.current.stopAudio();
+        }
+        onModuleComplete();
+        setCurrentPage(Page.ModuleSelection); 
+      }
+      setIsChangingStep(false);
+    }, 300);
+  }, [currentStepIndex, steps.length, onModuleComplete, setCurrentPage, isChangingStep]);
+
+  const handlePersonaNarrationEnd = useCallback(() => {
+    console.log('Persona narration ended');
+    // For pure narration steps with no additional content, go directly to next step
+    if (currentStep?.type === 'narration' && !currentStep.content) {
+      console.log('Pure narration step - advancing directly to next step');
+      handleNext();
+    } else {
+      // For steps with content, show the content view
+      console.log('Step has content - showing content view');
+      setCurrentView('content');
+    }
+  }, [currentStep, handleNext]);
 
   const handleQuizComplete = (score: number, total: number) => {
     console.log(`${moduleTitle} 퀴즈 완료: ${total}점 만점에 ${score}점`);
     handleNext(); 
+  };
+
+  const handleReturnToModuleSelection = () => {
+    console.log('Returning to module selection - stopping all audio first');
+    // Stop any playing audio before navigating
+    if (personaTransitionRef.current && personaTransitionRef.current.stopAudio) {
+      personaTransitionRef.current.stopAudio();
+    }
+    setCurrentPage(Page.ModuleSelection);
   };
   
   if (!currentStep && currentView === 'content') { 
@@ -334,7 +355,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         <Card>
           <p className="text-center text-xl text-green-600">{moduleCompletionMessage}</p>
           <div className="mt-8 flex justify-center">
-            <Button onClick={() => setCurrentPage(Page.ModuleSelection)} variant="primary" size="lg">
+            <Button onClick={handleReturnToModuleSelection} variant="primary" size="lg">
               모듈 선택으로 돌아가기
             </Button>
           </div>
@@ -343,180 +364,193 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     );
   }
 
+  const getSectionTitle = (step: ModuleStep) => {
+    if (!step) return "안내 중...";
+    
+    // Module 1 (Fake News) sections
+    if (moduleTitle === "가짜 뉴스란?") {
+      if (step.type === 'info' || step.type === 'narration') {
+        return "1. 가짜 뉴스 개념";
+      } else if (step.type === 'video_case_study') {
+        return "2. 가짜 뉴스 사례";
+      } else if (step.type === 'faceswap_scenario') {
+        return "3. 가짜 뉴스 체험";
+      } else if (step.type === 'quiz' || step.type === 'video_identification_quiz') {
+        return "4. 가짜 뉴스 대응";
+      }
+    }
+    
+    // Module 2 (Identity Theft) sections
+    if (moduleTitle === "신원 도용이란?") {
+      if (step.type === 'info' || step.type === 'narration') {
+        return "1. 신원도용 개념";
+      } else if (step.type === 'video_case_study') {
+        return "2. 신원도용 사례";
+      } else if (step.type === 'voice_call_scenario' || step.type === 'video_call_scenario') {
+        return "3. 신원도용 체험";
+      } else if (step.type === 'quiz' || step.type === 'video_identification_quiz') {
+        return "4. 신원도용 대응";
+      }
+    }
+    
+    return step.title;
+  };
 
   const renderContentForStep = () => {
-    if (isLoadingStep || !currentStep) { 
+    if (!currentStep) return null;
+
+    if (isLoadingStep) {
       return <div className="flex justify-center py-12"><LoadingSpinner text="단계 로딩 중..." /></div>;
     }
+
     if (stepError) {
       return <p className="text-red-600 text-center text-lg p-4 bg-red-50 rounded-md border border-red-300">{stepError}</p>;
     }
 
-    // Determine if content has its own narration, different from persona's intro
-    let contentSpecificNarration: string | null = null;
-    if (currentStep.type === 'info' && currentStep.narrationScript && scriptForPersona !== currentStep.narrationScript) {
-        contentSpecificNarration = currentStep.narrationScript;
-    } else if ((currentStep.type === 'caseStudy' || currentStep.type === 'video_case_study') && currentStep.narrationScript) {
-        // Only provide narration if it's different or more detailed than what persona said
-        if (currentStep.narrationScript && !scriptForPersona.includes(currentStep.narrationScript)) {
-            contentSpecificNarration = currentStep.narrationScript;
-        }
+    // For detection tips, show the content while narrator speaks
+    if (currentStep.id === 'fn_detection_tips' || currentStep.id === 'it_detection_tips') {
+      return (
+        <div className="mt-4">
+          <div dangerouslySetInnerHTML={{ __html: currentStep.content || '' }} />
+        </div>
+      );
     }
 
+    // For case studies, show a more detailed heading
+    if (currentStep.type === 'video_case_study') {
+      return (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-700">
+            {currentStep.title.includes('사례') ? 
+              `이 영상은 ${currentStep.title.split(':')[1]?.trim() || currentStep.title}에 대한 실제 사례를 보여줍니다.` :
+              currentStep.title
+            }
+          </h3>
+          <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
+            <video 
+              controls 
+              autoPlay
+              muted
+              className="w-full h-full object-cover"
+              src={currentStep.videoUrl}
+            >
+              <p>브라우저가 동영상을 지원하지 않습니다.</p>
+            </video>
+          </div>
+          <p className="text-sm text-slate-600 italic">
+            이는 AI 기술을 사용한 교육용 시뮬레이션입니다.
+          </p>
+        </div>
+      );
+    }
 
-    const mainContent = (() => {
-        switch (currentStep.type) {
-        case 'info':
-        case 'narration': 
-            return <div className="text-slate-700 text-lg leading-relaxed space-y-4">{typeof currentStep.content === 'string' ? currentStep.content.split('\n').map((para, i) => <p key={i}>{para}</p>) : currentStep.content}</div>;
-        case 'caseStudy':
-            // Legacy case study support - now mostly handled by video_case_study and other specific types
-            return (
-                <div className="text-slate-700 text-lg leading-relaxed space-y-4">
-                    {typeof currentStep.content === 'string' ? 
-                        currentStep.content.split('\n').map((para, i) => <p key={i}>{para}</p>) : 
-                        currentStep.content || "사례 연구 내용을 불러오는 중..."
-                    }
-                </div>
-            );
-        case 'quiz':
-            const quizQuestions = currentStep.quizId ? QUIZZES[currentStep.quizId] : null;
-            if (!quizQuestions) return <p className="text-red-500 text-lg">퀴즈를 찾을 수 없습니다.</p>;
-            return <QuizComponent questions={quizQuestions} onQuizComplete={handleQuizComplete} voiceId={voiceId} />;
-        case 'interactive':
-            return interactiveContent || <div className="text-slate-700 text-lg leading-relaxed">{currentStep.content || "대화형 콘텐츠 로딩 중..."}</div>;
-        
-        case 'video_case_study':
-            return (
-                <div className="text-center">
-                    <h3 className="text-xl font-bold mb-4">{currentStep.title}</h3>
-                    <div className="aspect-video bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
-                        {currentStep.videoUrl ? (
-                            <video 
-                                controls 
-                                className="w-full h-full rounded-lg"
-                                src={currentStep.videoUrl}
-                            >
-                                <p>브라우저가 동영상을 지원하지 않습니다.</p>
-                            </video>
-                        ) : (
-                            <p className="text-gray-500">동영상 URL이 설정되지 않았습니다.</p>
-                        )}
-                    </div>
-                </div>
-            );
-        
-        case 'faceswap_scenario':
-            return (
-                <div className="text-center">
-                    <h3 className="text-xl font-bold mb-4">{currentStep.title}</h3>
-                    {interactiveContent ? interactiveContent : (
-                        <div className="text-slate-700 text-lg">
-                            <LoadingSpinner size="lg" />
-                            <p className="mt-4">AI 시나리오 생성 중...</p>
-                            <p className="text-sm text-slate-500 mt-2">이 작업은 최대 2분까지 소요될 수 있습니다.</p>
-                        </div>
-                    )}
-                </div>
-            );
-        
-        case 'voice_call_scenario':
-            return (
-                <div className="text-center">
-                    <h3 className="text-xl font-bold mb-4">{currentStep.title}</h3>
-                    {interactiveContent ? interactiveContent : (
-                        <div className="bg-gray-900 text-white p-8 rounded-xl max-w-sm mx-auto">
-                            <div className="text-center">
-                                <LoadingSpinner size="lg" />
-                                <p className="text-lg font-semibold mt-4">음성 통화 시뮬레이션</p>
-                                <p className="text-sm mt-2">음성 생성 중...</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        
-        case 'video_call_scenario':
-            return (
-                <div className="text-center">
-                    <h3 className="text-xl font-bold mb-4">{currentStep.title}</h3>
-                    {interactiveContent ? interactiveContent : (
-                        <div className="bg-gray-900 text-white p-8 rounded-xl max-w-md mx-auto">
-                            <div className="text-center">
-                                <LoadingSpinner size="lg" />
-                                <p className="text-lg font-semibold mt-4">영상 통화 시뮬레이션</p>
-                                <p className="text-sm mt-2">딥페이크 영상 생성 중...</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        
-        default:
-            return <p className="text-yellow-500 text-lg">알 수 없는 단계 유형입니다.</p>;
-        }
-    })();
-
-    return (
-        <>
-            {mainContent}
-            {contentSpecificNarration && (
-                 <NarrationPlayer 
-                    script={contentSpecificNarration} 
-                    voiceId={voiceId} 
-                    autoPlay={false} // Should not autoplay if persona already introduced the topic
-                    showControls={true}
-                    imageUrl={caricatureUrl || PLACEHOLDER_USER_IMAGE}
-                    talkingImageUrl={talkingPhotoUrl || ""}
-                />
+    // Handle other step types
+    switch (currentStep.type) {
+      case 'quiz':
+        const quizQuestions = currentStep.quizId ? QUIZZES[currentStep.quizId] : null;
+        if (!quizQuestions) return <p className="text-red-500 text-lg">퀴즈를 찾을 수 없습니다.</p>;
+        return <QuizComponent questions={quizQuestions} onQuizComplete={handleQuizComplete} voiceId={voiceId} />;
+      
+      case 'faceswap_scenario':
+        return (
+          <div className="text-center">
+            {interactiveContent ? interactiveContent : (
+              <div className="text-slate-700 text-lg">
+                <LoadingSpinner size="lg" />
+                <p className="mt-4">AI 시나리오 생성 중...</p>
+                <p className="text-sm text-slate-500 mt-2">이 작업은 최대 2분까지 소요될 수 있습니다.</p>
+              </div>
             )}
-        </>
-    );
+          </div>
+        );
+      
+      case 'voice_call_scenario':
+        return (
+          <div className="text-center">
+            {interactiveContent ? interactiveContent : (
+              <div className="bg-gray-900 text-white p-8 rounded-xl max-w-sm mx-auto">
+                <div className="text-center">
+                  <LoadingSpinner size="lg" />
+                  <p className="text-lg font-semibold mt-4">음성 통화 시뮬레이션</p>
+                  <p className="text-sm mt-2">음성 생성 중...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      
+      case 'video_call_scenario':
+        return (
+          <div className="text-center">
+            {interactiveContent ? interactiveContent : (
+              <div className="bg-gray-900 text-white p-8 rounded-xl max-w-md mx-auto">
+                <div className="text-center">
+                  <LoadingSpinner size="lg" />
+                  <p className="text-lg font-semibold mt-4">영상 통화 시뮬레이션</p>
+                  <p className="text-sm mt-2">딥페이크 영상 생성 중...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      
+      default:
+        // For other steps, show the content if available
+        return currentStep.content ? (
+          <div className="mt-4" dangerouslySetInnerHTML={{ __html: currentStep.content }} />
+        ) : null;
+    }
   };
 
   const showNextButtonForContent = currentView === 'content' && currentStep?.type !== 'quiz';
 
   return (
-    <PageLayout title={moduleTitle} showAppTitle={false}>
-      <Card title={currentView === 'content' && currentStep ? `${currentStep.title} (${steps.length}단계 중 ${currentStepIndex + 1}단계)` : "안내 중..."}>
-        {/* Back Button */}
-        {canGoBack && (
-          <div className="mb-6">
-            <BackButton onClick={onGoBack} />
-          </div>
-        )}
-        
-        {currentView === 'personaTransition' && currentStep ? (
-          <PersonaTransitionSlide
-            onNext={handlePersonaNarrationEnd}
-            userData={userData}
-            caricatureUrl={caricatureUrl}
-            talkingPhotoUrl={talkingPhotoUrl}
-            voiceId={voiceId}
-            script={scriptForPersona}
-          />
-        ) : currentView === 'content' && currentStep ? (
-          <>
-            <div className="min-h-[200px]">
-              {renderContentForStep()}
+    <PageLayout
+      title={moduleTitle}
+      showAppTitle={false}
+    >
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <Card title={currentStep ? getSectionTitle(currentStep) : "안내 중..."}>
+          {/* Back Button */}
+          {canGoBack && (
+            <div className="mb-6">
+              <BackButton onClick={onGoBack} />
             </div>
-            {showNextButtonForContent && ( 
-              <div className="mt-10 flex justify-center">
-                <Button onClick={handleNext} variant="primary" size="lg">
-                  {currentStepIndex === steps.length - 1 ? "모듈 완료" : "계속"}
-                </Button>
+          )}
+          
+          {currentView === 'personaTransition' && currentStep ? (
+            <PersonaTransitionSlide
+              ref={personaTransitionRef}
+              onNext={handlePersonaNarrationEnd}
+              userData={userData}
+              caricatureUrl={caricatureUrl}
+              talkingPhotoUrl={talkingPhotoUrl}
+              voiceId={voiceId}
+              script={scriptForPersona}
+            />
+          ) : currentView === 'content' && currentStep ? (
+            <>
+              <div className="min-h-[200px]">
+                {renderContentForStep()}
               </div>
-            )}
-          </>
-        ) : (
-             <div className="min-h-[200px] flex items-center justify-center">
-                <LoadingSpinner text="모듈 준비 중..." />
-             </div>
-        )}
-      </Card>
-       <Button onClick={() => setCurrentPage(Page.ModuleSelection)} variant="ghost" size="md" className="mt-8 mx-auto !text-slate-600 hover:!text-orange-600 hover:!bg-slate-200">
-            모듈 선택으로 돌아가기
-        </Button>
+              {showNextButtonForContent && ( 
+                <div className="mt-10 flex justify-center">
+                  <Button onClick={handleNext} variant="primary" size="lg">
+                    {currentStepIndex === steps.length - 1 ? "모듈 완료" : "계속"}
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+               <div className="min-h-[200px] flex items-center justify-center">
+                  <LoadingSpinner text="모듈 준비 중..." />
+               </div>
+          )}
+        </Card>
+         <Button onClick={handleReturnToModuleSelection} variant="ghost" size="md" className="mt-8 mx-auto !text-slate-600 hover:!text-orange-600 hover:!bg-slate-200">
+              모듈 선택으로 돌아가기
+          </Button>
+      </div>
     </PageLayout>
   );
 };

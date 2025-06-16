@@ -154,12 +154,14 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
             </div>
             <p className="text-base text-slate-600 mb-10">(어떤가요? 말하는 캐릭터가 생겼어요!)</p>
 
-            <Button onClick={() => setCurrentPage(Page.DeepfakeIntroduction)} variant="primary" size="lg">
-              다음: 딥페이크 기술 이해하기
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg>
-            </Button>
+            <div className="flex justify-center">
+              <Button onClick={() => setCurrentPage(Page.DeepfakeIntroduction)} variant="primary" size="lg">
+                다음: 딥페이크 기술 이해하기
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </Button>
+            </div>
           </div>
         )}
       </Card>

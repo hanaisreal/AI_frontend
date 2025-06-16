@@ -21,7 +21,7 @@ interface FakeNewsModulePageProps {
 const FakeNewsModulePage: React.FC<FakeNewsModulePageProps> = (props) => {
   return (
     <BaseModulePage
-      moduleTitle="모듈 1: 가짜 뉴스 경험" // Translated title
+      moduleTitle="모듈 1: 가짜 뉴스" // Translated title
       steps={FAKE_NEWS_MODULE_STEPS}
       moduleCompletionMessage={SCRIPTS.module1Complete} // Already translated in constants
       {...props}

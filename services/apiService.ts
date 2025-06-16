@@ -116,16 +116,17 @@ export const generateCaricature = async (facialFeatures: Record<string, any>, pr
 };
 
 
-export const generateTalkingPhoto = async (caricatureUrl: string, userName: string, voiceId: string): Promise<{ videoUrl: string; taskId: string }> => {
+export const generateTalkingPhoto = async (caricatureUrl: string, userName: string, voiceId: string, audioScript?: string): Promise<{ videoUrl: string; taskId: string }> => {
   console.log(`FRONTEND: Calling /api/generate-talking-photo`);
   console.log(`  - Caricature URL: ${caricatureUrl}`);
   console.log(`  - User Name: ${userName}`);
   console.log(`  - Voice ID: ${voiceId}`);
+  console.log(`  - Audio Script: ${audioScript || 'Default script'}`);
   
   const response = await fetch(`${API_BASE_URL}/api/generate-talking-photo`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ caricatureUrl, userName, voiceId }),
+    body: JSON.stringify({ caricatureUrl, userName, voiceId, audioScript }),
   });
 
   const result = await handleApiResponse(response);
@@ -169,6 +170,9 @@ export const getUserProgress = async (userId: number) => {
     headers: { 'Content-Type': 'application/json' }
   });
   
-  return handleApiResponse(response);
+  console.log('API Response status:', response.status);
+  const data = await handleApiResponse(response);
+  console.log('API Response data:', data);
+  return data;
 };
 

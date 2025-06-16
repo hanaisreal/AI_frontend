@@ -32,36 +32,36 @@ export const SCRIPTS = {
   personaIntroInteractive: "다음은 당신과 관련된 예제입니다!",
   
   // New scripts for deepfake introduction flow
-  deepfakeIntroStart: "먼저, 딥페이크, 딥보이스 어떻게 만들어지는지 영상을 통해 확인해볼게요.",
-  deepfakeQuizIntro: "좋습니다. 요즘에는 가짜 얼굴 합성과 더불어서 가짜 영상을 만들수도 있어요. 다음 퀴즈를 통해 알아볼까요? 가짜 영상인지 아닌지 맞춰보세요!",
+  deepfakeIntroStart: "AI 기술을 체험하기 앞서서 먼저 딥페이크와 딥보이스가 어떻게 만들어지는지 영상을 통해 확인해볼게요.",
+  deepfakeQuizIntro: "좋습니다. 요즘에는 가짜 얼굴 합성과 더불어서 가짜 영상을 만들수도 있어요. 다음 영상을 보고, 가짜 영상인지 아닌지 한번 맞춰보세요!",
   deepfakeQuizComplete: "놀랍게도 전부 만들어진 가짜 영상이었습니다. 이제 다음으로 딥페이크, 딥보이스가 어떻게 악용될 수 있는지 자세히 살펴볼게요.",
 
   // Module 1 (Fake News) - Updated detailed flow
   fakeNewsIntroDetailed: "가짜 뉴스는, 거짓말인데 진짜처럼 보이는 소식이에요. 예를 들어, '이 약 먹으면 3일 만에 치매가 낫는다' 이런 말을 들으면 혹하죠. 하지만 알고 보면 사기인 경우가 많아요.",
-  fakeNewsCaseStudyIntro: "이제 사례 영상들을 통해 딥페이크가 어떻게 악용될 수 있는지, 그리고 우리가 어떻게 주의해야 하는지 알아보세요.",
-  fakeNewsCase1: "젤렌스키가 트럼프를 때리는 가짜 영상.",
-  fakeNewsCase2: "에펠타워가 불에 타는 영상이에요~",
-  fakeNewsExperienceIntro: "이제 직접 딥페이크를 만들어보는 체험을 해볼 거예요.",
+  fakeNewsCaseStudyIntro: "이제 사례 영상들을 통해 딥페이크가 어떻게 악용될 수 있는지, 그리고 우리가 어떻게 주의해야 하는지 알아볼게요.",
+  fakeNewsCase1: "첫 번째 사례는 젤렌스키 대통령이 트럼프 대통령을 주먹으로 때리는 장면이 담긴 가짜 영상이에요. 함께 시청해볼게요~",
+  fakeNewsCase2: "이런 영상만 본다면 속을 수 있겠죠? 다음은 에펠타워가 불에 타는 영상이에요~",
+  fakeNewsExperienceIntro: "이제 직접 딥페이크 기술로 가짜 뉴스를 만들어보는 체험을 해볼 거예요.",
   fakeNewsScenario1Audio: "1등 당첨돼서 정말 기뻐요!",
-  fakeNewsScenario1to2: "이런 기사가 주변 지인들에게 퍼진다면 재미로 넘길수도 있겠지만, 만약 나쁜쪽으로 이어진다면 어떨까요?",
+  fakeNewsScenario1to2: "이런 기사가 주변 지인들에게 퍼진다면 재미로 넘길수도 있겠지만, 만약 안 좋은 기사가 만들어진다면 어떨까요?",
   fakeNewsScenario2Audio: "찍지 마세요. 죄송합니다…",
-  fakeNewsWrapUp: "이런식으로 뉴스 기사가 난다고 생각하니 정말 무섭네요. 이제 딥페이크 영상에 대한 대응방안을 함께 알아볼까요?",
-  fakeNewsDetectionIntro: "딥페이크 영상은 이제 정교하게 만들어져서 실제로 구분하기 정말 어려워졌어요. 그래도 딥페이크 영상을 분별할 수 있는 몇가지 팁들을 알아볼게요.",
-  fakeNewsDetectionTips: "누가 영상이나 뉴스를 보내줬다고 해서, 다 믿으면 안 돼요. 누가 만든 건지, 진짜 뉴스에 나왔는지, 그 사람 공식 계정에 올라온 건지 꼭 출처를 확인하는 습관이 필요해요. 영상을 봤을 때 바로 확인해야 할 요소들로는 블러나 어색한 경계 등이 있어요.",
+  fakeNewsWrapUp: "이런식으로 뉴스 기사가 난다고 생각하니 정말 무섭네요!",
+  fakeNewsDetectionIntro: "사례들을 보니 정말 그럴듯하죠? 그렇다면 이런 딥페이크가 적용된 가짜뉴스에 속지 않으려면 어떻게 해야 할까요?",
+  fakeNewsDetectionTips: "먼저 누가 영상이나 뉴스를 보내줬다고 해서, 다 믿으면 안 돼요. 누가 만든 건지, 진짜 뉴스에 나왔는지, 그 사람 공식 계정에 올라온 건지 꼭 출처를 확인하는 습관이 필요해요. 진짜 가게인지 확인도 안 하고 물건을 사면 안 되듯이, 진짜 영상인지도 꼭 확인하고 믿는 거예요.",
   fakeNewsModuleEnd: "첫 번째 체험이 모두 끝났어요. 딥페이크 기술의 위험성과 가능성에 대해 조금이나마 이해가 되셨기를 바라요. 다음 파트로 이동해볼까요?",
 
   // Module 2 (Identity Theft) - Updated detailed flow
   identityTheftCaseStudyIntro: "각 사례를 통해 이 기술이 우리 생활에 어떤 영향을 미칠 수 있는지 알아보세요.",
-  identityTheftCase1: "유명 연예인을 사칭해서 투자를 하라는 영상 소개",
-  identityTheftCase2: "유명한 축구선수가 주식 종목을 추천해주는 영상.",
+  identityTheftCase1: "첫 번째 사례는 유명 연예인을 사칭해서 투자를 하라는 영상을 봐볼게요",
+  identityTheftCase2: "다음 사례는 유명한 축구선수가 주식 종목을 추천해주는 영상이에요.",
   identityTheftExperienceIntro: "이제 일상생활에서 신원 도용이 일어나는 체험을 해볼 거예요.",
   identityTheftScenario1Intro: "본인이 투자 사기를 시도하는 상황을 체험해보겠습니다. 목소리 변조로 본인의 목소리가 사용되다면 어떨까요?",
   identityTheftScenario1Audio: "요즘 투자 정보 하나 알아낸 게 있는데, 친구들 다 2~3배씩 수익 났다고 하더라. 내가 링크 하나 보낼 테니까 한번 들어가서 확인해봐.",
   identityTheftVoiceModulation: "이 목소리가 실시간으로 변조돼서 전화에 사용될 수 있어요!",
-  identityTheftScenario2Intro: "사고 상황을 가장하여 긴급한 돈을 요구하는 사기 상황을 체험해보겠습니다.",
+  identityTheftScenario2Intro: "다음 체험에서는 사고 상황을 가장하여 돈을 요구하는 사기 상황을 체험해보겠습니다.",
   identityTheftScenario2Audio: "나 지금 교통사고가 났어. 보험 부르지 말고 그냥 적당히 합의보는 게 좋을 것 같아. 혹시 지금 50만 원만 보내줄 수 있을까?",
   identityTheftWrapUp: "이제는 실시간으로 얼굴 변조랑 목소리 변조까지 가능하니, 이런식으로 가족한테 연락이 간다면 속을 수 있을거 같아요.",
-  identityTheftDetectionIntro: "딥페이크 영상은 이제 정교하게 만들어져서 실제로 구분하기 정말 어려워졌어요. 신원도용에 맞서기 위해 알아야할 몇가지 팁들을 알아볼게요.",
+  identityTheftDetectionIntro: "딥페이크 영상은 이제 정교하게 만들어져서 실제로 구분하기 정말 어려워졌어요. 신원도용에 맞서기 위해 알아야할 몇가지 대응방안을 알아볼게요.",
   identityTheftDetectionTips: "걸려온 전화의 경우 가족간의 암호를 물어봄으로써 상대방이 가족이 맞는지 확인하기. 온라인에 사진 올리지 말기. 가족들 포함해서. 가족을 저장할때 '딸, 아들'이라고 저장하지 말고 이름으로 저장하기. 본인의 핸드폰이 해킹되었을 경우 가족들의 신분이 노출되지 않기 위해.",
   identityTheftModuleEnd: "신원도용에 대한 체험이 끝났어요. 앞으로 이런 상황들을 조심해서 대처하시길 바라요.",
 };
@@ -87,7 +87,7 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
   // 1. Narrator explains fake news concept
   { 
     id: 'fn_intro', 
-    title: "가짜 뉴스 개념 설명", 
+    title: "가짜 뉴스 개념", 
     type: 'narration', 
     narrationScript: SCRIPTS.fakeNewsIntroDetailed,
     requires: ['userCaricature']
@@ -208,7 +208,14 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
   },
   
   // 13. Detection tips content
-  { 
+  /* TODO: update with the following context:
+    - 또 딥페이크 영상은 대충 보면 진짜 같지만, 잘 살펴보면 이상한 점들이 보여요.
+    - 얼굴 전체를 자세히 살펴보세요. 얼굴에 뭔가 ‘어색한 느낌’이 든다면 의심해보세요. 입모양이나 눈동자가 부자연스러울 수 있어요.
+    - 눈을 자주 깜빡이거나, 거의 안 깜빡이면 의심해보세요. 사람은 자연스럽게 눈을 깜빡이는데, AI 영상에서는 이걸 놓치는 경우가 많아요.
+    - 입이 움직이는 걸 잘 보세요. 말하는 소리와 입모양이 딱 맞지 않거나, 입술이 부자연스럽게 움직이면 가짜 영상일 수 있어요. 립싱크 느낌이 들 수도 있어요.
+    - 볼과 이마가 너무 매끈하거나 이상하게 주름져 있는지 보세요. 피부가 지나치게 매끈하거나 나이에 안 맞게 어려 보이면 이상한 영상일 수 있어요. 예를 들어, 머리는 하얗게 세었는데 얼굴은 아기처럼 탱탱하면 이상하죠?
+  */
+    { 
     id: 'fn_detection_tips', 
     title: "딥페이크 분별 팁", 
     type: 'info', 
@@ -286,7 +293,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
   // 6. Case 2: Show video
   { 
     id: 'it_case2_video', 
-    title: "사례 2: 축구선수 주식 추천 영상", 
+    title: "사례 2:주식 종목을 추천 영상", 
     type: 'video_case_study', 
     videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/identitytheft-case2.m4v" 
     // 🎥 VIDEO NEEDED: Famous soccer player recommending stocks using deepfake technology

@@ -37,49 +37,54 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [videoLoading, setVideoLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastGeneratedScriptRef = useRef<string | null>(null);
   const hasAutoPlayed = useRef(false); // Track if auto-play has already happened
 
   // Generate audio using ElevenLabs when script or voiceId changes
   useEffect(() => {
-    if (!script?.trim()) {
-      setAudioUrl(null);
-      setError(null);
-      setIsPlaying(false);
-      lastGeneratedScriptRef.current = null;
-      if (onEnd) {
-        onEnd();
-      }
-      return;
-    }
-
-    if (!voiceId) {
-      console.log('NarrationPlayer: No voiceId provided, skipping audio generation');
-      setError('사용자 음성이 필요합니다. 음성 등록을 완료해주세요.');
-      return;
-    }
-
-    // Check if we already have this audio cached
-    const scriptKey = `${script}-${voiceId}`;
-    
-    // Check completed cache first
-    if (completedCache.has(scriptKey)) {
-      console.log('NarrationPlayer: Using completed cache for script');
-      setAudioUrl(completedCache.get(scriptKey)!);
-      setIsLoading(false);
-      return;
-    }
-
-    // Check if we already generated audio for this component instance
-    if (lastGeneratedScriptRef.current === scriptKey) {
-      console.log('NarrationPlayer: Skipping duplicate generation for same script in this component');
-      return;
-    }
-
     let isCancelled = false;
 
     const generateAudio = async () => {
+      if (!script?.trim()) {
+        setAudioUrl(null);
+        setError(null);
+        setIsPlaying(false);
+        lastGeneratedScriptRef.current = null;
+        if (onEnd) {
+          onEnd();
+        }
+        return;
+      }
+
+      if (!voiceId) {
+        console.log('NarrationPlayer: No voiceId provided, skipping audio generation');
+        setError('사용자 음성이 필요합니다. 음성 등록을 완료해주세요.');
+        return;
+      }
+
+      // Check if we already have this audio cached
+      const scriptKey = `${script}-${voiceId}`;
+      console.log(`NarrationPlayer: Cache key: ${scriptKey.substring(0, 100)}...`);
+      
+      // Check completed cache first
+      if (completedCache.has(scriptKey)) {
+        console.log('NarrationPlayer: Using completed cache for script');
+        const cachedUrl = completedCache.get(scriptKey)!;
+        console.log(`NarrationPlayer: Cached URL: ${cachedUrl.substring(0, 50)}...`);
+        setError(null); // Clear any previous errors
+        setAudioUrl(cachedUrl);
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if we already generated audio for this component instance
+      if (lastGeneratedScriptRef.current === scriptKey) {
+        console.log('NarrationPlayer: Skipping duplicate generation for same script in this component');
+        return;
+      }
+
       try {
         setIsLoading(true);
         setError(null);
@@ -91,6 +96,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
           const audioUrl = await existingPromise;
           
           if (!isCancelled) {
+            setError(null); // Clear any previous errors
             setAudioUrl(audioUrl);
             lastGeneratedScriptRef.current = scriptKey;
             console.log(`NarrationPlayer: Using cached audio: ${audioUrl}`);
@@ -120,6 +126,8 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         const audioUrl = await generationPromise;
         
         if (!isCancelled) {
+          console.log(`NarrationPlayer: Setting new audioUrl: ${audioUrl.substring(0, 50)}...`);
+          setError(null); // Clear any previous errors on successful generation
           setAudioUrl(audioUrl);
           lastGeneratedScriptRef.current = scriptKey;
           console.log(`NarrationPlayer: Audio generated successfully (blob URL)`);
@@ -143,17 +151,29 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     return () => {
       isCancelled = true;
     };
-  }, [script, voiceId]); // Removed onEnd from dependencies
+  }, [script, voiceId, onEnd]); // Added onEnd to dependencies
 
   const handlePlayPause = useCallback(() => {
     if (!audioUrl || isLoading) return;
     
-    if (!audioRef.current) {
-      // Create audio element if it doesn't exist
+    // Always create a new audio element or update the source if URL changed
+    if (!audioRef.current || audioRef.current.src !== audioUrl) {
+      // Clean up previous audio element
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+      
+      console.log(`NarrationPlayer: Creating new audio element with URL: ${audioUrl.substring(0, 50)}...`);
+      
+      // Create new audio element with the current URL
       const audio = new Audio(audioUrl);
       audio.preload = 'auto';
       audio.loop = false; // Ensure no auto-replay
       audio.onplay = () => {
+        console.log('NarrationPlayer: Audio started playing');
+        setError(null); // Clear any error when audio starts playing
         setIsPlaying(true);
         if (onPlay) onPlay();
       };
@@ -164,15 +184,29 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       audio.onended = () => {
         setIsPlaying(false);
         if (onPause) onPause(); // Call onPause when ended to switch back to static image
-        // Auto-continue when audio finishes
-        setTimeout(() => {
-          if (onEnd) onEnd();
-        }, 1000); // 1 second delay before auto-continuing
+        // Call onEnd to notify that narration is complete (for enabling continue button)
+        if (onEnd) onEnd();
       };
       audio.onerror = (e) => {
         console.error('NarrationPlayer: Audio playback error:', e);
-        setError('음성 재생에 실패했습니다.');
-        setIsPlaying(false);
+        console.error('Audio error details:', {
+          error: e,
+          audioSrc: audio.src,
+          audioReadyState: audio.readyState,
+          audioNetworkState: audio.networkState
+        });
+        
+        // Don't set error immediately - wait a moment to see if audio recovers
+        setTimeout(() => {
+          if (audioRef.current === audio && !audio.paused) {
+            // Audio is still the current one and not playing - then it's a real error
+            console.log('NarrationPlayer: Confirmed audio error after delay');
+            setError('음성 재생에 실패했습니다.');
+            setIsPlaying(false);
+          } else {
+            console.log('NarrationPlayer: Audio error ignored - audio is playing or changed');
+          }
+        }, 1000);
       };
       audioRef.current = audio;
     }
@@ -194,6 +228,17 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       setAudioUrl(null);
     }
   }, [script, voiceId]);
+
+  // Track audioUrl changes for debugging and reset auto-play flag
+  useEffect(() => {
+    if (audioUrl) {
+      console.log(`NarrationPlayer: audioUrl changed to: ${audioUrl.substring(0, 50)}...`);
+      // Reset auto-play flag when audioUrl changes
+      hasAutoPlayed.current = false;
+      // Clear any previous errors when new audio is available
+      setError(null);
+    }
+  }, [audioUrl]);
 
   // Auto-play when audio is ready (always auto-play, not just when autoPlay prop is true)
   useEffect(() => {
@@ -222,6 +267,32 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     }
   }, [onPause]);
 
+  // Cleanup effect when script changes
+  useEffect(() => {
+    return () => {
+      // Clean up audio element when script changes
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+      setIsPlaying(false);
+    };
+  }, [script]); // This runs when script changes
+
+  // Global cleanup effect when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clean up audio element when component unmounts completely
+      if (audioRef.current) {
+        console.log('NarrationPlayer: Cleaning up audio on component unmount');
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+      setIsPlaying(false);
+    };
+  }, []); // Empty dependency array - runs only on mount/unmount
+
   // Expose stopAudio method to parent components
   useImperativeHandle(ref, () => ({
     stopAudio,
@@ -232,16 +303,18 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   // If no script but showControls is true, show a continue button
   if (!script && !showControls) return null;
   
-  // If no script but showControls is true, show continue button
-  if (!script && showControls) {
-    // Auto-continue when there's no script
-    useEffect(() => {
+  // Auto-continue effect when there's no script but showControls is true
+  useEffect(() => {
+    if (!script && showControls && onEnd) {
       const timer = setTimeout(() => {
-        if (onEnd) onEnd();
+        onEnd();
       }, 500);
       return () => clearTimeout(timer);
-    }, [onEnd]);
-    
+    }
+  }, [script, showControls, onEnd]);
+
+  // If no script but showControls is true, show continue message
+  if (!script && showControls) {
     return (
       <Card className="bg-slate-100 p-4 mt-6 shadow-md">
         <div className="text-center">
@@ -272,20 +345,46 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       {!isLoading && !error && audioUrl && (
         <div className="text-center">
           {/* Display talking video if available, otherwise static image */}
-          <div className="my-4">
+          <div className="my-4 relative">
             {talkingImageUrl && isPlaying ? (
-              <video 
-                src={talkingImageUrl}
-                className="rounded-lg w-64 h-64 object-cover mx-auto border-4 border-orange-500"
-                autoPlay
-                loop
-                muted
-              />
+              <div className="relative">
+                <video 
+                  src={talkingImageUrl}
+                  className="rounded-lg w-64 h-64 object-cover mx-auto border-4 border-orange-500"
+                  autoPlay
+                  muted
+                  onLoadStart={() => {
+                    console.log('NarrationPlayer: Video loading started');
+                    setVideoLoading(true);
+                  }}
+                  onCanPlay={() => {
+                    console.log('NarrationPlayer: Video can play');
+                    setVideoLoading(false);
+                  }}
+                  onLoadedData={() => {
+                    console.log('NarrationPlayer: Video data loaded');
+                    setVideoLoading(false);
+                  }}
+                  style={{ background: '#f8f9fa' }}
+                />
+                {/* Loading overlay for video */}
+                {videoLoading && (
+                  <div className="absolute inset-0 bg-gray-100 rounded-lg border-4 border-orange-500 flex items-center justify-center"
+                       style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
+                    <div className="text-center">
+                      <LoadingSpinner size="md" />
+                      <p className="text-sm text-slate-600 mt-2">영상 로딩 중...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <img 
                 src={imageUrl}
                 alt="AI 캐릭터"
                 className="rounded-lg w-64 h-64 object-cover mx-auto border-4 border-gray-300"
+                onLoad={() => console.log('NarrationPlayer: Image loaded')}
+                style={{ background: '#f8f9fa' }}
               />
             )}
           </div>

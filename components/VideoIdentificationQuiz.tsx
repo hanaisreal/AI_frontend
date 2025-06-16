@@ -100,7 +100,7 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
       {currentPhase === 'observing' && currentPerson && (
         <div className="text-center">
           <p className="text-slate-700 text-lg mb-4">
-            영상을 주의 깊게 관찰해주세요. 이 영상이 진짜인지 AI로 생성된 가짜인지 판단해보세요.
+            영상을 주의 깊게 관찰해주세요. 이 영상이 진짜인지 AI로 생성된 가짜 영상인지 판단해보세요.
           </p>
           {currentPerson.videoUrl ? (
             <video 
@@ -114,7 +114,7 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
           )}
           <div className="flex justify-center">
             <Button onClick={handleObservationComplete} variant="primary" size="lg">
-              관찰 완료
+              시청 완료
             </Button>
           </div>
         </div>
@@ -123,7 +123,7 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
       {currentPhase === 'judging' && currentPerson && (
         <div className="text-center">
           <p className="text-slate-700 text-lg mb-8">
-            영상을 관찰한 결과, 이 영상이 진짜라고 생각하시나요, 아니면 AI로 생성된 가짜라고 생각하시나요?
+            이 영상이 진짜라고 생각하시나요, 아니면 AI로 생성된 가짜 영상으로 보이시나요?
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-6">
             <Button onClick={() => handleJudgement('fake')} variant="primary" size="lg" className="min-w-[150px]">
