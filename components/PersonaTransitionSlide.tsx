@@ -10,6 +10,7 @@ interface PersonaTransitionSlideProps {
   talkingPhotoUrl: string | null;
   voiceId: string | null;
   script: string;
+  hideScript?: boolean;
 }
 
 const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
@@ -19,6 +20,7 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
   talkingPhotoUrl,
   voiceId,
   script,
+  hideScript = false,
 }, ref) => {
   const [canContinue, setCanContinue] = useState(false);
   const narrationPlayerRef = useRef<any>(null);
@@ -67,6 +69,7 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
             talkingImageUrl={talkingPhotoUrl}
             autoPlay={true}
             onEnd={() => setCanContinue(true)} // Enable continue button when narration ends
+            hideScript={hideScript}
           />
         ) : (
           <div className="text-center">

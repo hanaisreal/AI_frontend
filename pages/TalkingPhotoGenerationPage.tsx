@@ -27,6 +27,7 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
   const [generatedTalkingPhoto, setGeneratedTalkingPhoto] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [videoError, setVideoError] = useState<boolean>(false);
+  const [sampleVideoMessage, setSampleVideoMessage] = useState<string | null>(null);
   const hasStartedGeneration = useRef(false);
 
 
@@ -61,7 +62,14 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
         
         setTalkingPhotoUrl(result.videoUrl);
         setGeneratedTalkingPhoto(result.videoUrl); 
-        setStatusMessage(SCRIPTS.talkingPhotoGenerated);
+        
+        // Check if this is a sample video due to API failure
+        if (result.isSample && result.message) {
+          setSampleVideoMessage(result.message);
+          setStatusMessage("샘플 영상으로 진행합니다");
+        } else {
+          setStatusMessage(SCRIPTS.talkingPhotoGenerated);
+        }
       } catch (err) {
         console.error("말하는 사진 생성 오류:", err);
         setError("말하는 사진 생성에 실패했습니다. 네트워크 또는 서비스 문제일 수 있습니다. 다시 시도해주세요.");
@@ -97,12 +105,17 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
         {!isLoading && !error && generatedTalkingPhoto && (
           <div className="text-center">
             <h2 className="text-3xl font-semibold text-green-600 mb-6">말하는 캐릭터 생성 완료!</h2>
+            {sampleVideoMessage && (
+              <div className="mb-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
+                <p className="text-orange-800 font-medium">{sampleVideoMessage}</p>
+              </div>
+            )}
             
             <div className="my-8 p-3 bg-slate-100 inline-block rounded-xl shadow-lg">
                 {!videoError ? (
                     <video 
                         src={generatedTalkingPhoto} 
-                        className="rounded-lg w-72 h-72 md:w-80 md:h-80 object-contain mx-auto border-4 border-orange-500"
+                        className="rounded-lg w-64 h-96 md:w-80 md:h-[30rem] object-contain mx-auto border-4 border-orange-500"
                         controls
                         autoPlay
                         loop
@@ -122,7 +135,7 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
                         onPlay={() => console.log('Video started playing')}
                     />
                 ) : (
-                    <div className="w-72 h-72 md:w-80 md:h-80 bg-gray-200 rounded-lg border-4 border-orange-500 flex flex-col items-center justify-center">
+                    <div className="w-64 h-96 md:w-80 md:h-[30rem] bg-gray-200 rounded-lg border-4 border-orange-500 flex flex-col items-center justify-center">
                         <p className="text-gray-600 text-center px-4">
                             동영상을 로드할 수 없습니다.<br/>
                             <span className="text-sm">CDN에서 처리 중일 수 있습니다.</span>

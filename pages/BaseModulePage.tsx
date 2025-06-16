@@ -85,13 +85,18 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     setIsLoadingStep(true);
     
     // Video case studies and some other types should skip persona transition
-    if (currentStep.type === 'video_case_study' || 
-        currentStep.type === 'faceswap_scenario' || 
-        currentStep.type === 'voice_call_scenario' || 
-        currentStep.type === 'video_call_scenario' ||
-        currentStep.type === 'quiz') {
+    // But info steps with narrationScript (like detection tips) should have persona transition
+    if ((currentStep.type === 'video_case_study' || 
+         currentStep.type === 'faceswap_scenario' || 
+         currentStep.type === 'voice_call_scenario' || 
+         currentStep.type === 'video_call_scenario' ||
+         currentStep.type === 'quiz') &&
+        // Exception: info steps with narrationScript should have persona
+        !(currentStep.type === 'info' && currentStep.narrationScript)) {
+      console.log(`🔄 Skipping persona transition for ${currentStep.type} step`);
       setCurrentView('content');
     } else {
+      console.log(`🔄 Using persona transition for ${currentStep.type} step with script:`, currentStep.narrationScript?.substring(0, 50) + '...');
       setCurrentView('personaTransition');
       // Use the narrationScript directly from the step
       setScriptForPersona(currentStep.narrationScript || '');
@@ -120,7 +125,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       
       
       // Generate talking photo with scenario-specific audio script
-      const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript);
+      const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript, step.scenarioType);
 
       return (
         <div className="text-center">
@@ -128,12 +133,16 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             <h4 className="text-lg font-semibold text-orange-600">
               {step.scenarioType === 'lottery' ? '복권 당첨 시나리오' : '범죄 용의자 시나리오'}
             </h4>
-            <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
+            {talkingPhotoResult.isSample && talkingPhotoResult.message && (
+              <div className="mb-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
+                <p className="text-orange-800 font-medium">{talkingPhotoResult.message}</p>
+              </div>
+            )}
+            <div className="w-64 h-96 md:w-80 md:h-[30rem] mx-auto bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
               <video 
                 controls 
                 autoPlay
-                muted
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 src={talkingPhotoResult.videoUrl}
               >
                 <p>브라우저가 동영상을 지원하지 않습니다.</p>
@@ -197,44 +206,44 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         return <div className="text-red-500">비디오 통화 데이터가 불완전합니다.</div>;
       }
 
-      // Select base video based on user gender
-      const baseVideo = userData.gender === 'male' ? step.baseImageMale : step.baseImageFemale;
-      if (!baseVideo) {
-        return <div className="text-red-500">기본 비디오를 찾을 수 없습니다.</div>;
+      // Select base image based on user gender (use image for face swap, not video)
+      const baseImage = userData.gender === 'male' ? step.baseImageMale : step.baseImageFemale;
+      if (!baseImage) {
+        return <div className="text-red-500">시나리오 이미지를 찾을 수 없습니다.</div>;
       }
 
       console.log(`Generating video call scenario: ${step.scenarioType}`);
       
-      // TODO: Implement face swap video with voice dubbing when APIs are available
-      // For now, use placeholder video and generate separate audio
-      const narrationResult = await apiService.generateNarration(step.audioScript, voiceId);
-      const placeholderVideoUrl = baseVideo; // Use base video as placeholder
+      // Generate faceswap image first
+      const faceswapResult = await apiService.generateFaceswapImage(baseImage, userImageUrl);
+      
+      // Generate talking photo with scenario-specific audio script
+      const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript, step.scenarioType);
 
       return (
         <div className="text-center">
           <div className="bg-gray-900 text-white p-6 rounded-xl max-w-md mx-auto">
             <div className="text-center space-y-4">
               <p className="text-lg font-semibold">긴급 상황 영상 통화</p>
-              <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden">
+              {talkingPhotoResult.isSample && talkingPhotoResult.message && (
+                <div className="mb-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
+                  <p className="text-orange-800 font-medium">{talkingPhotoResult.message}</p>
+                </div>
+              )}
+              <div className="w-64 h-96 md:w-80 md:h-[30rem] mx-auto bg-gray-800 rounded-lg overflow-hidden">
                 <video 
                   controls 
-                  muted
-                  className="w-full h-full object-cover"
-                  src={placeholderVideoUrl}
+                  autoPlay
+                  className="w-full h-full object-contain"
+                  src={talkingPhotoResult.videoUrl}
                 >
                   <p>브라우저가 동영상을 지원하지 않습니다.</p>
                 </video>
               </div>
-              <audio 
-                controls 
-                autoPlay
-                className="w-full mt-2"
-                src={`data:${narrationResult.audioType};base64,${narrationResult.audioData}`}
-              />
               <div className="text-sm text-gray-300 space-y-1">
                 <p>"{step.audioScript}"</p>
               </div>
-              <p className="text-xs text-gray-400">당신의 목소리로 재생됩니다 (비디오는 플레이스홀더)</p>
+              <p className="text-xs text-gray-400">당신의 복제된 얼굴과 목소리로 재생됩니다</p>
             </div>
           </div>
         </div>
@@ -338,6 +347,10 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     if (currentStep?.type === 'narration' && (!currentStep.content || (typeof currentStep.content === 'string' && currentStep.content.trim() === ''))) {
       console.log('Pure narration step - advancing directly to next step');
       handleNext();
+    } else if (currentStep?.id === 'fn_detection_tips' || currentStep?.id === 'it_detection_tips') {
+      // For detection tips, content was already shown during persona transition, so go to next step
+      console.log('Detection tips completed - advancing to next step');
+      handleNext();
     } else {
       // For steps with content, show the content view
       console.log('Step has content - showing content view');
@@ -410,7 +423,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     if (!currentStep) return null;
 
     if (isLoadingStep) {
-      return <div className="flex justify-center py-12"><LoadingSpinner text="단계 로딩 중..." /></div>;
+      return <div className="flex justify-center py-12"><LoadingSpinner text="로딩 중..." /></div>;
     }
 
     if (stepError) {
@@ -526,15 +539,24 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
           )}
           
           {currentView === 'personaTransition' && currentStep ? (
-            <PersonaTransitionSlide
-              ref={personaTransitionRef}
-              onNext={handlePersonaNarrationEnd}
-              userData={userData}
-              caricatureUrl={caricatureUrl}
-              talkingPhotoUrl={talkingPhotoUrl}
-              voiceId={voiceId}
-              script={scriptForPersona}
-            />
+            <>
+              <PersonaTransitionSlide
+                ref={personaTransitionRef}
+                onNext={handlePersonaNarrationEnd}
+                userData={userData}
+                caricatureUrl={caricatureUrl}
+                talkingPhotoUrl={talkingPhotoUrl}
+                voiceId={voiceId}
+                script={scriptForPersona}
+                hideScript={currentStep.id === 'fn_detection_tips' || currentStep.id === 'it_detection_tips'}
+              />
+              {/* For detection tips, show content during persona narration */}
+              {(currentStep.id === 'fn_detection_tips' || currentStep.id === 'it_detection_tips') && (
+                <div className="mt-8">
+                  <div dangerouslySetInnerHTML={{ __html: currentStep.content || '' }} />
+                </div>
+              )}
+            </>
           ) : currentView === 'content' && currentStep ? (
             <>
               <div className="min-h-[200px]">

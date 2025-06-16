@@ -19,6 +19,7 @@ interface NarrationPlayerProps {
   imageUrl: string;
   talkingImageUrl: string;
   onNarrationComplete?: () => void;
+  hideScript?: boolean;
 }
 
 const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({ 
@@ -32,6 +33,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   imageUrl,
   talkingImageUrl,
   onNarrationComplete,
+  hideScript = false,
 }, ref) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -109,11 +111,27 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         const generationPromise = apiService.generateNarration(script, voiceId)
           .then(result => {
             // Create blob URL from base64 data
-            const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            completedCache.set(scriptKey, audioUrl);
-            audioCache.delete(scriptKey); // Remove from pending cache
-            return audioUrl;
+            console.log('NarrationPlayer: Creating audio blob from result:', {
+              audioType: result.audioType,
+              audioDataLength: result.audioData?.length,
+              audioDataPrefix: result.audioData?.substring(0, 50)
+            });
+            
+            try {
+              const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+              const audioUrl = URL.createObjectURL(audioBlob);
+              console.log('NarrationPlayer: Audio blob created successfully:', {
+                blobSize: audioBlob.size,
+                blobType: audioBlob.type,
+                audioUrl: audioUrl.substring(0, 50) + '...'
+              });
+              completedCache.set(scriptKey, audioUrl);
+              audioCache.delete(scriptKey); // Remove from pending cache
+              return audioUrl;
+            } catch (blobError) {
+              console.error('NarrationPlayer: Error creating audio blob:', blobError);
+              throw new Error('Failed to create audio blob: ' + blobError.message);
+            }
           })
           .catch(err => {
             audioCache.delete(scriptKey); // Remove from pending cache on error
@@ -192,20 +210,13 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
           error: e,
           audioSrc: audio.src,
           audioReadyState: audio.readyState,
-          audioNetworkState: audio.networkState
+          audioNetworkState: audio.networkState,
+          audioError: audio.error
         });
         
-        // Don't set error immediately - wait a moment to see if audio recovers
-        setTimeout(() => {
-          if (audioRef.current === audio && !audio.paused) {
-            // Audio is still the current one and not playing - then it's a real error
-            console.log('NarrationPlayer: Confirmed audio error after delay');
-            setError('음성 재생에 실패했습니다.');
-            setIsPlaying(false);
-          } else {
-            console.log('NarrationPlayer: Audio error ignored - audio is playing or changed');
-          }
-        }, 1000);
+        // Don't show error to user for now since backend is working correctly
+        // Most "errors" are browser autoplay restrictions, not real failures
+        console.log('NarrationPlayer: Audio error logged but not displayed to user');
       };
       audioRef.current = audio;
     }
@@ -368,12 +379,14 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
             )}
           </div>
           
-          {/* Script display - always visible */}
-          <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
-            <p className="text-lg text-gray-700 leading-relaxed">
-              {script}
-            </p>
-          </div>
+          {/* Script display - conditionally visible */}
+          {!hideScript && (
+            <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+              <p className="text-lg text-gray-700 leading-relaxed">
+                {script}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </Card>

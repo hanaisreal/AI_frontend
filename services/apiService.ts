@@ -116,21 +116,27 @@ export const generateCaricature = async (facialFeatures: Record<string, any>, pr
 };
 
 
-export const generateTalkingPhoto = async (caricatureUrl: string, userName: string, voiceId: string, audioScript?: string): Promise<{ videoUrl: string; taskId: string }> => {
+export const generateTalkingPhoto = async (caricatureUrl: string, userName: string, voiceId: string, audioScript?: string, scenarioType?: string): Promise<{ videoUrl: string; taskId?: string; message?: string; isSample?: boolean }> => {
   console.log(`FRONTEND: Calling /api/generate-talking-photo`);
   console.log(`  - Caricature URL: ${caricatureUrl}`);
   console.log(`  - User Name: ${userName}`);
   console.log(`  - Voice ID: ${voiceId}`);
   console.log(`  - Audio Script: ${audioScript || 'Default script'}`);
+  console.log(`  - Scenario Type: ${scenarioType || 'default'}`);
   
   const response = await fetch(`${API_BASE_URL}/api/generate-talking-photo`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ caricatureUrl, userName, voiceId, audioScript }),
+    body: JSON.stringify({ caricatureUrl, userName, voiceId, audioScript, scenarioType }),
   });
 
   const result = await handleApiResponse(response);
-  return { videoUrl: result.videoUrl, taskId: result.taskId };
+  return { 
+    videoUrl: result.videoUrl, 
+    taskId: result.taskId,
+    message: result.message,
+    isSample: result.isSample
+  };
 };
 
 export const getProgress = async (taskId: string): Promise<{

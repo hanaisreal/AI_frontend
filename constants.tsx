@@ -1,4 +1,3 @@
-
 import { QuizQuestion, ModuleStep, PersonIdentificationData } from './types.ts';
 
 export const APP_TITLE = "AI 기술(딥페이크, 딥보이스)란?";
@@ -41,13 +40,14 @@ export const SCRIPTS = {
   fakeNewsCaseStudyIntro: "이제 사례 영상들을 통해 딥페이크가 어떻게 악용될 수 있는지, 그리고 우리가 어떻게 주의해야 하는지 알아볼게요.",
   fakeNewsCase1: "첫 번째 사례는 젤렌스키 대통령이 트럼프 대통령을 주먹으로 때리는 장면이 담긴 가짜 영상이에요. 함께 시청해볼게요~",
   fakeNewsCase2: "이런 영상만 본다면 속을 수 있겠죠? 다음은 에펠타워가 불에 타는 영상이에요~",
-  fakeNewsExperienceIntro: "이제 직접 딥페이크 기술로 가짜 뉴스를 만들어보는 체험을 해볼 거예요.",
+  fakeNewsExperienceIntro: "이제 직접 딥페이크 기술로 가짜 뉴스를 만들어보는 체험을 해볼 거예요. 첫 번째 체험은 로또 당첨된 기사에 대한 체험이에요.",
   fakeNewsScenario1Audio: "1등 당첨돼서 정말 기뻐요!",
   fakeNewsScenario1to2: "이런 기사가 주변 지인들에게 퍼진다면 재미로 넘길수도 있겠지만, 만약 안 좋은 기사가 만들어진다면 어떨까요?",
   fakeNewsScenario2Audio: "찍지 마세요. 죄송합니다…",
   fakeNewsWrapUp: "이런식으로 뉴스 기사가 난다고 생각하니 정말 무섭네요!",
   fakeNewsDetectionIntro: "사례들을 보니 정말 그럴듯하죠? 그렇다면 이런 딥페이크가 적용된 가짜뉴스에 속지 않으려면 어떻게 해야 할까요?",
   fakeNewsDetectionTips: "먼저 누가 영상이나 뉴스를 보내줬다고 해서, 다 믿으면 안 돼요. 누가 만든 건지, 진짜 뉴스에 나왔는지, 그 사람 공식 계정에 올라온 건지 꼭 출처를 확인하는 습관이 필요해요. 진짜 가게인지 확인도 안 하고 물건을 사면 안 되듯이, 진짜 영상인지도 꼭 확인하고 믿는 거예요.",
+  fakeNewsDetectionTips2: "딥페이크 영상은 얼핏 보면 진짜처럼 보여도, 잘 보면 어딘가 이상한 점이 드러납니다. 먼저 얼굴 전체를 자세히 살펴보세요. 입모양이나 눈동자가 어색하게 움직이면 의심해봐야 해요. 눈 깜빡임도 중요해요. 너무 자주 깜빡이거나 거의 안 깜빡이면 딥페이크일 수 있어요. 입술이 말소리와 안 맞거나 립싱크처럼 보이면 가짜 영상일 가능성이 높습니다. 또, 피부가 너무 매끈하거나 나이에 비해 지나치게 어려 보이면 이상한 점이 있는 거예요. 예를 들어, 머리는 흰데 얼굴은 아기처럼 탱탱하면 의심해야 해요.",
   fakeNewsModuleEnd: "첫 번째 체험이 모두 끝났어요. 딥페이크 기술의 위험성과 가능성에 대해 조금이나마 이해가 되셨기를 바라요. 다음 파트로 이동해볼까요?",
 
   // Module 2 (Identity Theft) - Updated detailed flow
@@ -62,23 +62,67 @@ export const SCRIPTS = {
   identityTheftScenario2Audio: "나 지금 교통사고가 났어. 보험 부르지 말고 그냥 적당히 합의보는 게 좋을 것 같아. 혹시 지금 50만 원만 보내줄 수 있을까?",
   identityTheftWrapUp: "이제는 실시간으로 얼굴 변조랑 목소리 변조까지 가능하니, 이런식으로 가족한테 연락이 간다면 속을 수 있을거 같아요.",
   identityTheftDetectionIntro: "딥페이크 영상은 이제 정교하게 만들어져서 실제로 구분하기 정말 어려워졌어요. 신원도용에 맞서기 위해 알아야할 몇가지 대응방안을 알아볼게요.",
-  identityTheftDetectionTips: "걸려온 전화의 경우 가족간의 암호를 물어봄으로써 상대방이 가족이 맞는지 확인하기. 온라인에 사진 올리지 말기. 가족들 포함해서. 가족을 저장할때 '딸, 아들'이라고 저장하지 말고 이름으로 저장하기. 본인의 핸드폰이 해킹되었을 경우 가족들의 신분이 노출되지 않기 위해.",
+  identityTheftDetectionTips: "가족 간에는 암호를 정해두고 전화가 오면 확인해보세요. 온라인에는 본인이나 가족 사진을 올리지 않는 것이 좋습니다. 연락처는 '딸', '아들' 같은 관계 대신 이름으로 저장하고, 휴대폰이 해킹되더라도 가족 정보가 노출되지 않도록 보안을 철저히 하세요.",
   identityTheftModuleEnd: "신원도용에 대한 체험이 끝났어요. 앞으로 이런 상황들을 조심해서 대처하시길 바라요.",
 };
 
 export const QUIZZES: { [key: string]: QuizQuestion[] } = {
   fakeNewsQuiz1: [
-    { id: 'fnq1', question: "AI 생성 가짜 뉴스 이미지의 일반적인 특징은 무엇인가요?", options: ["항상 흐릿함", "미묘한 시각적 불일치를 포함할 수 있음", "흑백만 가능", "모든 경우에 완벽하게 현실적임"], correctAnswer: "미묘한 시각적 불일치를 포함할 수 있음", explanation: "AI가 발전하고 있지만, 생성된 이미지는 때때로 이상한 손이나 왜곡된 배경과 같은 이상한 세부 정보를 가질 수 있으며, 이는 단서가 될 수 있습니다." },
+    {
+      id: 'fnq1',
+      question: "딥페이크 영상에서 의심해야 할 특징은 무엇인가요?",
+      options: [
+        "항상 화면이 흐림",
+        "눈동자와 입이 완벽하게 자연스러움",
+        "눈을 거의 깜빡이지 않거나 과도하게 깜빡임",
+        "항상 배경이 시끄러움"
+      ],
+      correctAnswer: "눈을 거의 깜빡이지 않거나 과도하게 깜빡임",
+      explanation: "딥페이크 영상에서는 눈 깜빡임이 너무 잦거나 거의 없을 수 있어요. 사람은 자연스럽게 눈을 깜빡이기 때문에, 이건 중요한 단서입니다."
+    }
   ],
   fakeNewsQuiz2: [
-    { id: 'fnq2', question: "뉴스 기사가 가짜라고 의심될 때 가장 먼저 해야 할 좋은 조치는 무엇인가요?", options: ["즉시 공유하기", "출처의 신뢰성 확인하기", "자신의 견해를 확인시켜주면 믿기", "무시하기"], correctAnswer: "출처의 신뢰성 확인하기", explanation: "정보 출처를 확인하는 것은 매우 중요합니다. 평판 좋은 뉴스 기관을 찾고 알려지지 않은 웹사이트나 소셜 미디어 게시물을 경계하십시오." },
+    {
+      id: 'fnq2',
+      question: "다음 중 딥페이크 영상에서 확인해야 할 시각적 단서는 무엇인가요?",
+      options: [
+        "화면이 선명한지",
+        "말소리와 입모양이 어색하게 어긋나는지",
+        "조명이 밝은지",
+        "음성이 크게 들리는지"
+      ],
+      correctAnswer: "말소리와 입모양이 어색하게 어긋나는지",
+      explanation: "딥페이크 영상은 립싱크가 부자연스럽거나 입술 움직임이 어색할 수 있어요. 이런 부분을 잘 살펴보면 가짜 영상을 구분할 수 있습니다."
+    }
   ],
   identityTheftQuiz1: [
-    { id: 'itq1', question: "'비싱(vishing)'이란 무엇인가요?", options: ["컴퓨터 바이러스의 일종", "복제된 목소리를 사용한 음성 피싱", "안전한 메시징 앱", "새로운 비디오 게임"], correctAnswer: "복제된 목소리를 사용한 음성 피싱", explanation: "'비싱'은 종종 음성 복제 기술로 강화되어 누군가를 사칭하는 음성 채널을 통해 수행되는 피싱 공격을 구체적으로 지칭합니다." },
+    {
+      id: 'itq1',
+      question: "가족을 사칭한 전화를 받았을 때 상대를 확인하는 좋은 방법은?",
+      options: [
+        "목소리만 듣고 판단한다",
+        "가족끼리 정한 암호를 물어본다",
+        "울고 있으면 진짜라고 믿는다",
+        "바로 돈을 송금한다"
+      ],
+      correctAnswer: "가족끼리 정한 암호를 물어본다",
+      explanation: "가족끼리만 아는 암호를 사용하면 진짜 가족인지 쉽게 확인할 수 있어요. 사칭 전화를 예방하는 좋은 방법입니다."
+    }
   ],
   identityTheftQuiz2: [
-    { id: 'itq2', question: "사랑하는 사람처럼 들리더라도 긴급하고 예상치 못한 돈 요구 전화를 받으면 어떻게 해야 하나요?", options: ["즉시 돈 보내기", "은행 정보 공유하기", "전화를 끊고 독립적으로 확인하기", "가능한 한 오래 통화 유지하기"], correctAnswer: "전화를 끊고 독립적으로 확인하기", explanation: "사기꾼들은 긴급성과 감정적 조작에 의존합니다. 조치를 취하기 전에 항상 별도의 신뢰할 수 있는 통신 채널을 통해 그러한 요청을 확인하십시오." },
-  ],
+    {
+      id: 'itq2',
+      question: "신원 도용을 방지하기 위한 좋은 습관은 무엇인가요?",
+      options: [
+        "연락처에 '딸', '아들'로 저장하기",
+        "가족 사진을 자주 SNS에 올리기",
+        "연락처를 이름으로 저장하고 사진 공유를 자제하기",
+        "암호 없이 핸드폰 사용하기"
+      ],
+      correctAnswer: "연락처를 이름으로 저장하고 사진 공유를 자제하기",
+      explanation: "연락처를 관계 대신 이름으로 저장하고, 가족 사진을 온라인에 올리지 않는 것이 신원 도용을 예방하는 데 도움이 됩니다."
+    }
+  ]
 };
 
 // NOTE: CASE_STUDIES removed - all content now uses direct step definitions and real-time AI generation
@@ -207,33 +251,52 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
     requires: ['userCaricature']
   },
   
-  // 13. Detection tips content
-  /* TODO: update with the following context:
-    - 또 딥페이크 영상은 대충 보면 진짜 같지만, 잘 살펴보면 이상한 점들이 보여요.
-    - 얼굴 전체를 자세히 살펴보세요. 얼굴에 뭔가 ‘어색한 느낌’이 든다면 의심해보세요. 입모양이나 눈동자가 부자연스러울 수 있어요.
-    - 눈을 자주 깜빡이거나, 거의 안 깜빡이면 의심해보세요. 사람은 자연스럽게 눈을 깜빡이는데, AI 영상에서는 이걸 놓치는 경우가 많아요.
-    - 입이 움직이는 걸 잘 보세요. 말하는 소리와 입모양이 딱 맞지 않거나, 입술이 부자연스럽게 움직이면 가짜 영상일 수 있어요. 립싱크 느낌이 들 수도 있어요.
-    - 볼과 이마가 너무 매끈하거나 이상하게 주름져 있는지 보세요. 피부가 지나치게 매끈하거나 나이에 안 맞게 어려 보이면 이상한 영상일 수 있어요. 예를 들어, 머리는 하얗게 세었는데 얼굴은 아기처럼 탱탱하면 이상하죠?
-  */
-    { 
-    id: 'fn_detection_tips', 
-    title: "딥페이크 분별 팁", 
-    type: 'info', 
-    content: `
-      <div class="space-y-4">
-        <h3 class="text-xl font-bold mb-4">딥페이크 영상 분별 방법</h3>
-        <div class="space-y-3">
-          <p><strong>1. 출처 확인:</strong> 누가 만든 건지, 진짜 뉴스에 나왔는지, 공식 계정에 올라온 건지 확인</p>
-          <p><strong>2. 시각적 단서:</strong> 블러나 어색한 경계선 확인</p>
-          <p><strong>3. 부자연스러운 움직임:</strong> 입술 동기화나 눈 깜빡임 패턴 확인</p>
-          <p><strong>4. MIT 딥페이크 탐지 가이드:</strong> <a href="https://www.media.mit.edu/projects/detect-fakes/overview/" target="_blank" class="text-blue-600 underline">자세한 정보 확인</a></p>
-        </div>
-      </div>
-    `,
-    narrationScript: SCRIPTS.fakeNewsDetectionTips
+  // 13. Detection tips - general advice
+  { 
+    id: 'fn_detection_general', 
+    title: "일반적인 대응 방법", 
+    type: 'narration', 
+    narrationScript: SCRIPTS.fakeNewsDetectionTips,
+    requires: ['userCaricature']
   },
   
-  // 14. Module conclusion
+  // 14. Detection tips - specific visual cues with content
+  { 
+    id: 'fn_detection_tips', 
+    title: "딥페이크 분별 방법", 
+    type: 'info', 
+    content: `
+     <div class="space-y-4">
+      <h3 class="text-xl font-bold mb-4">딥페이크 영상 분별 방법</h3>
+      <div class="space-y-3">
+        <p><strong>1. 얼굴 전체를 자세히 살펴보세요:</strong> 얼굴의 비율이나 표정이 미묘하게 이상하다면 의심해보세요.</p>
+        <p><strong>2. 눈 깜빡임을 확인하세요:</strong> 너무 자주 깜빡이거나 거의 깜빡이지 않으면 딥페이크일 수 있어요.</p>
+        <p><strong>3. 입모양과 소리의 싱크를 살펴보세요:</strong> 말소리와 입술 움직임이 어긋나거나 립싱크처럼 느껴지면 가짜일 가능성이 있어요.</p>
+        <p><strong>4. 피부와 주름을 관찰하세요:</strong> 피부가 너무 매끈하거나 나이에 맞지 않게 어려 보이는 경우 주의하세요.</p>
+
+      </div>
+    </div>
+    `,
+    narrationScript: SCRIPTS.fakeNewsDetectionTips2
+  },
+  
+  // 15. Quiz 1 - Deepfake visual detection
+  { 
+    id: 'fn_quiz_1', 
+    title: "확인 퀴즈 1", 
+    type: 'quiz', 
+    quizId: 'fakeNewsQuiz1'
+  },
+  
+  // 16. Quiz 2 - Audio-visual synchronization
+  { 
+    id: 'fn_quiz_2', 
+    title: "확인 퀴즈 2", 
+    type: 'quiz', 
+    quizId: 'fakeNewsQuiz2'
+  },
+  
+  // 17. Module conclusion
   { 
     id: 'fn_conclusion', 
     title: "모듈 마무리", 
@@ -391,17 +454,33 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
       <div class="space-y-4">
         <h3 class="text-xl font-bold mb-4">신원 도용 방지 방법</h3>
         <div class="space-y-3">
-          <p><strong>1. 가족 암호:</strong> 걸려온 전화의 경우 가족간의 암호를 물어봄으로써 확인</p>
-          <p><strong>2. 온라인 사진 주의:</strong> 온라인에 사진 올리지 말기 (가족들 포함)</p>
-          <p><strong>3. 연락처 저장:</strong> 가족을 '딸, 아들'이 아닌 이름으로 저장하기</p>
-          <p><strong>4. 즉시 확인:</strong> 의심스러운 요청 시 다른 방법으로 본인 확인</p>
+          <p><strong>1. 가족 암호:</strong> 걸려온 전화의 경우 가족간의 암호를 물어봄으로써 상대방이 가족이 맞는지 확인하기</p>
+          <p><strong>2. 온라인 사진 주의:</strong> 온라인에 사진 올리지 말기 (가족들 포함해서)</p>
+          <p><strong>3. 연락처 저장:</strong> 가족을 '딸, 아들'이라고 저장하지 말고 이름으로 저장하기</p>
+          <p><strong>4. 보안 강화:</strong> 본인의 핸드폰이 해킹되었을 경우 가족들의 신분이 노출되지 않기 위해</p>
         </div>
       </div>
     `,
     narrationScript: SCRIPTS.identityTheftDetectionTips
   },
   
-  // 16. Module conclusion
+  // 16. Quiz 1 - Family verification
+  { 
+    id: 'it_quiz_1', 
+    title: "확인 퀴즈 1", 
+    type: 'quiz', 
+    quizId: 'identityTheftQuiz1'
+  },
+  
+  // 17. Quiz 2 - Prevention habits
+  { 
+    id: 'it_quiz_2', 
+    title: "확인 퀴즈 2", 
+    type: 'quiz', 
+    quizId: 'identityTheftQuiz2'
+  },
+  
+  // 18. Module conclusion
   { 
     id: 'it_conclusion', 
     title: "모듈 마무리", 
