@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Page, UserData } from './types.ts';
 import { PLACEHOLDER_USER_IMAGE } from './constants.tsx';
 import * as apiService from './services/apiService.ts';
@@ -98,6 +98,10 @@ const App: React.FC = () => {
     }
   };
 
+  // Add debouncing and prevent duplicate calls
+  const lastSaveRef = useRef<string>('');
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const saveUserProgress = useCallback(async (updates: {
     currentPage?: Page;
     currentStep?: number;
@@ -107,32 +111,49 @@ const App: React.FC = () => {
   }) => {
     if (!userId || isInitialLoad) return;
     
-    try {
-      const progressUpdate: any = {
-        user_id: userId // Required by the schema
-      };
-      
-      if (updates.currentPage !== undefined) {
-        progressUpdate.current_page = Page[updates.currentPage];
-      }
-      if (updates.currentStep !== undefined) {
-        progressUpdate.current_step = updates.currentStep;
-      }
-      if (updates.caricatureUrl !== undefined) {
-        progressUpdate.caricature_url = updates.caricatureUrl;
-      }
-      if (updates.talkingPhotoUrl !== undefined) {
-        progressUpdate.talking_photo_url = updates.talkingPhotoUrl;
-      }
-      if (updates.completedModules !== undefined) {
-        progressUpdate.completed_modules = updates.completedModules;
-      }
-      
-      await apiService.updateUserProgress(userId, progressUpdate);
-      console.log('User progress saved successfully');
-    } catch (error) {
-      console.error('Failed to save user progress:', error);
+    // Create a key to identify unique save operations
+    const saveKey = JSON.stringify({ userId, ...updates });
+    if (lastSaveRef.current === saveKey) {
+      console.log('Duplicate save operation detected, skipping');
+      return;
     }
+    
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Debounce the save operation
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        const progressUpdate: any = {
+          user_id: userId // Required by the schema
+        };
+        
+        if (updates.currentPage !== undefined) {
+          progressUpdate.current_page = Page[updates.currentPage];
+        }
+        if (updates.currentStep !== undefined) {
+          progressUpdate.current_step = updates.currentStep;
+        }
+        if (updates.caricatureUrl !== undefined) {
+          progressUpdate.caricature_url = updates.caricatureUrl;
+        }
+        if (updates.talkingPhotoUrl !== undefined) {
+          progressUpdate.talking_photo_url = updates.talkingPhotoUrl;
+        }
+        if (updates.completedModules !== undefined) {
+          progressUpdate.completed_modules = updates.completedModules;
+        }
+        
+        lastSaveRef.current = saveKey;
+        await apiService.updateUserProgress(userId, progressUpdate);
+        console.log('User progress saved successfully');
+      } catch (error) {
+        console.error('Failed to save user progress:', error);
+        lastSaveRef.current = ''; // Reset on error to allow retry
+      }
+    }, 500); // 500ms debounce
   }, [userId, isInitialLoad]);
   
 

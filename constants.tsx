@@ -34,7 +34,7 @@ export const SCRIPTS = {
   // New scripts for deepfake introduction flow
   deepfakeIntroStart: "먼저, 딥페이크, 딥보이스 어떻게 만들어지는지 영상을 통해 확인해볼게요.",
   deepfakeQuizIntro: "좋습니다. 요즘에는 가짜 얼굴 합성과 더불어서 가짜 영상을 만들수도 있어요. 다음 퀴즈를 통해 알아볼까요? 가짜 영상인지 아닌지 맞춰보세요!",
-  deepfakeQuizComplete: "전부 만들어진 영상입니다! 이제 다음으로 딥페이크, 딥보이스가 어떻게 악용될 수 있는지 자세히 살펴볼게요.",
+  deepfakeQuizComplete: "놀랍게도 전부 만들어진 가짜 영상이었습니다. 이제 다음으로 딥페이크, 딥보이스가 어떻게 악용될 수 있는지 자세히 살펴볼게요.",
 
   // Module 1 (Fake News) - Updated detailed flow
   fakeNewsIntroDetailed: "가짜 뉴스는, 거짓말인데 진짜처럼 보이는 소식이에요. 예를 들어, '이 약 먹으면 3일 만에 치매가 낫는다' 이런 말을 들으면 혹하죠. 하지만 알고 보면 사기인 경우가 많아요.",

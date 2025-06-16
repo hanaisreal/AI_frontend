@@ -1,14 +1,14 @@
-
 import React, { useState } from 'react';
 import { PersonIdentificationData, UserAnswerForVideoQuiz } from '../types.ts';
 import Button from './Button.tsx';
 import Card from './Card.tsx';
 
 interface VideoIdentificationQuizProps {
-  videoUrl: string; // Placeholder image for the "video"
+  videoUrl?: string; // Optional placeholder image for the "video"
   peopleData: PersonIdentificationData[];
   onQuizComplete: (score: number, total: number, answers: UserAnswerForVideoQuiz[]) => void;
   title?: string;
+  onPrevious?: () => void;
 }
 
 type QuizPhase = 'observing' | 'judging' | 'results';
@@ -17,7 +17,6 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
   videoUrl,
   peopleData,
   onQuizComplete,
-  title = "딥페이크 탐지 챌린지"
 }) => {
   const [currentPersonIndex, setCurrentPersonIndex] = useState(0);
   const [currentPhase, setCurrentPhase] = useState<QuizPhase>('observing');
@@ -97,7 +96,7 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
   }
 
   return (
-    <Card title={currentPerson?.name || title}>
+    <Card title={`퀴즈 ${currentPersonIndex + 1}`}>
       {currentPhase === 'observing' && currentPerson && (
         <div className="text-center">
           <p className="text-slate-700 text-lg mb-4">
@@ -113,9 +112,11 @@ const VideoIdentificationQuiz: React.FC<VideoIdentificationQuizProps> = ({
           ) : (
             <img src={videoUrl} alt={`${currentPerson.name}의 시뮬레이션된 비디오 클립`} className="w-full max-w-md mx-auto rounded-lg shadow-md mb-6 border border-slate-300" />
           )}
-          <Button onClick={handleObservationComplete} variant="primary" size="lg">
-            관찰 완료
-          </Button>
+          <div className="flex justify-center">
+            <Button onClick={handleObservationComplete} variant="primary" size="lg">
+              관찰 완료
+            </Button>
+          </div>
         </div>
       )}
 

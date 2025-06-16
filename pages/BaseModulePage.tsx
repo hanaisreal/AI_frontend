@@ -6,10 +6,9 @@ import QuizComponent from '../components/QuizComponent.tsx';
 import PageLayout from '../components/PageLayout.tsx';
 import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
-import InstagramEmbed from '../components/InstagramEmbed.tsx';
 import BackButton from '../components/BackButton.tsx';
-import { Page, ModuleStep, QuizQuestion } from '../types.ts';
-import { QUIZZES, SCRIPTS, MOCK_FACESWAP_IMAGE_URL, MOCK_TALKING_PHOTO_URL, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
+import { Page, ModuleStep, QuizQuestion, UserData } from '../types.ts';
+import { QUIZZES, SCRIPTS, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
 import * as apiService from '../services/apiService.ts';
 
 interface BaseModulePageProps {
@@ -17,7 +16,7 @@ interface BaseModulePageProps {
   steps: ModuleStep[];
   setCurrentPage: (page: Page) => void;
   onModuleComplete: () => void;
-  userData: { name: string } | null;
+  userData: UserData | null;
   userImageUrl: string | null;
   caricatureUrl: string | null;
   talkingPhotoUrl: string | null;
@@ -124,8 +123,6 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       console.log(`Generating faceswap for ${step.scenarioType} scenario`);
       const faceswapResult = await apiService.generateFaceswapImage(baseImage, userImageUrl);
       
-      // Generate audio with user's voice
-      const audioScript = step.audioScript || "음성 스크립트가 없습니다.";
       
       // Generate talking photo
       const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId);

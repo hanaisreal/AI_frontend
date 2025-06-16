@@ -175,21 +175,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
         </div>
       )}
 
-      {/* Progress indicator */}
-      {currentStepData.type !== 'narration' && (
-        <div className="mb-8">
-          <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
-            <span>진행률</span>
-            <span>{currentStepIndex + 1} / {steps.length}</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
-            />
-          </div>
-        </div>
-      )}
+      
 
       {renderStepContent()}
     </PageLayout>

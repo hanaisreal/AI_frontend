@@ -164,7 +164,10 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       audio.onended = () => {
         setIsPlaying(false);
         if (onPause) onPause(); // Call onPause when ended to switch back to static image
-        // Removed auto-progression - user must click button to continue
+        // Auto-continue when audio finishes
+        setTimeout(() => {
+          if (onEnd) onEnd();
+        }, 1000); // 1 second delay before auto-continuing
       };
       audio.onerror = (e) => {
         console.error('NarrationPlayer: Audio playback error:', e);
@@ -192,14 +195,14 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     }
   }, [script, voiceId]);
 
-  // Auto-play when audio is ready (only once)
+  // Auto-play when audio is ready (always auto-play, not just when autoPlay prop is true)
   useEffect(() => {
-    if (audioUrl && autoPlay && !isPlaying && !isLoading && !hasAutoPlayed.current) {
-      console.log('NarrationPlayer: Auto-playing generated audio (first time only)');
+    if (audioUrl && !isPlaying && !isLoading && !hasAutoPlayed.current) {
+      console.log('NarrationPlayer: Auto-playing generated audio');
       hasAutoPlayed.current = true;
       setTimeout(() => handlePlayPause(), 100); // Small delay to ensure audio element is ready
     }
-  }, [audioUrl, autoPlay, isPlaying, isLoading, handlePlayPause]);
+  }, [audioUrl, isPlaying, isLoading, handlePlayPause]);
 
   // Expose stop function for external control
   useEffect(() => {
@@ -225,7 +228,28 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   }), [stopAudio]);
 
 
-  if (!script || !showControls) return null;
+  // If no script and showControls is false, return null
+  // If no script but showControls is true, show a continue button
+  if (!script && !showControls) return null;
+  
+  // If no script but showControls is true, show continue button
+  if (!script && showControls) {
+    // Auto-continue when there's no script
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        if (onEnd) onEnd();
+      }, 500);
+      return () => clearTimeout(timer);
+    }, [onEnd]);
+    
+    return (
+      <Card className="bg-slate-100 p-4 mt-6 shadow-md">
+        <div className="text-center">
+          <div className="text-slate-600">계속 진행 중...</div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-slate-100 p-4 mt-6 shadow-md">
@@ -256,12 +280,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                 autoPlay
                 loop
                 muted
-                playsInline
-                crossOrigin="anonymous"
-                onError={(e) => {
-                  console.error('Talking video error, falling back to static image:', e);
-                }}
-                onLoadedData={() => console.log('Talking video loaded successfully')}
               />
             ) : (
               <img 
@@ -272,34 +290,10 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
             )}
           </div>
           
-          {/* Audio control button */}
-          <Button
-            onClick={handlePlayPause}
-            variant={isPlaying ? "secondary" : "primary"}
-            size="md"
-            className="flex items-center space-x-2"
-          >
-            {isPlaying ? (
-              <>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                </svg>
-                <span>일시정지</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-                <span>음성 듣기</span>
-              </>
-            )}
-          </Button>
-          
-          {/* Script display */}
-          <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-            <p className="text-sm text-gray-700 leading-relaxed">
-              <strong>Script:</strong> {script}
+          {/* Script display - always visible */}
+          <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+            <p className="text-lg text-gray-700 leading-relaxed">
+              {script}
             </p>
           </div>
         </div>
