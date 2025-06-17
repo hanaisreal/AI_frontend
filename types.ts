@@ -44,6 +44,7 @@ export interface ModuleStep {
   baseImageMale?: string; // Base image for male users in faceswap scenarios
   baseImageFemale?: string; // Base image for female users in faceswap scenarios
   audioScript?: string; // Audio script for voice/video scenarios
+  audioUrl?: string; // Pre-recorded audio URL for voice dubbing scenarios
   scenarioType?: 'lottery' | 'crime' | 'investment_call' | 'accident_call'; // Type of scenario
   callType?: 'voice' | 'video'; // Type of call simulation
 }

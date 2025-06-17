@@ -13,7 +13,7 @@ export const SCRIPTS = {
   fakeNewsTech: "AI는 실제 뉴스처럼 보이는 텍스트, 이미지, 심지어 비디오까지 생성할 수 있습니다. 이것들은 빠르게 확산되어 여론에 영향을 미칠 수 있습니다.",
   fakeNewsRisk: "개인화된 가짜 뉴스는 특히 해로울 수 있으며, 개인의 모습이나 목소리를 사용하여 신뢰할 수 있어 보이는 거짓 정보로 개인을 타겟팅합니다.",
   fakeNewsCountermeasures: "가짜 뉴스를 식별하려면 출처를 확인하고, 이미지/비디오에서 특이한 세부 정보를 찾고, 감정적으로 자극적인 헤드라인을 경계하십시오. 비판적 사고가 최선의 방어책입니다.",
-  identityTheftIntro: "신원 도용이란, 누가 내 이름이나 주민번호를 훔쳐서 내가 아닌 사람이 나인 척하는 거예요. 누가 내 주민등록증을 몰래 주워서 내 이름으로 휴대폰을 사고, 돈도 빌리는 것처럼요.",
+  identityTheftIntro: "신원 도용이란, 누가 내 이름이나 주민번호를 훔쳐서 내가 아닌 사람이 나인 척하는 거예요. 누가 내 주민등록증을 몰래 주워서 내 이름으로 휴대폰을 사고, 돈도 빌리는 것처럼 얼굴과 목소리도 도용이 될 수 있어요. ",
   identityTheftTech: "음성 피싱은 복제된 목소리를 사용하여 가족이나 은행 직원과 같은 신뢰할 수 있는 사람을 사칭하여 피해자가 민감한 정보를 공개하거나 돈을 보내도록 속입니다.",
   identityTheftRisk: "곤경에 처한 사랑하는 사람으로부터 긴급한 도움을 요청하는 전화를 받는다고 상상해보세요. 그들의 목소리가 복제되었다면 사기를 감지하기가 매우 어려울 수 있습니다.",
   identityTheftCountermeasures: "의심스러운 전화를 받으면 전화를 끊고 다른 신뢰할 수 있는 연락 방법을 통해 상황을 확인하세요. 아무리 설득력 있게 들리더라도 요청하지 않은 전화를 기반으로 개인 정보를 공유하거나 돈을 보내지 말아야해요. ",
@@ -160,7 +160,7 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
     id: 'fn_case1_video', 
     title: "사례 1: 젤렌스키 가짜 영상", 
     type: 'video_case_study', 
-    videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/part1_case3.mov" 
+    videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/part1_case3.mov" 
     // 🎥 VIDEO NEEDED: Fake video of Zelensky hitting Trump (가짜 영상: 젤렌스키가 트럼프를 때리는 영상)
   },
   
@@ -178,7 +178,7 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
     id: 'fn_case2_video', 
     title: "사례 2: 에펠타워 화재 영상", 
     type: 'video_case_study', 
-    videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-eiffel-on-fire.mp4" 
+    videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-eiffel-on-fire.mp4" 
     // 🎥 VIDEO NEEDED: Fake video of Eiffel Tower on fire (가짜 영상: 에펠타워가 불에 타는 영상)
     // This should be a deepfake video showing Eiffel Tower burning (fake news example)
   },
@@ -339,7 +339,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
     id: 'it_case1_video', 
     title: "사례 1: 연예인 투자 사기 영상", 
     type: 'video_case_study', 
-    videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/identitytheft_case1.m4v" 
+    videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/identitytheft_case1.m4v" 
     // 🎥 VIDEO NEEDED: Celebrity (actor/singer) promoting fake investment scheme using deepfake
     // 유명 연예인을 사칭해서 투자를 하라는 영상 (deepfake celebrity investment scam video)
   },
@@ -358,7 +358,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
     id: 'it_case2_video', 
     title: "사례 2:주식 종목을 추천 영상", 
     type: 'video_case_study', 
-    videoUrl: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/identitytheft-case2.m4v" 
+    videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/identitytheft-case2.m4v" 
     // 🎥 VIDEO NEEDED: Famous soccer player recommending stocks using deepfake technology
     // 유명한 축구선수가 주식 종목을 추천해주는 영상 (deepfake soccer player stock recommendation)
   },
@@ -389,6 +389,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
     scenarioType: 'investment_call',
     callType: 'voice',
     audioScript: SCRIPTS.identityTheftScenario1Audio,
+    audioUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/voice1.mp3",
     requires: ['userVoice']
   },
   
@@ -418,6 +419,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
     scenarioType: 'accident_call',
     callType: 'video',
     audioScript: SCRIPTS.identityTheftScenario2Audio, // "나 지금 교통사고가 났어. 보험 부르지 말고 그냥 적당히 합의보는 게 좋을 것 같아. 혹시 지금 50만 원만 보내줄 수 있을까?"
+    audioUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/voice2.mp3",
     baseImageMale: "https://example.com/video-call-male.mp4", 
     // 🎥 VIDEO NEEDED (MALE): Video of man on video call (face visible, talking), emergency/stressed expression
     // User's face will be swapped onto this person for video call simulation

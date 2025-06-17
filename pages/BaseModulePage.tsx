@@ -86,15 +86,18 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     
     // Video case studies and some other types should skip persona transition
     // But info steps with narrationScript (like detection tips) should have persona transition
-    if ((currentStep.type === 'video_case_study' || 
-         currentStep.type === 'faceswap_scenario' || 
-         currentStep.type === 'voice_call_scenario' || 
-         currentStep.type === 'video_call_scenario' ||
-         currentStep.type === 'quiz') &&
-        // Exception: info steps with narrationScript should have persona
-        !(currentStep.type === 'info' && currentStep.narrationScript)) {
+    if (currentStep.type === 'video_case_study' || 
+        currentStep.type === 'faceswap_scenario' || 
+        currentStep.type === 'voice_call_scenario' || 
+        currentStep.type === 'video_call_scenario' ||
+        currentStep.type === 'quiz') {
       console.log(`🔄 Skipping persona transition for ${currentStep.type} step`);
       setCurrentView('content');
+    } else if (currentStep.type === 'info' && currentStep.narrationScript) {
+      // Info steps with narrationScript (like detection tips) should have persona transition
+      console.log(`🔄 Using persona transition for info step with script:`, currentStep.narrationScript?.substring(0, 50) + '...');
+      setCurrentView('personaTransition');
+      setScriptForPersona(currentStep.narrationScript || '');
     } else {
       console.log(`🔄 Using persona transition for ${currentStep.type} step with script:`, currentStep.narrationScript?.substring(0, 50) + '...');
       setCurrentView('personaTransition');
@@ -162,13 +165,13 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
 
   const processVoiceCallScenario = async (step: ModuleStep) => {
     try {
-      if (!voiceId || !step.audioScript) {
+      if (!voiceId || !step.audioUrl) {
         return <div className="text-red-500">음성 데이터가 불완전합니다.</div>;
       }
 
-      // Generate voice with user's voice ID
+      // Use voice dubbing with pre-recorded audio
       console.log(`Generating voice call scenario: ${step.scenarioType}`);
-      const narrationResult = await apiService.generateNarration(step.audioScript, voiceId);
+      const narrationResult = await apiService.generateVoiceDub(step.audioUrl, voiceId, step.scenarioType || 'default');
 
       return (
         <div className="text-center">
@@ -202,48 +205,35 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
 
   const processVideoCallScenario = async (step: ModuleStep) => {
     try {
-      if (!userImageUrl || !userData || !voiceId || !step.audioScript) {
-        return <div className="text-red-500">비디오 통화 데이터가 불완전합니다.</div>;
-      }
-
-      // Select base image based on user gender (use image for face swap, not video)
-      const baseImage = userData.gender === 'male' ? step.baseImageMale : step.baseImageFemale;
-      if (!baseImage) {
-        return <div className="text-red-500">시나리오 이미지를 찾을 수 없습니다.</div>;
+      if (!voiceId || !step.audioUrl) {
+        return <div className="text-red-500">음성 데이터가 불완전합니다.</div>;
       }
 
       console.log(`Generating video call scenario: ${step.scenarioType}`);
       
-      // Generate faceswap image first
-      const faceswapResult = await apiService.generateFaceswapImage(baseImage, userImageUrl);
-      
-      // Generate talking photo with scenario-specific audio script
-      const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript, step.scenarioType);
+      // Use voice dubbing with pre-recorded audio (no video for now)
+      const narrationResult = await apiService.generateVoiceDub(step.audioUrl, voiceId, step.scenarioType || 'default');
 
       return (
         <div className="text-center">
-          <div className="bg-gray-900 text-white p-6 rounded-xl max-w-md mx-auto">
+          <div className="bg-gray-900 text-white p-6 rounded-xl max-w-sm mx-auto">
             <div className="text-center space-y-4">
-              <p className="text-lg font-semibold">긴급 상황 영상 통화</p>
-              {talkingPhotoResult.isSample && talkingPhotoResult.message && (
-                <div className="mb-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
-                  <p className="text-orange-800 font-medium">{talkingPhotoResult.message}</p>
-                </div>
-              )}
-              <div className="w-64 h-96 md:w-80 md:h-[30rem] mx-auto bg-gray-800 rounded-lg overflow-hidden">
-                <video 
-                  controls 
-                  autoPlay
-                  className="w-full h-full object-contain"
-                  src={talkingPhotoResult.videoUrl}
-                >
-                  <p>브라우저가 동영상을 지원하지 않습니다.</p>
-                </video>
+              <div className="w-16 h-16 bg-green-500 rounded-full mx-auto flex items-center justify-center">
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
               </div>
-              <div className="text-sm text-gray-300 space-y-1">
+              <p className="text-lg font-semibold">긴급 상황 전화</p>
+              <div className="text-sm space-y-2">
                 <p>"{step.audioScript}"</p>
               </div>
-              <p className="text-xs text-gray-400">당신의 복제된 얼굴과 목소리로 재생됩니다</p>
+              <audio 
+                controls 
+                autoPlay
+                className="w-full mt-4"
+                src={`data:${narrationResult.audioType};base64,${narrationResult.audioData}`}
+              />
+              <p className="text-xs text-gray-400">당신의 복제된 목소리로 재생됩니다</p>
             </div>
           </div>
         </div>
@@ -450,7 +440,6 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             <video 
               controls 
               autoPlay
-              muted
               className="w-full h-full object-cover"
               src={currentStep.videoUrl}
             >

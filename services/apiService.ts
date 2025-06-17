@@ -31,6 +31,24 @@ export const generateNarration = async (script: string, voiceId: string | null):
   return { audioData: result.audioData, audioType: result.audioType };
 };
 
+export const generateVoiceDub = async (audioUrl: string, voiceId: string, scenarioType: string): Promise<{ audioData: string; audioType: string; dubbingId: string }> => {
+  console.log(`FRONTEND: Calling /api/generate-voice-dub`);
+  console.log(`  - Audio URL: ${audioUrl}`);
+  console.log(`  - Voice ID: ${voiceId}`);
+  console.log(`  - Scenario Type: ${scenarioType}`);
+  
+  const response = await fetch(`${API_BASE_URL}/api/generate-voice-dub`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ audioUrl, voiceId, scenarioType }),
+  });
+  
+  const result = await handleApiResponse(response);
+  return { audioData: result.audioData, audioType: result.audioType, dubbingId: result.dubbingId };
+};
+
 export const generateFaceswapImage = async (baseImageUrl: string, userImageUrl: string): Promise<{ resultUrl: string }> => {
   console.log(`FRONTEND: Calling /api/generate-faceswap-image. Base: ${baseImageUrl}, User: ${userImageUrl}`);
   
