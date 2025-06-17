@@ -130,7 +130,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
               return audioUrl;
             } catch (blobError) {
               console.error('NarrationPlayer: Error creating audio blob:', blobError);
-              throw new Error('Failed to create audio blob: ' + blobError.message);
+              throw new Error('Failed to create audio blob: ' );
             }
           })
           .catch(err => {
@@ -363,6 +363,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                   className="rounded-lg w-64 h-64 object-cover mx-auto border-4 border-orange-500"
                   autoPlay
                   muted
+                  loop
                   preload="metadata"
                   playsInline
                   style={{ background: '#f8f9fa' }}

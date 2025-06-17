@@ -53,7 +53,7 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
   }
 
   return (
-    <Card title={`퀴즈: ${questions.length}개 중 ${currentQuestionIndex + 1}번 질문`}>
+    <Card >
       <p className="text-xl text-slate-800 mb-8 min-h-[60px]">{currentQuestion.question}</p>
       
       <div className="space-y-4 mb-8">

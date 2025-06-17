@@ -147,6 +147,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 autoPlay
                 className="w-full h-full object-contain"
                 src={talkingPhotoResult.videoUrl}
+                playsInline
+                preload="auto"
+                disablePictureInPicture
               >
                 <p>브라우저가 동영상을 지원하지 않습니다.</p>
               </video>
@@ -162,6 +165,22 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       return <div className="text-red-500">시나리오 생성 중 오류가 발생했습니다.</div>;
     }
   };
+
+  const VoiceVisualization = () => (
+    <div className="flex justify-center space-x-1">
+      {[...Array(8)].map((_, i) => (
+        <div
+          key={i}
+          className="w-1 bg-green-400 rounded-full animate-pulse"
+          style={{
+            height: `${Math.random() * 20 + 10}px`,
+            animationDelay: `${i * 0.1}s`,
+            animationDuration: '0.8s'
+          }}
+        />
+      ))}
+    </div>
+  );
 
   const processVoiceCallScenario = async (step: ModuleStep) => {
     try {
@@ -182,10 +201,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
               </div>
-              <p className="text-lg font-semibold">투자 사기 전화</p>
-              <div className="text-sm space-y-2">
-                <p>"{step.audioScript}"</p>
+              <p className="text-lg font-semibold">친구</p>
+              
+              {/* Voice visualization during call */}
+              <div className="py-4">
+                <VoiceVisualization />
+                <p className="text-xs text-gray-400 mt-3">통화 중...</p>
               </div>
+              
               <audio 
                 controls 
                 autoPlay
@@ -223,10 +246,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
               </div>
-              <p className="text-lg font-semibold">긴급 상황 전화</p>
-              <div className="text-sm space-y-2">
-                <p>"{step.audioScript}"</p>
+              <p className="text-lg font-semibold">가족</p>
+              
+              {/* Voice visualization during call */}
+              <div className="py-4">
+                <VoiceVisualization />
+                <p className="text-xs text-gray-400 mt-3">통화 중...</p>
               </div>
+              
               <audio 
                 controls 
                 autoPlay
@@ -442,6 +469,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               autoPlay
               className="w-full h-full object-cover"
               src={currentStep.videoUrl}
+              playsInline
+              preload="metadata"
+              disablePictureInPicture
             >
               <p>브라우저가 동영상을 지원하지 않습니다.</p>
             </video>

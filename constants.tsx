@@ -63,7 +63,7 @@ export const SCRIPTS = {
   identityTheftWrapUp: "이제는 실시간으로 얼굴 변조랑 목소리 변조까지 가능하니, 이런식으로 가족한테 연락이 간다면 속을 수 있을거 같아요.",
   identityTheftDetectionIntro: "딥페이크 영상은 이제 정교하게 만들어져서 실제로 구분하기 정말 어려워졌어요. 신원도용에 맞서기 위해 알아야할 몇가지 대응방안을 알아볼게요.",
   identityTheftDetectionTips: "가족 간에는 암호를 정해두고 전화가 오면 확인해보세요. 온라인에는 본인이나 가족 사진을 올리지 않는 것이 좋습니다. 연락처는 '딸', '아들' 같은 관계 대신 이름으로 저장하고, 휴대폰이 해킹되더라도 가족 정보가 노출되지 않도록 보안을 철저히 하세요.",
-  identityTheftModuleEnd: "신원도용에 대한 체험이 끝났어요. 앞으로 이런 상황들을 조심해서 대처하시길 바라요.",
+  identityTheftModuleEnd: "신원도용에 대한 체험이 끝났어요. 정말 수고 많으셨어요!",
 };
 
 export const QUIZZES: { [key: string]: QuizQuestion[] } = {
@@ -283,7 +283,7 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
   // 15. Quiz 1 - Deepfake visual detection
   { 
     id: 'fn_quiz_1', 
-    title: "확인 퀴즈 1", 
+    title: "가짜뉴스 퀴즈", 
     type: 'quiz', 
     quizId: 'fakeNewsQuiz1'
   },
@@ -291,7 +291,7 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
   // 16. Quiz 2 - Audio-visual synchronization
   { 
     id: 'fn_quiz_2', 
-    title: "확인 퀴즈 2", 
+    title: "가짜뉴스 퀴즈", 
     type: 'quiz', 
     quizId: 'fakeNewsQuiz2'
   },
@@ -469,7 +469,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
   // 16. Quiz 1 - Family verification
   { 
     id: 'it_quiz_1', 
-    title: "확인 퀴즈 1", 
+    title: "신원도용 퀴즈", 
     type: 'quiz', 
     quizId: 'identityTheftQuiz1'
   },
@@ -477,7 +477,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
   // 17. Quiz 2 - Prevention habits
   { 
     id: 'it_quiz_2', 
-    title: "확인 퀴즈 2", 
+    title: "신원도용 퀴즈", 
     type: 'quiz', 
     quizId: 'identityTheftQuiz2'
   },

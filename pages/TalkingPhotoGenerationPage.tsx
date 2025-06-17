@@ -118,10 +118,11 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
                         className="rounded-lg w-64 h-96 md:w-80 md:h-[30rem] object-contain mx-auto border-4 border-orange-500"
                         controls
                         autoPlay
-                        loop
                         playsInline
                         crossOrigin="anonymous"
-                        preload="metadata"
+                        preload="auto"
+                        disablePictureInPicture
+                        controlsList="nodownload"
                         onError={(e) => {
                             console.error('Video load error:', e);
                             console.error('Video src:', generatedTalkingPhoto);
@@ -169,7 +170,7 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
 
             <div className="flex justify-center">
               <Button onClick={() => setCurrentPage(Page.DeepfakeIntroduction)} variant="primary" size="lg">
-                다음: 딥페이크 기술 이해하기
+                딥페이크 기술 이해하기
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
