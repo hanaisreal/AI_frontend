@@ -139,6 +139,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
           const link = document.createElement('a');
           link.href = url;
           link.download = `${step.scenarioType === 'lottery' ? '복권당첨' : '범죄용의자'}_시나리오_${userData.name}.mp4`;
+          link.target = '_blank'; // Prevent navigation
+          link.rel = 'noopener noreferrer'; // Security
+          link.style.display = 'none'; // Hide the link
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
