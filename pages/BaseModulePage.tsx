@@ -130,6 +130,25 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       // Generate talking photo with scenario-specific audio script
       const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript, step.scenarioType);
 
+      // Download function
+      const handleDownload = async () => {
+        try {
+          const response = await fetch(talkingPhotoResult.videoUrl);
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${step.scenarioType === 'lottery' ? '복권당첨' : '범죄용의자'}_시나리오_${userData.name}.mp4`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error('Download failed:', error);
+          alert('다운로드에 실패했습니다. 다시 시도해주세요.');
+        }
+      };
+
       return (
         <div className="text-center">
           <div className="space-y-4">
@@ -153,6 +172,17 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               >
                 <p>브라우저가 동영상을 지원하지 않습니다.</p>
               </video>
+            </div>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleDownload}
+                className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 flex items-center space-x-2 shadow-md"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>영상 다운로드</span>
+              </button>
             </div>
             <p className="text-sm text-slate-600 italic">
               이는 AI 기술을 사용해 생성된 영상입니다. 
