@@ -10,7 +10,9 @@ interface PersonaTransitionSlideProps {
   talkingPhotoUrl: string | null;
   voiceId: string | null;
   script: string;
-  hideScript?: boolean;
+  hideScript?: boolean; // Deprecated: use showScript instead
+  showScript?: boolean; // New prop to control script visibility (default: true)
+  chunkedDisplay?: boolean; // New prop for chunked text display
 }
 
 const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
@@ -21,6 +23,8 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
   voiceId,
   script,
   hideScript = false,
+  showScript = false,
+  chunkedDisplay = false,
 }, ref) => {
   const [canContinue, setCanContinue] = useState(false);
   const narrationPlayerRef = useRef<any>(null);
@@ -70,6 +74,8 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
             autoPlay={true}
             onEnd={() => setCanContinue(true)} // Enable continue button when narration ends
             hideScript={hideScript}
+            showScript={showScript}
+            chunkedDisplay={chunkedDisplay}
           />
         ) : (
           <div className="text-center">

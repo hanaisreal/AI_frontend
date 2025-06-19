@@ -19,7 +19,9 @@ interface NarrationPlayerProps {
   imageUrl: string;
   talkingImageUrl: string;
   onNarrationComplete?: () => void;
-  hideScript?: boolean;
+  hideScript?: boolean; // Deprecated: use showScript instead
+  showScript?: boolean; // New prop to control script visibility (default: true)
+  chunkedDisplay?: boolean; // New prop for chunked text display
 }
 
 const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({ 
@@ -34,6 +36,8 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   talkingImageUrl,
   onNarrationComplete,
   hideScript = false,
+  showScript = true,
+  chunkedDisplay = false,
 }, ref) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +46,32 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastGeneratedScriptRef = useRef<string | null>(null);
   const hasAutoPlayed = useRef(false); // Track if auto-play has already happened
+  
+  // Chunked display state
+  const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
+  const [chunks, setChunks] = useState<string[]>([]);
+  const [chunkTimings, setChunkTimings] = useState<number[]>([]);
+  const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Split script into chunks when script changes
+  useEffect(() => {
+    if (script && chunkedDisplay) {
+      // Split by comma, period, or other natural pauses
+      const scriptChunks = script.split(/[,.!?]/).map(chunk => chunk.trim()).filter(chunk => chunk.length > 0);
+      setChunks(scriptChunks);
+      setCurrentChunkIndex(0);
+      
+      // We'll calculate timing after we get the actual audio duration
+      // For now, set empty timings
+      setChunkTimings([]);
+      
+      console.log('NarrationPlayer: Created chunks:', scriptChunks);
+    } else {
+      setChunks([]);
+      setChunkTimings([]);
+      setCurrentChunkIndex(0);
+    }
+  }, [script, chunkedDisplay]);
 
   // Generate audio using ElevenLabs when script or voiceId changes
   useEffect(() => {
@@ -189,20 +219,44 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       audio.preload = 'auto';
       audio.loop = false; // Ensure no auto-replay
       audio.onplay = () => {
-        console.log('NarrationPlayer: Audio started playing');
+        console.log('NarrationPlayer: Audio started playing, duration:', audio.duration, 'chunks:', chunks.length);
         setError(null); // Clear any error when audio starts playing
         setIsPlaying(true);
         if (onPlay) onPlay();
+        
+        // Start chunk timing tracking if chunked display is enabled
+        if (chunkedDisplay && chunks.length > 0) {
+          console.log('NarrationPlayer: Starting chunked timing with simple even distribution');
+          // Reset to first chunk when starting
+          setCurrentChunkIndex(0);
+          // Start timing with simple even distribution
+          startChunkTiming();
+        }
       };
       audio.onpause = () => {
         setIsPlaying(false);
         if (onPause) onPause();
+        
+        // Stop chunk timing when paused
+        stopChunkTiming();
       };
       audio.onended = () => {
         setIsPlaying(false);
         if (onPause) onPause(); // Call onPause when ended to switch back to static image
+        
+        // Stop chunk timing and show last chunk
+        stopChunkTiming();
+        if (chunkedDisplay && chunks.length > 0) {
+          setCurrentChunkIndex(chunks.length - 1);
+        }
+        
         // Call onEnd to notify that narration is complete (for enabling continue button)
         if (onEnd) onEnd();
+      };
+      
+      // Add loadedmetadata event for debugging
+      audio.onloadedmetadata = () => {
+        console.log('NarrationPlayer: Audio metadata loaded, duration:', audio.duration, 'chunkedDisplay:', chunkedDisplay, 'chunks:', chunks.length);
       };
       audio.onerror = (e) => {
         console.error('NarrationPlayer: Audio playback error:', e);
@@ -267,6 +321,45 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     }
   }, [script]);
 
+  // We're using simple even distribution, so this is no longer needed
+  
+  // Chunk timing functions
+  const startChunkTiming = useCallback(() => {
+    if (!audioRef.current || chunks.length === 0) return;
+    
+    console.log('NarrationPlayer: Starting chunk timing with', chunks.length, 'chunks');
+    
+    const updateChunk = () => {
+      if (!audioRef.current) return;
+      
+      const currentTime = audioRef.current.currentTime;
+      const totalDuration = audioRef.current.duration;
+      
+      if (!totalDuration || chunks.length === 0 || audioRef.current.paused) return;
+      
+      let newChunkIndex = 0;
+      
+      // Simple even distribution - more reliable than character-based timing
+      const timePerChunk = totalDuration / chunks.length;
+      newChunkIndex = Math.min(Math.floor(currentTime / timePerChunk), chunks.length - 1);
+      
+      if (newChunkIndex !== currentChunkIndex && newChunkIndex < chunks.length) {
+        console.log(`NarrationPlayer: Switching to chunk ${newChunkIndex} at time ${currentTime.toFixed(2)}s / ${totalDuration.toFixed(2)}s: "${chunks[newChunkIndex]}"`);
+        setCurrentChunkIndex(newChunkIndex);
+      }
+    };
+    
+    // Update chunk every 100ms
+    timeUpdateIntervalRef.current = setInterval(updateChunk, 100);
+  }, [currentChunkIndex, chunks]);
+  
+  const stopChunkTiming = useCallback(() => {
+    if (timeUpdateIntervalRef.current) {
+      clearInterval(timeUpdateIntervalRef.current);
+      timeUpdateIntervalRef.current = null;
+    }
+  }, []);
+
   // Add stop method to component
   const stopAudio = useCallback(() => {
     if (audioRef.current) {
@@ -275,7 +368,11 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       setIsPlaying(false);
       if (onPause) onPause();
     }
-  }, [onPause]);
+    stopChunkTiming();
+    if (chunkedDisplay) {
+      setCurrentChunkIndex(0);
+    }
+  }, [onPause, stopChunkTiming, chunkedDisplay]);
 
   // Cleanup effect when script changes
   useEffect(() => {
@@ -286,8 +383,9 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         audioRef.current.src = '';
       }
       setIsPlaying(false);
+      stopChunkTiming();
     };
-  }, [script]); // This runs when script changes
+  }, [script, stopChunkTiming]); // This runs when script changes
 
   // Global cleanup effect when component unmounts
   useEffect(() => {
@@ -300,8 +398,9 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         audioRef.current = null;
       }
       setIsPlaying(false);
+      stopChunkTiming();
     };
-  }, []); // Empty dependency array - runs only on mount/unmount
+  }, [stopChunkTiming]); // Empty dependency array - runs only on mount/unmount
 
   // Expose stopAudio method to parent components
   useImperativeHandle(ref, () => ({
@@ -381,11 +480,58 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
           </div>
           
           {/* Script display - conditionally visible */}
-          {!hideScript && (
+          {(hideScript ? false : showScript) && (
             <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
-              <p className="text-lg text-gray-700 leading-relaxed">
-                {script}
-              </p>
+              {chunkedDisplay && chunks.length > 0 ? (
+                <div className="w-full">
+                  <div className="text-center">
+                    {/* Text container with proper height and positioning */}
+                    <div className="relative min-h-[5rem] sm:min-h-[4rem] flex items-center justify-center px-2 sm:px-4">
+                      <div className="w-full max-w-none">
+                        {chunks.map((chunk, index) => (
+                          <p 
+                            key={`chunk-${index}`}
+                            className={`text-base sm:text-lg md:text-xl text-gray-800 leading-relaxed font-medium transition-all duration-500 ease-in-out ${
+                              index === currentChunkIndex 
+                                ? 'opacity-100 transform translate-y-0 relative' 
+                                : 'opacity-0 transform translate-y-2 absolute inset-0'
+                            }`}
+                            style={{
+                              textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                              wordBreak: 'keep-all',
+                              overflowWrap: 'break-word',
+                              whiteSpace: 'pre-wrap'
+                            }}
+                          >
+                            {chunk}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Progress indicators */}
+                    <div className="mt-4 flex justify-center items-center space-x-2">
+                      {chunks.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            index === currentChunkIndex 
+                              ? 'bg-orange-500 scale-125 shadow-sm' 
+                              : index < currentChunkIndex 
+                                ? 'bg-orange-300' 
+                                : 'bg-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    
+                  </div>
+                </div>
+              ) : (
+                <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                  {script}
+                </p>
+              )}
             </div>
           )}
         </div>

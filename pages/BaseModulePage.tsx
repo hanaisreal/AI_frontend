@@ -336,6 +336,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                                     showControls={true}
                                     imageUrl={displayCaricature}
                                     talkingImageUrl={talkingPhotoUrl || ""}
+                                    chunkedDisplay={true}
                                 />
                                 <p className="text-sm text-slate-500 italic mt-3">(페르소나가 이 시나리오를 소개한 후, 당신의 캐리커처가 위 메시지를 목소리로 전달한다고 상상해보세요.)</p>
                             </div>
@@ -601,6 +602,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 voiceId={voiceId}
                 script={scriptForPersona}
                 hideScript={currentStep.id === 'fn_detection_tips' || currentStep.id === 'it_detection_tips'}
+                chunkedDisplay={true}
               />
               {/* For detection tips, show content during persona narration */}
               {(currentStep.id === 'fn_detection_tips' || currentStep.id === 'it_detection_tips') && (

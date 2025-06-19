@@ -43,7 +43,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   const steps = [
     {
       id: 'video-intro-narration',
-      title: '딥페이크 기술 소개',
+      title: 'AI와 딥페이크 기술 소개',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeIntroStart,
       requires: ['userCaricature'],
@@ -59,13 +59,18 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       id: 'deepvoice-concept',
       title: '딥보이스란 무엇인가요?',
       type: 'narration',
-      content: SCRIPTS.deepvoiceConcept,
       narrationScript: SCRIPTS.deepvoiceConcept,
       requires: ['userCaricature'],
     },
     {
+      id: 'deepfake-transition',
+      title: '딥페이크, 어떻게 만들어지나요?',
+      type: 'narration',
+      narrationScript: SCRIPTS.deepfakeVideoIntro,
+      requires: ['userCaricature'],
+    },
+    {
       id: 'concept-video',
-      title: '딥페이크 개념 영상',
       type: 'info',
       content: (
         <div className="text-center">
@@ -86,6 +91,13 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       ),
     },
     {
+      id: 'deepfake-transition',
+      title: '딥페이크와 딥보이스의 위험성',
+      type: 'narration',
+      narrationScript: SCRIPTS.genAIConcept,
+      requires: ['userCaricature'],
+    },
+    {
       id: 'quiz-intro-narration',
       title: '퀴즈 소개',
       type: 'narration',
@@ -93,15 +105,19 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       requires: ['userCaricature'],
     },
     {
-      id: 'video-identification-quiz',
-      title: '진짜 vs 가짜 영상 퀴즈',
-      type: 'video_identification_quiz',
-      videoQuizData: DEEPFAKE_PEOPLE_DATA,
+      id: 'quiz-feedback-1',
+      type: 'narration',
+      narrationScript: SCRIPTS.deepfakeQuiz1,
+      requires: ['userCaricature'],
     },
-    
+    {
+      id: 'quiz-feedback-2',
+      type: 'narration',
+      narrationScript: SCRIPTS.deepfakeQuiz2,
+      requires: ['userCaricature'],
+    },
     {
       id: 'quiz-complete-narration',
-      title: '퀴즈 완료 및 모듈 전환',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeQuizComplete,
       requires: ['userCaricature'],
@@ -129,20 +145,28 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     switch (currentStepData.type) {
       case 'narration':
         return (
-          <PersonaTransitionSlide
-            onNext={handleNext}
-            userData={userData}
-            caricatureUrl={caricatureUrl}
-            voiceId={voiceId}
-            talkingPhotoUrl={talkingPhotoUrl}
-            script={currentStepData.narrationScript || ''}
-          />
+          <Card>
+            <div className="text-center">
+              <h3 className="text-2xl font-bold mb-6">{currentStepData.title}</h3>
+              <PersonaTransitionSlide
+                onNext={handleNext}
+                userData={userData}
+                caricatureUrl={caricatureUrl}
+                voiceId={voiceId}
+                talkingPhotoUrl={talkingPhotoUrl}
+                script={currentStepData.narrationScript || ''}
+                chunkedDisplay={true}
+                showScript={true} // Set to false to hide script and show only talking photo
+              />
+            </div>
+          </Card>
         );
 
       case 'info':
         return (
           <Card>
             <div className="text-center">
+              <h3 className="text-2xl font-bold mb-6">{currentStepData.title}</h3>
               {currentStepData.content}
               <div className="mt-8 flex justify-center space-x-4">
                 {currentStepIndex > 0 && (
@@ -158,14 +182,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
           </Card>
         );
 
-      case 'video_identification_quiz':
-        return (
-          <VideoIdentificationQuiz
-            peopleData={currentStepData.videoQuizData || []}
-            onQuizComplete={handleNext}
-            onPrevious={currentStepIndex > 0 ? handlePrevious : undefined}
-          />
-        );
+     
 
       default:
         return (

@@ -20,6 +20,7 @@ import DeepfakeIntroductionPage from './pages/DeepfakeIntroductionPage.tsx';
 const App: React.FC = () => {
   console.log('App component mounting...');
   
+  
   // All hooks must be declared at the top level - never inside try/catch or conditionals
   const [currentPage, setCurrentPage] = useState<Page>(Page.Landing);
   const [userData, setUserDataState] = useState<UserData | null>(null);
@@ -198,24 +199,22 @@ const App: React.FC = () => {
     // Debounce the save operation
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        const progressUpdate: any = {
-          user_id: userId // Required by the schema
-        };
+        const progressUpdate: any = {};
         
         if (updates.currentPage !== undefined) {
-          progressUpdate.current_page = Page[updates.currentPage];
+          progressUpdate.currentPage = Page[updates.currentPage];
         }
         if (updates.currentStep !== undefined) {
-          progressUpdate.current_step = updates.currentStep;
+          progressUpdate.currentStep = updates.currentStep;
         }
         if (updates.caricatureUrl !== undefined) {
-          progressUpdate.caricature_url = updates.caricatureUrl;
+          progressUpdate.caricatureUrl = updates.caricatureUrl;
         }
         if (updates.talkingPhotoUrl !== undefined) {
-          progressUpdate.talking_photo_url = updates.talkingPhotoUrl;
+          progressUpdate.talkingPhotoUrl = updates.talkingPhotoUrl;
         }
         if (updates.completedModules !== undefined) {
-          progressUpdate.completed_modules = updates.completedModules;
+          progressUpdate.completedModules = updates.completedModules;
         }
         
         lastSaveRef.current = saveKey;
