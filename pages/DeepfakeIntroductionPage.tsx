@@ -135,7 +135,11 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
 
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
+      console.log(`Going back from step ${currentStepIndex} to step ${currentStepIndex - 1}`);
       setCurrentStepIndex(currentStepIndex - 1);
+    } else {
+      // If at first step, use the global back function to go to previous page
+      onGoBack();
     }
   };
 
@@ -202,9 +206,9 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   return (
     <PageLayout title="딥페이크 기술 이해하기">
       {/* Back Button */}
-      {canGoBack && currentStepData.type !== 'narration' && (
+      {(canGoBack || currentStepIndex > 0) && currentStepData.type !== 'narration' && (
         <div className="mb-6">
-          <BackButton onClick={onGoBack} />
+          <BackButton onClick={handlePrevious} />
         </div>
       )}
 

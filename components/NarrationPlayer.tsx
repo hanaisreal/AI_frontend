@@ -43,6 +43,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [retryTrigger, setRetryTrigger] = useState(0); // Trigger for forcing retry
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastGeneratedScriptRef = useRef<string | null>(null);
   const hasAutoPlayed = useRef(false); // Track if auto-play has already happened
@@ -198,7 +199,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     return () => {
       isCancelled = true;
     };
-  }, [script, voiceId, onEnd]); // Added onEnd to dependencies
+  }, [script, voiceId, onEnd, retryTrigger]); // Added retryTrigger to force retry
 
   const handlePlayPause = useCallback(() => {
     if (!audioUrl || isLoading) return;
@@ -287,9 +288,18 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
 
   const handleRetry = useCallback(() => {
     if (script && voiceId) {
+      console.log('NarrationPlayer: Retrying audio generation');
       setError(null);
-      // Re-trigger audio generation by clearing audioUrl
       setAudioUrl(null);
+      setIsPlaying(false);
+      // Reset the last generated script ref to force regeneration
+      lastGeneratedScriptRef.current = null;
+      // Reset autoplay flag so it will autoplay after retry
+      hasAutoPlayed.current = false;
+      // Set loading state immediately to show progress
+      setIsLoading(true);
+      // Increment retry trigger to force useEffect to re-run
+      setRetryTrigger(prev => prev + 1);
     }
   }, [script, voiceId]);
 
@@ -425,26 +435,26 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   // If no script but showControls is true, show continue message
   if (!script && showControls) {
     return (
-      <Card className="bg-slate-100 p-4 mt-6 shadow-md">
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 mt-8 shadow-lg border-0">
         <div className="text-center">
-          <div className="text-slate-600">계속 진행 중...</div>
+          <div className="text-xl text-gray-600 font-medium">계속 진행 중...</div>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-slate-100 p-4 mt-6 shadow-md">
+    <div className="mt-6">
       {isLoading && (
-        <div className="flex items-center space-x-3 py-2">
+        <div className="flex items-center space-x-4 py-4">
           <LoadingSpinner size="sm" />
-          <span className="text-sm text-slate-600">사용자 음성으로 내레이션 생성 중...</span>
+          <span className="text-lg text-gray-600 font-medium">사용자 음성으로 내레이션 생성 중...</span>
         </div>
       )}
       
       {error && (
-        <div className="flex items-center justify-between py-2">
-          <span className="text-sm text-red-600">{error}</span>
+        <div className="flex items-center justify-between py-4 bg-red-50 rounded-2xl px-4">
+          <span className="text-lg text-red-600 font-medium">{error}</span>
           <Button onClick={handleRetry} variant="ghost" size="sm">
             다시 시도
           </Button>
@@ -454,34 +464,36 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       {!isLoading && !error && audioUrl && (
         <div className="text-center">
           {/* Display talking video if available, otherwise static image */}
-          <div className="my-4 relative">
+          <div className="my-6 relative">
             {talkingImageUrl && isPlaying ? (
               <div className="relative">
                 <video 
                   src={talkingImageUrl}
-                  className="rounded-lg w-64 h-64 object-cover mx-auto border-4 border-orange-500"
+                  className="rounded-3xl w-72 h-72 md:w-80 md:h-80 object-cover mx-auto"
                   autoPlay
                   muted
                   loop
                   preload="metadata"
                   playsInline
-                  style={{ background: '#f8f9fa' }}
+                  style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}
                 />
               </div>
             ) : (
-              <img 
-                src={imageUrl}
-                alt="AI 캐릭터"
-                className="rounded-lg w-64 h-64 object-cover mx-auto border-4 border-gray-300"
-                onLoad={() => console.log('NarrationPlayer: Image loaded')}
-                style={{ background: '#f8f9fa' }}
-              />
+              <div className="relative">
+                <img 
+                  src={imageUrl}
+                  alt="AI 캐릭터"
+                  className="rounded-3xl w-72 h-72 md:w-80 md:h-80 object-cover mx-auto"
+                  onLoad={() => console.log('NarrationPlayer: Image loaded')}
+                  style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}
+                />
+              </div>
             )}
           </div>
           
           {/* Script display - conditionally visible */}
           {(hideScript ? false : showScript) && (
-            <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+            <div className="mt-6">
               {chunkedDisplay && chunks.length > 0 ? (
                 <div className="w-full">
                   <div className="text-center">
@@ -491,10 +503,10 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                         {chunks.map((chunk, index) => (
                           <p 
                             key={`chunk-${index}`}
-                            className={`text-base sm:text-lg md:text-xl text-gray-800 leading-relaxed font-medium transition-all duration-500 ease-in-out ${
+                            className={`text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed font-medium transition-all duration-700 ease-in-out ${
                               index === currentChunkIndex 
-                                ? 'opacity-100 transform translate-y-0 relative' 
-                                : 'opacity-0 transform translate-y-2 absolute inset-0'
+                                ? 'opacity-100 transform translate-y-0 relative scale-100' 
+                                : 'opacity-0 transform translate-y-3 absolute inset-0 scale-95'
                             }`}
                             style={{
                               textShadow: '0 1px 2px rgba(0,0,0,0.1)',
@@ -510,16 +522,16 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                     </div>
                     
                     {/* Progress indicators */}
-                    <div className="mt-4 flex justify-center items-center space-x-2">
+                    <div className="mt-6 flex justify-center items-center space-x-3">
                       {chunks.map((_, index) => (
                         <div
                           key={index}
-                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          className={`w-3 h-3 rounded-full transition-all duration-500 ${
                             index === currentChunkIndex 
-                              ? 'bg-orange-500 scale-125 shadow-sm' 
+                              ? 'bg-gradient-to-r from-orange-400 to-amber-400 scale-150 shadow-lg' 
                               : index < currentChunkIndex 
-                                ? 'bg-orange-300' 
-                                : 'bg-gray-300'
+                                ? 'bg-gradient-to-r from-orange-300 to-amber-300 scale-110' 
+                                : 'bg-gray-300 scale-100'
                           }`}
                         />
                       ))}
@@ -528,7 +540,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                   </div>
                 </div>
               ) : (
-                <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                <p className="text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed font-medium text-center">
                   {script}
                 </p>
               )}
@@ -536,7 +548,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
           )}
         </div>
       )}
-    </Card>
+    </div>
   );
 });
 

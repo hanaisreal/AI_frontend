@@ -3,6 +3,20 @@ import Button from './Button';
 import NarrationPlayer from './NarrationPlayer';
 import { Page, UserData } from '../types';
 
+// CSS for modern zoom animation
+const pulseZoomStyles = `
+  @keyframes pulse-zoom {
+    0%, 100% { 
+      transform: scale(1);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    50% { 
+      transform: scale(1.05);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+  }
+`;
+
 interface PersonaTransitionSlideProps {
   onNext: () => void;
   userData: UserData | null;
@@ -23,16 +37,19 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
   voiceId,
   script,
   hideScript = false,
-  showScript = false,
+  showScript = false,  //true would show the narration on screen
   chunkedDisplay = false,
 }, ref) => {
   const [canContinue, setCanContinue] = useState(false);
+  const [narrationEnded, setNarrationEnded] = useState(false);
   const narrationPlayerRef = useRef<any>(null);
 
   useEffect(() => {
     // Allow continuing immediately for faster interaction
     setCanContinue(true);
-  }, []);
+    // Reset narration ended state when script changes
+    setNarrationEnded(false);
+  }, [script]);
 
   const handleNext = () => {
     // Stop audio immediately when user clicks continue
@@ -63,6 +80,7 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
 
   return (
     <div className="text-center">
+      <style>{pulseZoomStyles}</style>
       <div className="max-w-md mx-auto mb-8">
         {caricatureUrl && talkingPhotoUrl && voiceId ? (
           <NarrationPlayer
@@ -72,7 +90,10 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
             imageUrl={caricatureUrl}
             talkingImageUrl={talkingPhotoUrl}
             autoPlay={true}
-            onEnd={() => setCanContinue(true)} // Enable continue button when narration ends
+            onEnd={() => {
+              setCanContinue(true);
+              setNarrationEnded(true);
+            }} // Enable continue button when narration ends
             hideScript={hideScript}
             showScript={showScript}
             chunkedDisplay={chunkedDisplay}
@@ -95,7 +116,14 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
           disabled={!canContinue}
           size="lg"
           variant="primary"
-          className="transition-opacity duration-500"
+          className={`transition-all duration-300 ${
+            narrationEnded && canContinue 
+              ? 'shadow-lg' 
+              : 'transition-opacity duration-500'
+          }`}
+          style={narrationEnded && canContinue ? {
+            animation: 'pulse-zoom 2s ease-in-out infinite',
+          } : {}}
         >
           계속하기
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2">

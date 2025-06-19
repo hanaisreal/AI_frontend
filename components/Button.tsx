@@ -18,22 +18,22 @@ const Button: React.FC<ButtonProps> = ({
   className,
   ...props
 }) => {
-  const baseStyles = "font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-75 transition-all duration-150 ease-in-out flex items-center justify-center shadow-md";
+  const baseStyles = "font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-75 transition-all duration-200 ease-in-out flex items-center justify-center shadow-md hover:shadow-lg border-0";
   
   const variantStyles = {
     primary: "bg-orange-500 hover:bg-orange-600 text-white focus:ring-orange-400 disabled:bg-orange-300",
-    secondary: "bg-slate-300 hover:bg-slate-400 text-slate-700 focus:ring-slate-400 disabled:bg-slate-200 disabled:text-slate-500",
+    secondary: "bg-gray-200 hover:bg-gray-300 text-gray-700 focus:ring-gray-400 disabled:bg-gray-200 disabled:text-gray-500",
     danger: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-400 disabled:bg-red-300",
-    ghost: "bg-transparent hover:bg-orange-50 text-orange-600 hover:text-orange-700 focus:ring-orange-500 disabled:text-slate-400 shadow-none",
+    ghost: "bg-transparent hover:bg-orange-50 text-orange-600 hover:text-orange-700 focus:ring-orange-500 disabled:text-gray-400 shadow-none",
   };
 
   const sizeStyles = {
-    sm: "px-4 py-2 text-base", // Formerly sm
-    md: "px-5 py-2.5 text-lg", // Formerly md, now larger
-    lg: "px-7 py-3.5 text-xl", // Formerly lg, now larger
+    sm: "px-6 py-3 text-lg min-h-[48px]", // Minimum touch target 48px
+    md: "px-8 py-4 text-xl min-h-[56px]", // Larger for seniors
+    lg: "px-10 py-5 text-2xl min-h-[64px]", // Extra large
   };
 
-  const widthStyles = fullWidth ? "w-full" : "w-auto min-w-[180px]"; // Added min-width for non-fullWidth
+  const widthStyles = fullWidth ? "w-full" : "w-auto min-w-[200px]"; // Larger min-width for better accessibility
 
   return (
     <button
