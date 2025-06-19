@@ -1,6 +1,5 @@
 export enum Page {
   Landing,
-  IntroductionEducation,
   UserOnboarding,
   CaricatureGeneration,
   TalkingPhotoGeneration,
@@ -26,7 +25,6 @@ export interface QuizQuestion {
   explanation?: string;
 }
 
-// CaseStudy interface removed - all content now uses ModuleStep with direct properties
 
 export interface ModuleStep {
   id: string;

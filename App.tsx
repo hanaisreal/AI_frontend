@@ -5,7 +5,6 @@ import * as apiService from './services/apiService.ts';
 
 // Static imports for pages
 import LandingPage from './pages/LandingPage.tsx';
-import IntroductionEducationPage from './pages/IntroductionEducationPage.tsx';
 import UserOnboardingPage from './pages/UserOnboardingPage.tsx';
 import CaricatureGenerationPage from './pages/CaricatureGenerationPage.tsx';
 import TalkingPhotoGenerationPage from './pages/TalkingPhotoGenerationPage.tsx';
@@ -400,18 +399,6 @@ const App: React.FC = () => {
       case Page.DeepfakeIntroduction:
         return <DeepfakeIntroductionPage 
                   setCurrentPage={setCurrentPageOptimized}
-                  userData={userData}
-                  caricatureUrl={caricatureUrl}
-                  voiceId={voiceId}
-                  talkingPhotoUrl={talkingPhotoUrl}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStepOptimized}
-                  onGoBack={goBack}
-                  canGoBack={canGoBack}
-                />;
-      case Page.IntroductionEducation:
-        return <IntroductionEducationPage 
-                  setCurrentPage={setCurrentPageOptimized} 
                   userData={userData}
                   caricatureUrl={caricatureUrl}
                   voiceId={voiceId}

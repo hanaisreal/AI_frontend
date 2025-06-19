@@ -49,6 +49,21 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       requires: ['userCaricature'],
     },
     {
+      id: 'deepfake-concept',
+      title: '딥페이크란 무엇인가요?',
+      type: 'narration',
+      narrationScript: SCRIPTS.deepfakeConcept,
+      requires: ['userCaricature'],
+    },
+    {
+      id: 'deepvoice-concept',
+      title: '딥보이스란 무엇인가요?',
+      type: 'narration',
+      content: SCRIPTS.deepvoiceConcept,
+      narrationScript: SCRIPTS.deepvoiceConcept,
+      requires: ['userCaricature'],
+    },
+    {
       id: 'concept-video',
       title: '딥페이크 개념 영상',
       type: 'info',
@@ -83,6 +98,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       type: 'video_identification_quiz',
       videoQuizData: DEEPFAKE_PEOPLE_DATA,
     },
+    
     {
       id: 'quiz-complete-narration',
       title: '퀴즈 완료 및 모듈 전환',
