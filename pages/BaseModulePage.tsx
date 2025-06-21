@@ -51,9 +51,51 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   const [currentView, setCurrentView] = useState<'personaTransition' | 'content'>('personaTransition');
   const [scriptForPersona, setScriptForPersona] = useState<string>("");
   const [isChangingStep, setIsChangingStep] = useState(false);
+  const [preloadingNext, setPreloadingNext] = useState(false);
   const personaTransitionRef = useRef<any>(null);
 
   const currentStep = steps[currentStepIndex];
+
+  // Preload next step's narration for instant experience
+  const preloadNextNarration = useCallback(async (currentStepIndex: number) => {
+    const nextStepIndex = currentStepIndex + 1;
+    if (nextStepIndex >= steps.length) return; // No next step
+    
+    const nextStep = steps[nextStepIndex];
+    if (nextStep.type !== 'narration' || !nextStep.narrationScript) return;
+    
+    if (!userData?.userId || !voiceId) return;
+    
+    try {
+      setPreloadingNext(true);
+      console.log(`🚀 Pre-loading narration for step ${nextStep.id}`);
+      console.log(`  - User ID: ${userData.userId}`);
+      console.log(`  - Step ID: ${nextStep.id}`);
+      console.log(`  - Script: "${nextStep.narrationScript?.substring(0, 50)}..."`);
+      console.log(`  - Voice ID: ${voiceId}`);
+      
+      // Call original narration API to cache the next step
+      const result = await apiService.generateNarration(nextStep.narrationScript, voiceId);
+      
+      // Store in the same cache format as NarrationPlayer
+      const scriptKey = `${nextStep.narrationScript}-${voiceId}`;
+      const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Access the global cache from NarrationPlayer
+      (window as any).narrationCache = (window as any).narrationCache || new Map();
+      (window as any).narrationCache.set(scriptKey, audioUrl);
+      
+      console.log(`✅ Pre-loaded narration for step ${nextStep.id}`);
+      console.log(`  - Audio blob created and cached`);
+      console.log(`  - Cache key: ${scriptKey.substring(0, 50)}...`);
+    } catch (error) {
+      console.error(`⚠️ Pre-load failed for step ${nextStep.id}:`, error);
+      // Pre-load failure is non-critical, continue normally
+    } finally {
+      setPreloadingNext(false);
+    }
+  }, [steps, userData?.userId, voiceId]);
 
   // Sync local step with global step tracking (one-way sync to prevent loops)
   useEffect(() => {
@@ -108,6 +150,45 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     setIsLoadingStep(false); 
 
   }, [currentStepIndex, steps]); // Removed currentStep to prevent duplicate dependency
+
+  // Preload next narration after current step content is ready
+  useEffect(() => {
+    if (!isLoadingStep && userData?.userId && voiceId) {
+      // Preload for persona transition steps (existing functionality)
+      if (currentView === 'personaTransition' && currentStep?.narrationScript) {
+        console.log(`🎵 Scheduling voice preload from persona transition: ${currentStep.id}`);
+        const preloadTimer = setTimeout(() => {
+          preloadNextNarration(currentStepIndex);
+        }, 3000); // Preload after 3 seconds
+        
+        return () => clearTimeout(preloadTimer);
+      }
+      
+      // NEW: Preload for video case study steps
+      if (currentView === 'content' && currentStep?.type === 'video_case_study') {
+        console.log(`🎵 Scheduling voice preload from video case study: ${currentStep.id}`);
+        const preloadTimer = setTimeout(() => {
+          preloadNextNarration(currentStepIndex);
+        }, 5000); // Preload after 5 seconds to allow video to start
+        
+        return () => clearTimeout(preloadTimer);
+      }
+      
+      // NEW: Preload for scenario steps (faceswap, voice call, video call)
+      if (currentView === 'content' && (
+        currentStep?.type === 'faceswap_scenario' || 
+        currentStep?.type === 'voice_call_scenario' || 
+        currentStep?.type === 'video_call_scenario'
+      )) {
+        console.log(`🎵 Scheduling voice preload from ${currentStep.type}: ${currentStep.id}`);
+        const preloadTimer = setTimeout(() => {
+          preloadNextNarration(currentStepIndex);
+        }, 7000); // Preload after 7 seconds to allow scenario content to load/generate
+        
+        return () => clearTimeout(preloadTimer);
+      }
+    }
+  }, [currentStepIndex, currentView]); // Added currentView to dependencies
 
   // Scenario processing functions
   const processFaceswapScenario = async (step: ModuleStep) => {
@@ -631,12 +712,6 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     >
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Card title={currentStep ? getSectionTitle(currentStep) : "안내 중..."}>
-          {/* Back Button */}
-          {canGoBack && (
-            <div className="mb-6">
-              <BackButton onClick={onGoBack} />
-            </div>
-          )}
           
           {currentView === 'personaTransition' && currentStep ? (
             <>
@@ -649,7 +724,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 talkingPhotoUrl={talkingPhotoUrl}
                 voiceId={voiceId}
                 script={scriptForPersona}
-                hideScript={currentStep.id === 'fn_detection_tips' || currentStep.id === 'it_detection_tips'}
+                showScript={false}
                 chunkedDisplay={true}
               />
               {/* For detection tips, show content during persona narration */}

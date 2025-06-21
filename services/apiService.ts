@@ -1,5 +1,23 @@
 import { UserData, QuizAnswerData } from '../types.ts';
 
+// Smart narration request interface
+interface SmartNarrationRequest {
+  user_id: number;
+  current_step_id: string;
+  current_script: string;
+  voice_id: string;
+  preload_next_step_id?: string;
+  preload_next_script?: string;
+}
+
+interface SmartNarrationResponse {
+  current_audio_url: string;
+  current_audio_type: string;
+  cache_hit: boolean;
+  preload_started: boolean;
+  message?: string;
+}
+
 // Base URL for your backend API
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -16,8 +34,46 @@ const handleApiResponse = async (response: Response) => {
 // These functions call the actual backend APIs
 // ===================================================================================
 
+// Smart narration with caching and preloading (hybrid strategy)
+export const generateSmartNarration = async (
+  userId: number,
+  stepId: string, 
+  script: string, 
+  voiceId: string,
+  nextStepId?: string,
+  nextScript?: string
+): Promise<{ audioUrl: string; audioType: string; cacheHit: boolean }> => {
+  console.log(`FRONTEND: Calling smart narration for step ${stepId}, user ${userId}`);
+  
+  const request: SmartNarrationRequest = {
+    user_id: userId,
+    current_step_id: stepId,
+    current_script: script,
+    voice_id: voiceId,
+    preload_next_step_id: nextStepId,
+    preload_next_script: nextScript
+  };
+  
+  const response = await fetch(`${API_BASE_URL}/api/smart-narration`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+  
+  const result: SmartNarrationResponse = await handleApiResponse(response);
+  
+  return {
+    audioUrl: result.current_audio_url,
+    audioType: result.current_audio_type,
+    cacheHit: result.cache_hit
+  };
+};
+
+// Legacy narration function (fallback)
 export const generateNarration = async (script: string, voiceId: string | null): Promise<{ audioData: string; audioType: string }> => {
-  console.log(`FRONTEND: Calling /api/generate-narration with voiceId: ${voiceId}, script: "${script.substring(0,30)}..."`);
+  console.log(`FRONTEND: Calling legacy /api/generate-narration with voiceId: ${voiceId}, script: "${script.substring(0,30)}..."`);
   
   const response = await fetch(`${API_BASE_URL}/api/generate-narration`, {
     method: 'POST',
@@ -49,6 +105,66 @@ export const generateVoiceDub = async (audioUrl: string, voiceId: string, scenar
   return { audioData: result.audioData, audioType: result.audioType, dubbingId: result.dubbingId };
 };
 
+// Get pre-generated scenario content from database (hybrid strategy)
+export const getPreGeneratedScenarioContent = async (userId: number): Promise<{
+  lottery_faceswap_url?: string;
+  crime_faceswap_url?: string;
+  investment_faceswap_url?: string;
+  accident_faceswap_url?: string;
+  lottery_video_url?: string;
+  crime_video_url?: string;
+  investment_video_url?: string;
+  accident_video_url?: string;
+  investment_call_audio_url?: string;
+  accident_call_audio_url?: string;
+  scenario_generation_status?: string;
+}> => {
+  console.log(`FRONTEND: Getting pre-generated content for user ${userId}`);
+  
+  const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  
+  const user = await handleApiResponse(response);
+  
+  return {
+    lottery_faceswap_url: user.lottery_faceswap_url,
+    crime_faceswap_url: user.crime_faceswap_url,
+    investment_faceswap_url: user.investment_faceswap_url,
+    accident_faceswap_url: user.accident_faceswap_url,
+    lottery_video_url: user.lottery_video_url,
+    crime_video_url: user.crime_video_url,
+    investment_video_url: user.investment_video_url,
+    accident_video_url: user.accident_video_url,
+    investment_call_audio_url: user.investment_call_audio_url,
+    accident_call_audio_url: user.accident_call_audio_url,
+    scenario_generation_status: user.scenario_generation_status
+  };
+};
+
+// Get scenario generation status
+export const getScenarioGenerationStatus = async (userId: number): Promise<{
+  status: string;
+  started_at?: string;
+  completed_at?: string;
+  error?: string;
+}> => {
+  console.log(`FRONTEND: Getting scenario status for user ${userId}`);
+  
+  const response = await fetch(`${API_BASE_URL}/api/scenario-status/${userId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  
+  return await handleApiResponse(response);
+};
+
+// Legacy face swap function (fallback)
 export const generateFaceswapImage = async (baseImageUrl: string, userImageUrl: string): Promise<{ resultUrl: string }> => {
   console.log(`FRONTEND: Calling /api/generate-faceswap-image. Base: ${baseImageUrl}, User: ${userImageUrl}`);
   

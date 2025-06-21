@@ -111,6 +111,20 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         return;
       }
 
+      // Check global preload cache (from preloading)
+      const globalCache = (window as any).narrationCache;
+      if (globalCache && globalCache.has(scriptKey)) {
+        console.log('NarrationPlayer: Using PRELOADED cache for script ⚡');
+        const preloadedUrl = globalCache.get(scriptKey);
+        console.log(`NarrationPlayer: Preloaded URL: ${preloadedUrl.substring(0, 50)}...`);
+        setError(null);
+        setAudioUrl(preloadedUrl);
+        setIsLoading(false);
+        // Also store in completedCache for future use
+        completedCache.set(scriptKey, preloadedUrl);
+        return;
+      }
+
       // Check if we already generated audio for this component instance
       if (lastGeneratedScriptRef.current === scriptKey) {
         console.log('NarrationPlayer: Skipping duplicate generation for same script in this component');
@@ -138,7 +152,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
 
         console.log(`NarrationPlayer: Generating audio with ElevenLabs for voiceId: ${voiceId}`);
         
-        // Create promise and cache it immediately
+        // Create promise and cache it immediately (using original working API)
         const generationPromise = apiService.generateNarration(script, voiceId)
           .then(result => {
             // Create blob URL from base64 data
@@ -354,7 +368,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       newChunkIndex = Math.min(Math.floor(currentTime / timePerChunk), chunks.length - 1);
       
       if (newChunkIndex !== currentChunkIndex && newChunkIndex < chunks.length) {
-        console.log(`NarrationPlayer: Switching to chunk ${newChunkIndex} at time ${currentTime.toFixed(2)}s / ${totalDuration.toFixed(2)}s: "${chunks[newChunkIndex]}"`);
+        //console.log(`NarrationPlayer: Switching to chunk ${newChunkIndex} at time ${currentTime.toFixed(2)}s / ${totalDuration.toFixed(2)}s: "${chunks[newChunkIndex]}"`);
         setCurrentChunkIndex(newChunkIndex);
       }
     };

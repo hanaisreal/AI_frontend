@@ -100,6 +100,7 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
             hideScript={hideScript}
             showScript={showScript}
             chunkedDisplay={chunkedDisplay}
+            // Note: Preloading is handled by the parent module pages
           />
         ) : (
           <div className="text-center">

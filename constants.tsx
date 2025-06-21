@@ -7,6 +7,8 @@ export const SCRIPTS = {
   caricatureGenerated: "이제 당신만의 특별한 캐릭터가 완성됐어요! 정말 멋지죠?",
   talkingPhotoGenerated: "짜잔! 이제 실제 상황에서 이 기술들이 어떻게 쓰일 수 있는지 살펴볼까요?",
   moduleSelection: "체험해보고 싶은 경험을 선택해 주세요. 궁금한 주제를 골라서 직접 느껴보세요!",
+  module1Complete: "딥페이크가 가짜뉴스에 어떻게 악용될 수 있는지 알아보았습니다. 수고하셨어요!",
+  module2Complete: "딥페이크가 신원도용에 어떻게 악용될 수 있는지 알아보았습니다. 수고하셨어요!",
   allModulesComplete: "정말 축하드려요! 모든 체험을 완료하셨습니다. 오늘의 경험이 앞으로 디지털 세상을 더 안전하게 살아가는 데 도움이 되길 바랍니다.",
 
   // Scripts for deepfake introduction flow
@@ -188,7 +190,7 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
   // 9. Experience introduction
   { 
     id: 'fn_experience_intro', 
-    title: "체험 소개", 
+    title: "실습 소개", 
     type: 'narration', 
     narrationScript: SCRIPTS.fakeNewsExperienceIntro,
     requires: ['userCaricature']
@@ -364,7 +366,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
   // 9. 체험 소개
   {
     id: 'it_experience_intro',
-    title: '체험 소개',
+    title: '실습 소개',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftExperienceIntro,
     requires: ['userCaricature']
