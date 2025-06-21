@@ -112,23 +112,42 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   // Scenario processing functions
   const processFaceswapScenario = async (step: ModuleStep) => {
     try {
+      console.log('🔍 Debugging faceswap scenario:', {
+        userImageUrl,
+        userData,
+        voiceId,
+        step: {
+          scenarioType: step.scenarioType,
+          baseImageMale: step.baseImageMale,
+          baseImageFemale: step.baseImageFemale,
+          audioScript: step.audioScript
+        }
+      });
+
       if (!userImageUrl || !userData || !voiceId) {
+        console.error('❌ Missing user data:', { userImageUrl: !!userImageUrl, userData: !!userData, voiceId: !!voiceId });
         return <div className="text-red-500">사용자 데이터가 불완전합니다.</div>;
       }
 
       // Select base image based on user gender
       const baseImage = userData.gender === 'male' ? step.baseImageMale : step.baseImageFemale;
+      console.log('🎭 Selected base image:', { gender: userData.gender, baseImage });
+      
       if (!baseImage) {
+        console.error('❌ No base image found for gender:', userData.gender);
         return <div className="text-red-500">시나리오 이미지를 찾을 수 없습니다.</div>;
       }
 
       // Generate faceswap image
-      console.log(`Generating faceswap for ${step.scenarioType} scenario`);
+      console.log(`🔄 Generating faceswap for ${step.scenarioType} scenario`);
       const faceswapResult = await apiService.generateFaceswapImage(baseImage, userImageUrl);
+      console.log('✅ Faceswap result:', faceswapResult);
       
       
       // Generate talking photo with scenario-specific audio script
+      console.log(`🔄 Generating talking photo with script: "${step.audioScript}"`);
       const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript, step.scenarioType);
+      console.log('✅ Talking photo result:', talkingPhotoResult);
 
       // Download function
       const handleDownload = async () => {
@@ -194,8 +213,20 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         </div>
       );
     } catch (error) {
-      console.error('Error processing faceswap scenario:', error);
-      return <div className="text-red-500">시나리오 생성 중 오류가 발생했습니다.</div>;
+      console.error('❌ Error processing faceswap scenario:', error);
+      
+      // Show more specific error information
+      let errorMessage = '시나리오 생성 중 오류가 발생했습니다.';
+      if (error instanceof Error) {
+        errorMessage += ` (${error.message})`;
+      }
+      
+      return (
+        <div className="text-red-500 p-4 bg-red-50 rounded-lg">
+          <div className="font-medium">{errorMessage}</div>
+          <div className="text-sm mt-2">콘솔을 확인하여 자세한 오류 정보를 확인하세요.</div>
+        </div>
+      );
     }
   };
 
@@ -349,8 +380,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             
             // Handle new scenario types
             if (currentStep.type === 'faceswap_scenario') {
+                console.log('🔄 Processing faceswap scenario...');
                 const processedContent = await processFaceswapScenario(currentStep);
+                console.log('✅ Faceswap scenario processed:', { 
+                  hasContent: !!processedContent, 
+                  contentType: typeof processedContent 
+                });
                 setInteractiveContent(processedContent);
+                console.log('✅ InteractiveContent set for faceswap');
             } else if (currentStep.type === 'voice_call_scenario') {
                 const processedContent = await processVoiceCallScenario(currentStep);
                 setInteractiveContent(processedContent);
@@ -429,9 +466,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         <Card>
           <p className="text-center text-xl text-green-600">{moduleCompletionMessage}</p>
           <div className="mt-8 flex justify-center">
-            <Button onClick={handleReturnToModuleSelection} variant="primary" size="lg">
+            {/* <Button onClick={handleReturnToModuleSelection} variant="primary" size="lg">
               모듈 선택으로 돌아가기
-            </Button>
+            </Button> */}
           </div>
         </Card>
       </PageLayout>
@@ -522,9 +559,19 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       case 'quiz':
         const quizQuestions = currentStep.quizId ? QUIZZES[currentStep.quizId] : null;
         if (!quizQuestions) return <p className="text-red-500 text-lg">퀴즈를 찾을 수 없습니다.</p>;
-        return <QuizComponent questions={quizQuestions} onQuizComplete={handleQuizComplete} voiceId={voiceId} />;
+        return <QuizComponent 
+          questions={quizQuestions} 
+          onQuizComplete={handleQuizComplete} 
+          voiceId={voiceId}
+          onPrevious={currentStepIndex > 0 ? () => setCurrentStepIndex(prev => prev - 1) : undefined}
+        />;
       
       case 'faceswap_scenario':
+        console.log('🎭 Rendering faceswap_scenario:', { 
+          hasInteractiveContent: !!interactiveContent, 
+          isLoadingStep,
+          interactiveContentType: typeof interactiveContent 
+        });
         return (
           <div className="text-center">
             {interactiveContent ? interactiveContent : (
@@ -596,6 +643,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               <PersonaTransitionSlide
                 ref={personaTransitionRef}
                 onNext={handlePersonaNarrationEnd}
+                onPrevious={currentStepIndex > 0 ? () => setCurrentStepIndex(prev => prev - 1) : undefined}
                 userData={userData}
                 caricatureUrl={caricatureUrl}
                 talkingPhotoUrl={talkingPhotoUrl}
@@ -617,7 +665,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 {renderContentForStep()}
               </div>
               {showNextButtonForContent && ( 
-                <div className="mt-10 flex justify-center">
+                <div className="mt-10 flex justify-center items-center space-x-4">
+                  {currentStepIndex > 0 && (
+                    <BackButton
+                      onClick={() => setCurrentStepIndex(prev => prev - 1)}
+                      size="lg"
+                      variant="primary"
+                    />
+                  )}
                   <Button onClick={handleNext} variant="primary" size="lg">
                     {currentStepIndex === steps.length - 1 ? "모듈 완료" : "계속"}
                   </Button>
@@ -630,9 +685,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                </div>
           )}
         </Card>
-         <Button onClick={handleReturnToModuleSelection} variant="ghost" size="md" className="mt-8 mx-auto !text-slate-600 hover:!text-orange-600 hover:!bg-slate-200">
+         {/* <Button onClick={handleReturnToModuleSelection} variant="ghost" size="md" className="mt-8 mx-auto !text-slate-600 hover:!text-orange-600 hover:!bg-slate-200">
               모듈 선택으로 돌아가기
-          </Button>
+          </Button> */}
       </div>
     </PageLayout>
   );

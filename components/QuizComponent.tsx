@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { QuizQuestion } from '../types.ts';
 import Button from './Button.tsx';
+import BackButton from './BackButton.tsx';
 import Card from './Card.tsx';
 
 interface QuizComponentProps {
   questions: QuizQuestion[];
   onQuizComplete: (score: number, total: number) => void;
   voiceId?: string | null;
+  onPrevious?: () => void; // Optional back button handler
 }
 
-const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete }) => {
+const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete, onPrevious }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -82,7 +84,14 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
         </div>
       )}
 
-      <div className="mt-8 flex justify-center">
+      <div className="mt-8 flex justify-center items-center space-x-4">
+        {onPrevious && (
+          <BackButton
+            onClick={onPrevious}
+            size="lg"
+            variant="primary"
+          />
+        )}
         {showExplanation ? (
           <Button onClick={handleNextQuestion} variant="primary" size="lg">
             {currentQuestionIndex < questions.length - 1 ? '다음 질문' : '퀴즈 완료'}

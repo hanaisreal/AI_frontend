@@ -154,6 +154,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
               <h3 className="text-2xl font-bold mb-6">{currentStepData.title}</h3>
               <PersonaTransitionSlide
                 onNext={handleNext}
+                onPrevious={currentStepIndex > 0 ? handlePrevious : undefined}
                 userData={userData}
                 caricatureUrl={caricatureUrl}
                 voiceId={voiceId}
@@ -172,13 +173,11 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
             <div className="text-center">
               <h3 className="text-2xl font-bold mb-6">{currentStepData.title}</h3>
               {currentStepData.content}
-              <div className="mt-8 flex justify-center space-x-4">
+              <div className="mt-8 flex justify-center items-center space-x-4">
                 {currentStepIndex > 0 && (
-                  <Button onClick={handlePrevious} variant="secondary">
-                    이전
-                  </Button>
+                  <BackButton onClick={handlePrevious} size="lg" variant="primary" />
                 )}
-                <Button onClick={handleNext} variant="primary">
+                <Button onClick={handleNext} variant="primary" size="lg">
                   다음
                 </Button>
               </div>

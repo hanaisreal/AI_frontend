@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import Button from './Button';
+import BackButton from './BackButton';
 import NarrationPlayer from './NarrationPlayer';
 import { Page, UserData } from '../types';
 
@@ -19,6 +20,7 @@ const pulseZoomStyles = `
 
 interface PersonaTransitionSlideProps {
   onNext: () => void;
+  onPrevious?: () => void; // Optional back button handler
   userData: UserData | null;
   caricatureUrl: string | null;
   talkingPhotoUrl: string | null;
@@ -31,6 +33,7 @@ interface PersonaTransitionSlideProps {
 
 const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
   onNext,
+  onPrevious,
   userData,
   caricatureUrl,
   talkingPhotoUrl,
@@ -110,7 +113,14 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
         )}
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center items-center space-x-4">
+        {onPrevious && (
+          <BackButton
+            onClick={onPrevious}
+            size="lg"
+            variant="primary"
+          />
+        )}
         <Button
           onClick={handleNext}
           disabled={!canContinue}

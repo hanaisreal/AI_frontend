@@ -21,19 +21,19 @@ const Button: React.FC<ButtonProps> = ({
   const baseStyles = "font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-75 transition-all duration-200 ease-in-out flex items-center justify-center shadow-md hover:shadow-lg border-0";
   
   const variantStyles = {
-    primary: "bg-orange-500 hover:bg-orange-600 text-white focus:ring-orange-400 disabled:bg-orange-300",
+    primary: "bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 focus:ring-orange-500 disabled:from-orange-300 disabled:to-amber-300",
     secondary: "bg-gray-200 hover:bg-gray-300 text-gray-700 focus:ring-gray-400 disabled:bg-gray-200 disabled:text-gray-500",
     danger: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-400 disabled:bg-red-300",
     ghost: "bg-transparent hover:bg-orange-50 text-orange-600 hover:text-orange-700 focus:ring-orange-500 disabled:text-gray-400 shadow-none",
   };
 
   const sizeStyles = {
-    sm: "px-6 py-3 text-lg min-h-[48px]", // Minimum touch target 48px
-    md: "px-8 py-4 text-xl min-h-[56px]", // Larger for seniors
-    lg: "px-10 py-5 text-2xl min-h-[64px]", // Extra large
+    sm: "px-3 py-2 text-sm",
+    md: "px-4 py-2 text-base", 
+    lg: "px-6 py-3 text-lg",
   };
 
-  const widthStyles = fullWidth ? "w-full" : "w-auto min-w-[200px]"; // Larger min-width for better accessibility
+  const widthStyles = fullWidth ? "w-full" : "w-auto";
 
   return (
     <button

@@ -7,11 +7,7 @@ export const SCRIPTS = {
   caricatureGenerated: "이제 당신만의 특별한 캐릭터가 완성됐어요! 정말 멋지죠?",
   talkingPhotoGenerated: "짜잔! 이제 실제 상황에서 이 기술들이 어떻게 쓰일 수 있는지 살펴볼까요?",
   moduleSelection: "체험해보고 싶은 경험을 선택해 주세요. 궁금한 주제를 골라서 직접 느껴보세요!",
-  module1Complete: "가짜 뉴스 모듈을 모두 마쳤어요! 이제 다른 주제도 함께 경험해볼까요?",
-  module2Complete: "신원 도용 모듈이 끝났어요! 남은 모듈도 도전해보세요.",
   allModulesComplete: "정말 축하드려요! 모든 체험을 완료하셨습니다. 오늘의 경험이 앞으로 디지털 세상을 더 안전하게 살아가는 데 도움이 되길 바랍니다.",
-  videoQuizIntro: "이제 네 가지 영상을 보여드릴게요. 각 영상을 천천히 관찰하면서, 진짜인지 AI가 만든 가짜인지 한 번 맞춰보세요. 준비되셨나요?",
-
 
   // Scripts for deepfake introduction flow
   deepfakeIntroStart: "요즘 뉴스나 일상 속에서 'AI'라는 말을 자주 들어보셨죠? AI는 '인공지능'이라는 뜻으로, 사람처럼 생각하고 판단할 수 있도록 만든 컴퓨터 기술이에요. AI는 이제 우리 생활 곳곳에 스며들어 있어요. 음식을 추천해주는 앱, 스마트 스피커, 심지어는 목소리나 얼굴을 복원해주는 기술까지! 정말 똑똑하고 신기한 기술이지만, 잘못 사용되면 오히려 우리에게 피해를 줄 수도 있답니다.",
@@ -203,8 +199,8 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
     title: "시나리오 1: 복권 당첨", 
     type: 'faceswap_scenario', 
     scenarioType: 'lottery',
-    baseImageMale: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-case1-male.png", 
-    baseImageFemale: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-case1-female.png", 
+    baseImageMale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case1-male.png", 
+    baseImageFemale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case1-female.png", 
     audioScript: SCRIPTS.fakeNewsScenario1Audio, // "1등 당첨돼서 정말 기뻐요!"
     requires: ['userImage', 'userVoice']
   },
@@ -222,8 +218,8 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
     title: "시나리오 2: 범죄 용의자", 
     type: 'faceswap_scenario', 
     scenarioType: 'crime',
-    baseImageMale: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-case2-male.png", 
-    baseImageFemale: "https://deepfake-videomaking.s3.us-east-1.amazonaws.com/video-url/fakenews-case2-female.png", 
+    baseImageMale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case2-male.png", 
+    baseImageFemale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case2-female.png", 
     audioScript: SCRIPTS.fakeNewsScenario2Audio, // "찍지 마세요. 죄송합니다…"
     requires: ['userImage', 'userVoice']
   },
