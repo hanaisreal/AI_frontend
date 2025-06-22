@@ -87,7 +87,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
     <div className={`bg-white rounded-lg border border-gray-200 p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-orange-600">{title}</h3>
         <div className="flex items-center space-x-2">
           {getProgressIcon()}
           <span className="text-sm font-medium text-gray-600">

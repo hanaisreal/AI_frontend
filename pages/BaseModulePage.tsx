@@ -612,7 +612,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     if (currentStep.type === 'video_case_study') {
       return (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-700">
+          <h3 className="text-lg font-semibold text-orange-600">
             
           </h3>
           <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
@@ -741,13 +741,13 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               </div>
               {showNextButtonForContent && ( 
                 <div className="mt-10 flex justify-center items-center space-x-4">
-                  {currentStepIndex > 0 && (
+                  {/* {currentStepIndex > 0 && (
                     <BackButton
                       onClick={() => setCurrentStepIndex(prev => prev - 1)}
                       size="lg"
                       variant="primary"
                     />
-                  )}
+                  )} */}
                   <Button onClick={handleNext} variant="primary" size="lg">
                     {currentStepIndex === steps.length - 1 ? "모듈 완료" : "계속"}
                   </Button>

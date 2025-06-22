@@ -1,8 +1,15 @@
 import { QuizQuestion, ModuleStep, PersonIdentificationData } from './types.ts';
 
-export const APP_TITLE = "AI 기술(딥페이크, 딥보이스)란?";
+export const APP_TITLE = "인공지능(AI) 기술";
+
+// Voice IDs
+export const NARRATOR_VOICE_ID = "z6Kj0hecH20CdetSElRT"; // Initial narrator voice
 
 export const SCRIPTS = {
+  // Initial narrator voice scripts (using voice ID: z6Kj0hecH20CdetSElRT)
+  onboardingWelcome: "안녕하세요! 딥페이크와 딥보이스 기술 체험에 오신 것을 진심으로 환영합니다. 이번 체험을 통해 AI 기술이 어떻게 작동하는지, 그리고 우리가 어떻게 대응해야 하는지 함께 알아보겠습니다.",
+  onboardingExplanation: "지금부터 인적사항을 적어주세요. 입력해주시는 사진과 음성은 여러분만의 개인화된 캐리커처를 만들고, AI 기술의 작동 원리를 설명하는 데 사용됩니다. 개인정보는 체험 목적으로만 활용되며, 안전하게 보호됩니다.",
+  
   welcome: "안녕하세요! 딥페이크와 딥보이스 기술 체험에 오신 것을 진심으로 환영합니다.",
   caricatureGenerated: "이제 당신만의 특별한 캐릭터가 완성됐어요! 정말 멋지죠?",
   talkingPhotoGenerated: "짜잔! 이제 실제 상황에서 이 기술들이 어떻게 쓰일 수 있는지 살펴볼까요?",
@@ -256,7 +263,7 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
     type: 'info', 
     content: `
      <div class="space-y-4">
-      <h3 class="text-xl font-bold mb-4">딥페이크 영상 분별 방법</h3>
+      <h3 class="text-xl font-bold mb-4 text-orange-600">딥페이크 영상 분별 방법</h3>
       <div class="space-y-3">
         <p><strong>1. 얼굴 전체를 자세히 살펴보세요:</strong> 얼굴의 비율이나 표정이 미묘하게 이상하다면 의심해보세요.</p>
         <p><strong>2. 눈 깜빡임을 확인하세요:</strong> 너무 자주 깜빡이거나 거의 깜빡이지 않으면 딥페이크일 수 있어요.</p>
@@ -442,7 +449,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
     type: 'info',
     content: `
       <div class="space-y-4">
-        <h3 class="text-xl font-bold mb-4">신원 도용 방지 방법</h3>
+        <h3 class="text-xl font-bold mb-4 text-orange-600">신원 도용 방지 방법</h3>
         <div class="space-y-3">
           <p><strong>1. 가족 암호:</strong> 걸려온 전화의 경우 가족간의 암호를 물어봄으로써 상대방이 가족이 맞는지 확인하기</p>
           <p><strong>2. 온라인 사진 주의:</strong> 온라인에 사진 올리지 말기 (가족들 포함해서)</p>

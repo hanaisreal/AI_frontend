@@ -104,7 +104,7 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
         )}
         {!isLoading && !error && generatedTalkingPhoto && (
           <div className="text-center">
-            <h2 className="text-3xl font-semibold text-green-600 mb-6">말하는 캐릭터 생성 완료!</h2>
+            <h2 className="text-3xl font-semibold text-orange-600 mb-6">말하는 캐릭터 생성 완료!</h2>
             {sampleVideoMessage && (
               <div className="mb-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
                 <p className="text-orange-800 font-medium">{sampleVideoMessage}</p>
@@ -170,7 +170,7 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
 
             <div className="flex justify-center">
               <Button onClick={() => setCurrentPage(Page.DeepfakeIntroduction)} variant="primary" size="lg">
-                딥페이크 기술 이해하기
+                딥페이크 이해하기
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>

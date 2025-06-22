@@ -85,13 +85,13 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
       )}
 
       <div className="mt-8 flex justify-center items-center space-x-4">
-        {onPrevious && (
+        {/* {onPrevious && (
           <BackButton
             onClick={onPrevious}
             size="lg"
             variant="primary"
           />
-        )}
+        )} */}
         {showExplanation ? (
           <Button onClick={handleNextQuestion} variant="primary" size="lg">
             {currentQuestionIndex < questions.length - 1 ? '다음 질문' : '퀴즈 완료'}

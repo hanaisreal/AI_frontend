@@ -7,6 +7,7 @@ import BackButton from '../components/BackButton.tsx';
 import { Page, UserData } from '../types.ts';
 import { SCRIPTS, DEEPFAKE_PEOPLE_DATA, DEEPFAKE_IDENTIFICATION_VIDEO_URL } from '../constants.tsx';
 import * as apiService from '../services/apiService.ts';
+import { scheduleNarrationPreload } from '../utils/narrationPreloader.ts';
 
 interface DeepfakeIntroductionPageProps {
   setCurrentPage: (page: Page) => void;
@@ -75,7 +76,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       type: 'info',
       content: (
         <div className="text-center">
-          <h3 className="text-2xl font-bold mb-6">딥페이크와 딥보이스 기술이란?</h3>
+          <h3 className="text-2xl font-bold mb-6 text-orange-600">딥페이크와 딥보이스 기술이란?</h3>
           <div className="aspect-video bg-gray-100 rounded-lg mb-6 flex items-center justify-center">
             <video 
               controls 
@@ -192,8 +193,8 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     }
   };
 
-  // Preload next step's narration for instant experience
-  const preloadNextNarration = useCallback(async (currentStepIndex: number) => {
+  // Preload next step's narration using the new utility
+  const preloadNextNarration = useCallback((currentStepIndex: number) => {
     const nextStepIndex = currentStepIndex + 1;
     if (nextStepIndex >= steps.length) return; // No next step
     
@@ -202,29 +203,8 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     
     if (!userData?.userId || !voiceId) return;
     
-    try {
-      setPreloadingNext(true);
-      console.log(`🚀 Pre-loading narration for step ${nextStep.id}`);
-      
-      // Call original narration API to cache the next step
-      const result = await apiService.generateNarration(nextStep.narrationScript, voiceId);
-      
-      // Store in the same cache format as NarrationPlayer
-      const scriptKey = `${nextStep.narrationScript}-${voiceId}`;
-      const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // Access the global cache from NarrationPlayer
-      (window as any).narrationCache = (window as any).narrationCache || new Map();
-      (window as any).narrationCache.set(scriptKey, audioUrl);
-      
-      console.log(`✅ Pre-loaded narration for step ${nextStep.id}`);
-      console.log(`  - Audio blob created and cached`);
-    } catch (error) {
-      console.error(`⚠️ Pre-load failed for step ${nextStep.id}:`, error);
-    } finally {
-      setPreloadingNext(false);
-    }
+    console.log(`🎵 Scheduling preload for step ${nextStep.id}`);
+    return scheduleNarrationPreload(nextStep.narrationScript, voiceId, 2000);
   }, [steps, userData?.userId, voiceId]);
 
   const currentStepData = steps[currentStepIndex];
@@ -232,27 +212,25 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   // Preload next narration after current step content is ready
   useEffect(() => {
     if (userData?.userId && voiceId) {
-      // Preload for narration steps (existing functionality)
+      // Preload for narration steps
       if (currentStepData?.type === 'narration' && currentStepData?.narrationScript) {
         console.log(`🎵 Scheduling voice preload from narration: ${currentStepData.id}`);
-        const preloadTimer = setTimeout(() => {
-          preloadNextNarration(currentStepIndex);
-        }, 3000); // Preload after 3 seconds
-        
-        return () => clearTimeout(preloadTimer);
+        const preloadTimer = preloadNextNarration(currentStepIndex);
+        return () => {
+          if (preloadTimer) clearTimeout(preloadTimer);
+        };
       }
       
-      // NEW: Preload for info steps with video content (concept video, quiz videos)
+      // Preload for info steps with video content (concept video, quiz videos)
       if (currentStepData?.type === 'info' && currentStepData?.content) {
         console.log(`🎵 Scheduling voice preload from info/video step: ${currentStepData.id}`);
-        const preloadTimer = setTimeout(() => {
-          preloadNextNarration(currentStepIndex);
-        }, 5000); // Preload after 5 seconds to allow video to start
-        
-        return () => clearTimeout(preloadTimer);
+        const preloadTimer = preloadNextNarration(currentStepIndex);
+        return () => {
+          if (preloadTimer) clearTimeout(preloadTimer);
+        };
       }
     }
-  }, [currentStepIndex]); // Only depend on step index to prevent infinite loops
+  }, [currentStepIndex, preloadNextNarration, userData?.userId, voiceId, currentStepData]); // Updated dependencies
 
   const renderStepContent = () => {
     switch (currentStepData.type) {
@@ -260,7 +238,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
         return (
           <Card>
             <div className="text-center">
-              <h3 className="text-2xl font-bold mb-6">{currentStepData.title}</h3>
+              <h3 className="text-2xl font-bold mb-6 text-orange-600">{currentStepData.title}</h3>
               <PersonaTransitionSlide
                 onNext={handleNext}
                 onPrevious={currentStepIndex > 0 ? handlePrevious : undefined}
@@ -280,12 +258,12 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
         return (
           <Card>
             <div className="text-center">
-              <h3 className="text-2xl font-bold mb-6">{currentStepData.title}</h3>
+              <h3 className="text-2xl font-bold mb-6 text-orange-600">{currentStepData.title}</h3>
               {currentStepData.content}
               <div className="mt-8 flex justify-center items-center space-x-4">
-                {currentStepIndex > 0 && (
+                {/* {currentStepIndex > 0 && (
                   <BackButton onClick={handlePrevious} size="lg" variant="primary" />
-                )}
+                )} */}
                 <Button onClick={handleNext} variant="primary" size="lg">
                   다음
                 </Button>
@@ -298,12 +276,12 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
         return (
           <Card>
             <div className="text-center">
-              <h3 className="text-2xl font-bold mb-6">{currentStepData.title}</h3>
+              <h3 className="text-2xl font-bold mb-6 text-orange-600">{currentStepData.title}</h3>
               {currentStepData.content}
               <div className="mt-8 flex justify-center items-center space-x-4">
-                {currentStepIndex > 0 && (
+                {/* {currentStepIndex > 0 && (
                   <BackButton onClick={handlePrevious} size="lg" variant="primary" />
-                )}
+                )} */}
                 <Button onClick={handleNext} variant="primary" size="lg">
                   다음
                 </Button>
@@ -316,7 +294,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
         return (
           <Card>
             <div className="text-center">
-              <h3 className="text-2xl font-bold mb-4">{currentStepData.title}</h3>
+              <h3 className="text-2xl font-bold mb-4 text-orange-600">{currentStepData.title}</h3>
               <p className="text-gray-600 mb-6">단계 내용이 준비되지 않았습니다.</p>
               <Button onClick={handleNext} variant="primary">
                 다음
@@ -328,13 +306,13 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   };
 
   return (
-    <PageLayout title="딥페이크 기술 이해하기">
+    <PageLayout >
       {/* Back Button */}
-      {(canGoBack || currentStepIndex > 0) && currentStepData.type !== 'narration' && (
+      {/* {(canGoBack || currentStepIndex > 0) && currentStepData.type !== 'narration' && (
         <div className="mb-6">
           <BackButton onClick={handlePrevious} />
         </div>
-      )}
+      )} */}
 
       
 

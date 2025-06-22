@@ -72,11 +72,16 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
     };
   }, []);
 
-  // Expose stopAudio method to parent components
+  // Expose stopAudio and replay methods to parent components
   useImperativeHandle(ref, () => ({
     stopAudio: () => {
       if (narrationPlayerRef.current && narrationPlayerRef.current.stopAudio) {
         narrationPlayerRef.current.stopAudio();
+      }
+    },
+    replay: () => {
+      if (narrationPlayerRef.current && narrationPlayerRef.current.replay) {
+        narrationPlayerRef.current.replay();
       }
     },
   }), []);
@@ -97,6 +102,11 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
               setCanContinue(true);
               setNarrationEnded(true);
             }} // Enable continue button when narration ends
+            onPlay={() => {
+              // Reset states when audio starts playing (including replay)
+              setCanContinue(false);
+              setNarrationEnded(false);
+            }}
             hideScript={hideScript}
             showScript={showScript}
             chunkedDisplay={chunkedDisplay}
@@ -115,13 +125,13 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
       </div>
 
       <div className="flex justify-center items-center space-x-4">
-        {onPrevious && (
+        {/* {onPrevious && (
           <BackButton
             onClick={onPrevious}
             size="lg"
             variant="primary"
           />
-        )}
+        )} */}
         <Button
           onClick={handleNext}
           disabled={!canContinue}

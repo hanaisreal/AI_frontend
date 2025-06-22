@@ -53,6 +53,9 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   const [chunks, setChunks] = useState<string[]>([]);
   const [chunkTimings, setChunkTimings] = useState<number[]>([]);
   const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Replay functionality
+  const [showReplayButton, setShowReplayButton] = useState(false);
 
   // Split script into chunks when script changes
   useEffect(() => {
@@ -237,6 +240,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         console.log('NarrationPlayer: Audio started playing, duration:', audio.duration, 'chunks:', chunks.length);
         setError(null); // Clear any error when audio starts playing
         setIsPlaying(true);
+        setShowReplayButton(false); // Hide replay button when audio starts
         if (onPlay) onPlay();
         
         // Start chunk timing tracking if chunked display is enabled
@@ -264,6 +268,9 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         if (chunkedDisplay && chunks.length > 0) {
           setCurrentChunkIndex(chunks.length - 1);
         }
+        
+        // Show replay button after narration ends
+        setShowReplayButton(true);
         
         // Call onEnd to notify that narration is complete (for enabling continue button)
         if (onEnd) onEnd();
@@ -426,10 +433,25 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     };
   }, [stopChunkTiming]); // Empty dependency array - runs only on mount/unmount
 
+  // Replay function
+  const handleReplay = useCallback(() => {
+    if (audioRef.current) {
+      console.log('NarrationPlayer: Replaying audio');
+      audioRef.current.currentTime = 0;
+      setShowReplayButton(false);
+      setCurrentChunkIndex(0); // Reset to first chunk
+      audioRef.current.play().catch(err => {
+        console.error('NarrationPlayer: Failed to replay audio:', err);
+        setError('음성 재생에 실패했습니다.');
+      });
+    }
+  }, []);
+
   // Expose stopAudio method to parent components
   useImperativeHandle(ref, () => ({
     stopAudio,
-  }), [stopAudio]);
+    replay: handleReplay,
+  }), [stopAudio, handleReplay]);
 
 
   // If no script and showControls is false, return null
@@ -501,6 +523,47 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                   onLoad={() => console.log('NarrationPlayer: Image loaded')}
                   style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}
                 />
+                
+                {/* Full Video Blur Replay Button */}
+                {showReplayButton && (
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center rounded-3xl"
+                    style={{
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)', // 30% opacity
+                    }}
+                  >
+                    <button
+                      onClick={handleReplay}
+                      className="group relative bg-white/20 hover:bg-white/40 
+                               border border-white/50 rounded-2xl px-6 py-3 
+                               transition-all duration-300 ease-out
+                               hover:scale-105 hover:shadow-xl 
+                               active:scale-95"
+                      style={{
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15)',
+                      }}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <svg 
+                          className="w-6 h-6 text-gray-800 group-hover:text-orange-600 transition-colors" 
+                          fill="currentColor" 
+                          viewBox="0 0 20 20"
+                        >
+                          <path 
+                            fillRule="evenodd" 
+                            d="M4 2a1 1 0 011 1v1.323l3.954 2.582 7.049 4.605a.5.5 0 010 .84l-7.049 4.605L5 17.677V19a1 1 0 11-2 0V3a1 1 0 011-1z" 
+                            clipRule="evenodd" 
+                          />
+                        </svg>
+                        <span className="text-gray-800 group-hover:text-orange-600 font-semibold text-base transition-colors">
+                          다시듣기
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

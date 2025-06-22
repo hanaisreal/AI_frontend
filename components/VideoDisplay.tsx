@@ -61,7 +61,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
   return (
     <Card>
       {title && (
-        <h3 className="text-xl font-bold text-center mb-4">{title}</h3>
+        <h3 className="text-xl font-bold text-center mb-4 text-orange-600">{title}</h3>
       )}
       
       <div className={`${getAspectRatioClass()} bg-black rounded-lg overflow-hidden`}>

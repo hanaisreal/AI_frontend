@@ -102,12 +102,12 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
   return (
     <PageLayout title="나만의 캐릭터 만들기">
       <Card>
-        {/* Back Button */}
+        {/* Back Button
         {canGoBack && (
           <div className="mb-6">
             <BackButton onClick={onGoBack} />
           </div>
-        )}
+        )} */}
         
         {isLoading && (
           <div className="text-center py-10">
@@ -147,7 +147,7 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
         )}
         {!isLoading && !showProgress && !error && generatedCaricature && (
           <div className="text-center">
-            <h2 className="text-3xl font-semibold text-green-600 mb-6">캐리커처 준비 완료!</h2>
+            <h2 className="text-3xl font-semibold text-orange-600 mb-6">캐릭터 준비 완료!</h2>
             <p className="text-slate-700 text-lg mb-8">{statusMessage}</p>
             <div className="my-8 p-3 bg-slate-100 inline-block rounded-xl shadow-lg border-2 border-slate-200">
                 <img 
