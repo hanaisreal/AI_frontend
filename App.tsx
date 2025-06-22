@@ -411,7 +411,9 @@ const App: React.FC = () => {
         return <ModuleSelectionPage 
                   setCurrentPage={setCurrentPageOptimized} 
                   module1Completed={module1Completed} 
-                  module2Completed={module2Completed} 
+                  module2Completed={module2Completed}
+                  userData={userData}
+                  voiceId={voiceId}
                 />;
       case Page.FakeNewsModule:
         return <FakeNewsModulePage 

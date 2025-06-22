@@ -15,6 +15,14 @@ export interface UserData {
   name: string;
   age: string; // Keeping as string for form input simplicity
   gender: string;
+  // Pre-generated content URLs (from hybrid pre-generation strategy)
+  lottery_faceswap_url?: string;
+  crime_faceswap_url?: string;
+  lottery_video_url?: string;
+  crime_video_url?: string;
+  investment_call_audio_url?: string;
+  accident_call_audio_url?: string;
+  pre_generation_status?: string;
 }
 
 export interface QuizQuestion {

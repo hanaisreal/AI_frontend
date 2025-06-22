@@ -1,15 +1,47 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import PageLayout from '../components/PageLayout.tsx';
-import { SCRIPTS } from '../constants.tsx';
+import { SCRIPTS, NARRATOR_VOICE_ID } from '../constants.tsx';
 import { Page } from '../types.ts';
+import * as apiService from '../services/apiService.ts';
 
 interface LandingPageProps {
   setCurrentPage: (page: Page) => void;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ setCurrentPage }) => {
+  
+  // Pre-cache the onboarding welcome narration when landing page loads
+  useEffect(() => {
+    const preCacheOnboardingNarration = async () => {
+      try {
+        console.log('🚀 Pre-caching onboarding welcome narration...');
+        
+        // Generate the first onboarding narration using Jenny's voice
+        const result = await apiService.generateNarration(SCRIPTS.onboardingWelcome, NARRATOR_VOICE_ID);
+        
+        // Create audio blob and cache it
+        const scriptKey = `${SCRIPTS.onboardingWelcome}-${NARRATOR_VOICE_ID}`;
+        const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        // Initialize global cache if it doesn't exist
+        (window as any).narrationCache = (window as any).narrationCache || new Map();
+        (window as any).narrationCache.set(scriptKey, audioUrl);
+        
+        console.log('✅ Pre-cached onboarding welcome narration');
+        console.log(`  - Cache key: ${scriptKey.substring(0, 50)}...`);
+      } catch (error) {
+        console.error('⚠️ Pre-cache failed for onboarding narration:', error);
+        // Pre-cache failure is non-critical, continue normally
+      }
+    };
+    
+    // Start pre-caching after a short delay to not block the landing page render
+    setTimeout(preCacheOnboardingNarration, 1000);
+  }, []);
+
   return (
     <PageLayout>
       <Card>

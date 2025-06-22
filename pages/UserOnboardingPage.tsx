@@ -125,7 +125,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
               voiceId={NARRATOR_VOICE_ID}
               talkingPhotoUrl={null}
               script={SCRIPTS.onboardingWelcome}
-              showScript={false}
+              showScript={true}
               chunkedDisplay={true}
             />
           </Card>
@@ -142,7 +142,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
               voiceId={NARRATOR_VOICE_ID}
               talkingPhotoUrl={null}
               script={SCRIPTS.onboardingExplanation}
-              showScript={false}
+              showScript={true}
               chunkedDisplay={true}
             />
           </Card>

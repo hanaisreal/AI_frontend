@@ -22,6 +22,7 @@ interface NarrationPlayerProps {
   hideScript?: boolean; // Deprecated: use showScript instead
   showScript?: boolean; // New prop to control script visibility (default: true)
   chunkedDisplay?: boolean; // New prop for chunked text display
+  showCharacter?: boolean; // New prop to control character image visibility (default: true)
 }
 
 const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({ 
@@ -38,6 +39,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   hideScript = false,
   showScript = true,
   chunkedDisplay = false,
+  showCharacter = true,
 }, ref) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -500,7 +502,8 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       {!isLoading && !error && audioUrl && (
         <div className="text-center">
           {/* Display talking video if available, otherwise static image */}
-          <div className="my-6 relative">
+          {showCharacter && (
+            <div className="my-6 relative">
             {talkingImageUrl && isPlaying ? (
               <div className="relative">
                 <video 
@@ -567,6 +570,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
               </div>
             )}
           </div>
+          )}
           
           {/* Script display - conditionally visible */}
           {(hideScript ? false : showScript) && (

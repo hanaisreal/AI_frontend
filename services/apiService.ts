@@ -316,3 +316,27 @@ export const getUserProgress = async (userId: number) => {
   return data;
 };
 
+export const startScenarioGeneration = async (voiceId: string): Promise<{
+  message: string;
+  status: string;
+  user_data: {
+    name: string;
+    gender: string;
+    pre_generation_status: string;
+  };
+}> => {
+  console.log(`FRONTEND: Starting scenario generation for voice ID: ${voiceId}`);
+  
+  const response = await fetch(`${API_BASE_URL}/api/start-scenario-generation`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ voiceId }),
+  });
+  
+  const result = await handleApiResponse(response);
+  console.log('Scenario generation started:', result);
+  return result;
+};
+

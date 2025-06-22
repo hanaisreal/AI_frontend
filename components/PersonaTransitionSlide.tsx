@@ -2,21 +2,10 @@ import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } f
 import Button from './Button';
 import BackButton from './BackButton';
 import NarrationPlayer from './NarrationPlayer';
+import ContinueButton from './ContinueButton';
 import { Page, UserData } from '../types';
 
-// CSS for modern zoom animation
-const pulseZoomStyles = `
-  @keyframes pulse-zoom {
-    0%, 100% { 
-      transform: scale(1);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    50% { 
-      transform: scale(1.05);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
-  }
-`;
+// CSS styles moved to ContinueButton component
 
 interface PersonaTransitionSlideProps {
   onNext: () => void;
@@ -43,8 +32,9 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
   showScript = false,  //true would show the narration on screen
   chunkedDisplay = false,
 }, ref) => {
-  const [canContinue, setCanContinue] = useState(false);
+  const [canContinue, setCanContinue] = useState(true); // Always allow continue
   const [narrationEnded, setNarrationEnded] = useState(false);
+  const [narrationStarted, setNarrationStarted] = useState(false);
   const narrationPlayerRef = useRef<any>(null);
 
   useEffect(() => {
@@ -52,6 +42,7 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
     setCanContinue(true);
     // Reset narration ended state when script changes
     setNarrationEnded(false);
+    setNarrationStarted(false);
   }, [script]);
 
   const handleNext = () => {
@@ -88,9 +79,8 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
 
   return (
     <div className="text-center">
-      <style>{pulseZoomStyles}</style>
       <div className="max-w-md mx-auto mb-8">
-        {caricatureUrl && talkingPhotoUrl && voiceId ? (
+        {caricatureUrl && voiceId ? (
           <NarrationPlayer
             ref={narrationPlayerRef}
             script={script}
@@ -103,13 +93,14 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
               setNarrationEnded(true);
             }} // Enable continue button when narration ends
             onPlay={() => {
-              // Reset states when audio starts playing (including replay)
-              setCanContinue(false);
+              // Track when narration starts
+              setNarrationStarted(true);
               setNarrationEnded(false);
             }}
             hideScript={hideScript}
             showScript={showScript}
             chunkedDisplay={chunkedDisplay}
+            showCharacter={!talkingPhotoUrl ? false : true}
             // Note: Preloading is handled by the parent module pages
           />
         ) : (
@@ -132,25 +123,11 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
             variant="primary"
           />
         )} */}
-        <Button
+        <ContinueButton
           onClick={handleNext}
           disabled={!canContinue}
-          size="lg"
-          variant="primary"
-          className={`transition-all duration-300 ${
-            narrationEnded && canContinue 
-              ? 'shadow-lg' 
-              : 'transition-opacity duration-500'
-          }`}
-          style={narrationEnded && canContinue ? {
-            animation: 'pulse-zoom 2s ease-in-out infinite',
-          } : {}}
-        >
-          계속하기
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-          </svg>
-        </Button>
+          showAnimation={narrationEnded && canContinue}
+        />
       </div>
     </div>
   );

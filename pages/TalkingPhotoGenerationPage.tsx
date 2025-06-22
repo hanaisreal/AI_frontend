@@ -5,7 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PageLayout from '../components/PageLayout.tsx';
 import * as apiService from '../services/apiService.ts';
 import { Page, UserData } from '../types.ts';
-import { SCRIPTS } from '../constants.tsx';
+import { SCRIPTS, NARRATOR_VOICE_ID } from '../constants.tsx';
 
 interface TalkingPhotoGenerationPageProps {
   setCurrentPage: (page: Page) => void;
@@ -55,6 +55,31 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
     }
     hasStartedGeneration.current = true;
 
+    // Function to pre-cache deepfake introduction narration
+    const preCacheDeepfakeIntroNarration = async () => {
+      try {
+        console.log('🚀 Pre-caching deepfake introduction narration...');
+        
+        // Generate the deepfake intro start narration using user's custom voice
+        const result = await apiService.generateNarration(SCRIPTS.deepfakeIntroStart, voiceId);
+        
+        // Create audio blob and cache it
+        const scriptKey = `${SCRIPTS.deepfakeIntroStart}-${voiceId}`;
+        const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        // Initialize global cache if it doesn't exist
+        (window as any).narrationCache = (window as any).narrationCache || new Map();
+        (window as any).narrationCache.set(scriptKey, audioUrl);
+        
+        console.log('✅ Pre-cached deepfake introduction narration with user voice');
+        console.log(`  - Cache key: ${scriptKey.substring(0, 50)}...`);
+      } catch (error) {
+        console.error('⚠️ Pre-cache failed for deepfake introduction narration:', error);
+        // Pre-cache failure is non-critical, continue normally
+      }
+    };
+
     const generate = async () => {
       try {
         setStatusMessage("캐릭터가 말하는 비디오를 생성하고 있어요... (최대 4분 소요)");
@@ -70,6 +95,10 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
         } else {
           setStatusMessage(SCRIPTS.talkingPhotoGenerated);
         }
+
+        // Pre-cache the deepfake introduction narration for instant experience
+        setTimeout(preCacheDeepfakeIntroNarration, 1000);
+        
       } catch (err) {
         console.error("말하는 사진 생성 오류:", err);
         setError("말하는 사진 생성에 실패했습니다. 네트워크 또는 서비스 문제일 수 있습니다. 다시 시도해주세요.");

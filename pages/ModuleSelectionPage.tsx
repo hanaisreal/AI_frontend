@@ -1,22 +1,146 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import PageLayout from '../components/PageLayout.tsx';
-import { SCRIPTS } from '../constants.tsx';
-import { Page } from '../types.ts';
+import { SCRIPTS, NARRATOR_VOICE_ID, FAKE_NEWS_MODULE_STEPS, IDENTITY_THEFT_MODULE_STEPS } from '../constants.tsx';
+import { Page, UserData } from '../types.ts';
+import * as apiService from '../services/apiService.ts';
 
 interface ModuleSelectionPageProps {
   setCurrentPage: (page: Page) => void;
   module1Completed: boolean;
   module2Completed: boolean;
+  userData: UserData | null;
+  voiceId: string | null;
 }
 
 const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
   setCurrentPage,
   module1Completed,
   module2Completed,
+  userData,
+  voiceId,
 }) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Play background narration when component mounts
+  useEffect(() => {
+    const playBackgroundNarration = async () => {
+      try {
+        // Check if already cached (using user's voice)
+        const scriptKey = `${SCRIPTS.moduleSelection}-${voiceId}`;
+        const existingCache = (window as any).narrationCache?.get(scriptKey);
+        
+        if (existingCache) {
+          // Use cached audio
+          console.log('🎵 Using cached module selection narration');
+          if (audioRef.current) {
+            audioRef.current.src = existingCache;
+            audioRef.current.play().catch(console.error);
+          }
+        } else {
+          // Generate new audio with user's voice
+          console.log('🎵 Generating module selection narration with user voice');
+          const result = await apiService.generateNarration(SCRIPTS.moduleSelection, voiceId);
+          
+          // Create audio blob and URL
+          const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          // Cache the audio
+          if (!(window as any).narrationCache) {
+            (window as any).narrationCache = new Map();
+          }
+          (window as any).narrationCache.set(scriptKey, audioUrl);
+          
+          // Play the audio
+          if (audioRef.current) {
+            audioRef.current.src = audioUrl;
+            audioRef.current.play().catch(console.error);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to play module selection narration:', error);
+      }
+    };
+
+    // Pre-cache first narrations of both modules
+    const preCacheModuleNarrations = async () => {
+      try {
+        // Wait a moment for the module selection narration to start
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        console.log('🎵 Pre-caching first narrations of both modules');
+        
+        // Get first scripts from both modules
+        const fakeNewsFirstScript = FAKE_NEWS_MODULE_STEPS[0]?.narrationScript;
+        const identityTheftFirstScript = IDENTITY_THEFT_MODULE_STEPS[0]?.narrationScript;
+        
+        // Initialize cache if needed
+        if (!(window as any).narrationCache) {
+          (window as any).narrationCache = new Map();
+        }
+        
+        // Pre-cache fake news module first narration (using user's voice)
+        if (fakeNewsFirstScript && voiceId) {
+          const fakeNewsScriptKey = `${fakeNewsFirstScript}-${voiceId}`;
+          const existingFakeNewsCache = (window as any).narrationCache.get(fakeNewsScriptKey);
+          
+          if (!existingFakeNewsCache) {
+            console.log('🎵 Generating fake news module first narration');
+            try {
+              const fakeNewsResult = await apiService.generateNarration(fakeNewsFirstScript, voiceId);
+              const fakeNewsBlob = new Blob([Uint8Array.from(atob(fakeNewsResult.audioData), c => c.charCodeAt(0))], { type: fakeNewsResult.audioType });
+              const fakeNewsUrl = URL.createObjectURL(fakeNewsBlob);
+              (window as any).narrationCache.set(fakeNewsScriptKey, fakeNewsUrl);
+              console.log('✅ Fake news module first narration cached');
+            } catch (error) {
+              console.error('⚠️ Failed to cache fake news narration:', error);
+            }
+          } else {
+            console.log('🎵 Fake news module first narration already cached');
+          }
+        }
+        
+        // Pre-cache identity theft module first narration (using user's voice)
+        if (identityTheftFirstScript && voiceId) {
+          const identityScriptKey = `${identityTheftFirstScript}-${voiceId}`;
+          const existingIdentityCache = (window as any).narrationCache.get(identityScriptKey);
+          
+          if (!existingIdentityCache) {
+            console.log('🎵 Generating identity theft module first narration');
+            try {
+              const identityResult = await apiService.generateNarration(identityTheftFirstScript, voiceId);
+              const identityBlob = new Blob([Uint8Array.from(atob(identityResult.audioData), c => c.charCodeAt(0))], { type: identityResult.audioType });
+              const identityUrl = URL.createObjectURL(identityBlob);
+              (window as any).narrationCache.set(identityScriptKey, identityUrl);
+              console.log('✅ Identity theft module first narration cached');
+            } catch (error) {
+              console.error('⚠️ Failed to cache identity theft narration:', error);
+            }
+          } else {
+            console.log('🎵 Identity theft module first narration already cached');
+          }
+        }
+        
+        console.log('✅ Module narration pre-caching setup complete');
+      } catch (error) {
+        console.error('⚠️ Failed to pre-cache module narrations:', error);
+      }
+    };
+
+    playBackgroundNarration();
+    preCacheModuleNarrations();
+
+    // Cleanup function
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
   if (module1Completed && module2Completed) {
     return (
       <PageLayout title="모든 모듈 완료!">
@@ -36,9 +160,12 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
   }
 
   return (
-    <PageLayout title="경험 선택하기">
+    <PageLayout >
+      {/* Hidden audio element for background narration */}
+      <audio ref={audioRef} hidden />
+      
       <Card>
-        <p className="text-slate-700 text-lg mb-10 text-center leading-relaxed">{SCRIPTS.moduleSelection}</p>
+        {/* <p className="text-slate-700 text-lg mb-10 text-center leading-relaxed">{SCRIPTS.moduleSelection}</p> */}
         <div className="space-y-6">
           <Button
             onClick={() => setCurrentPage(Page.FakeNewsModule)}
@@ -50,8 +177,8 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
           >
             <div className={`w-full flex items-center justify-between p-5 rounded-lg ${module1Completed ? "bg-slate-200 text-slate-600" : ""}`}>
               <div className="text-left">
-                  <h3 className={`text-xl font-semibold ${module1Completed ? "text-slate-700" : "text-white"}`}>모듈 1: 가짜 뉴스</h3>
-                  <p className={`text-sm mt-1 ${module1Completed ? "text-slate-500" : "opacity-80 text-white"}`}>잘못된 정보 속 AI 탐색하기.</p>
+                  <h3 className={`text-xl font-semibold ${module1Completed ? "text-slate-700" : "text-white"}`}>가짜 뉴스</h3>
+                  <p className={`text-sm mt-1 ${module1Completed ? "text-slate-500" : "opacity-80 text-white"}`}>조작된 영상에 속는 위험성 이해하기.</p>
               </div>
               {module1Completed ? (
                    <span className="text-green-600 font-semibold ml-4 text-lg whitespace-nowrap">✓ 완료됨</span>
@@ -73,8 +200,8 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
           >
             <div className={`w-full flex items-center justify-between p-5 rounded-lg ${module2Completed ? "bg-slate-200 text-slate-600" : ""}`}>
               <div className="text-left">
-                  <h3 className={`text-xl font-semibold ${module2Completed ? "text-slate-700" : "text-white"}`}>모듈 2: 신원 도용</h3>
-                  <p className={`text-sm mt-1 ${module2Completed ? "text-slate-500" : "opacity-80 text-white"}`}>AI 음성 복제 사기 위험 이해하기.</p>
+                  <h3 className={`text-xl font-semibold ${module2Completed ? "text-slate-700" : "text-white"}`}>신원 도용</h3>
+                  <p className={`text-sm mt-1 ${module2Completed ? "text-slate-500" : "opacity-80 text-white"}`}>음성 복제의 위험성 이해하기.</p>
               </div>
               {module2Completed ? (
                   <span className="text-green-600 font-semibold ml-4 text-lg whitespace-nowrap">✓ 완료됨</span>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { QuizQuestion } from '../types.ts';
 import Button from './Button.tsx';
 import BackButton from './BackButton.tsx';
+import ContinueButton from './ContinueButton.tsx';
 import Card from './Card.tsx';
 
 interface QuizComponentProps {
@@ -93,9 +94,11 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
           />
         )} */}
         {showExplanation ? (
-          <Button onClick={handleNextQuestion} variant="primary" size="lg">
-            {currentQuestionIndex < questions.length - 1 ? '다음 질문' : '퀴즈 완료'}
-          </Button>
+          <ContinueButton 
+            onClick={handleNextQuestion} 
+            text={currentQuestionIndex < questions.length - 1 ? '다음 질문' : '퀴즈 완료'}
+            showAnimation={true}
+          />
         ) : (
           <Button onClick={handleSubmitAnswer} variant="primary" disabled={!selectedAnswer} size="lg">
             답변 제출

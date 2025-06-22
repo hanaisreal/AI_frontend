@@ -85,7 +85,7 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
     }
 
     generateCaricature();
-  }, [userImageUrl, caricatureUrl, setCaricatureUrl]);
+  }, [userImageUrl, caricatureUrl]); // Removed setCaricatureUrl to prevent infinite loop
 
   const handleProgressComplete = (result: any) => {
     setGeneratedCaricature(result.caricatureUrl || result.videoUrl);

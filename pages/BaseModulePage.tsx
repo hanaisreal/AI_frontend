@@ -7,6 +7,8 @@ import PageLayout from '../components/PageLayout.tsx';
 import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import BackButton from '../components/BackButton.tsx';
+import ContinueButton from '../components/ContinueButton.tsx';
+import ModuleProgressBar from '../components/ModuleProgressBar.tsx';
 import { Page, ModuleStep, QuizQuestion, UserData } from '../types.ts';
 import { QUIZZES, SCRIPTS, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
 import * as apiService from '../services/apiService.ts';
@@ -52,6 +54,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   const [scriptForPersona, setScriptForPersona] = useState<string>("");
   const [isChangingStep, setIsChangingStep] = useState(false);
   const [preloadingNext, setPreloadingNext] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
   const personaTransitionRef = useRef<any>(null);
 
   const currentStep = steps[currentStepIndex];
@@ -151,6 +154,11 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
 
   }, [currentStepIndex, steps]); // Removed currentStep to prevent duplicate dependency
 
+  // Reset video ended state when step changes
+  useEffect(() => {
+    setVideoEnded(false);
+  }, [currentStepIndex]);
+
   // Preload next narration after current step content is ready
   useEffect(() => {
     if (!isLoadingStep && userData?.userId && voiceId) {
@@ -210,30 +218,49 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         return <div className="text-red-500">사용자 데이터가 불완전합니다.</div>;
       }
 
-      // Select base image based on user gender
-      const baseImage = userData.gender === 'male' ? step.baseImageMale : step.baseImageFemale;
-      console.log('🎭 Selected base image:', { gender: userData.gender, baseImage });
-      
-      if (!baseImage) {
-        console.error('❌ No base image found for gender:', userData.gender);
-        return <div className="text-red-500">시나리오 이미지를 찾을 수 없습니다.</div>;
-      }
+      // Check if pre-generated content exists
+      let talkingPhotoUrl = null;
+      let isSample = false;
+      let message = null;
 
-      // Generate faceswap image
-      console.log(`🔄 Generating faceswap for ${step.scenarioType} scenario`);
-      const faceswapResult = await apiService.generateFaceswapImage(baseImage, userImageUrl);
-      console.log('✅ Faceswap result:', faceswapResult);
-      
-      
-      // Generate talking photo with scenario-specific audio script
-      console.log(`🔄 Generating talking photo with script: "${step.audioScript}"`);
-      const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript, step.scenarioType);
-      console.log('✅ Talking photo result:', talkingPhotoResult);
+      if (step.scenarioType === 'lottery' && userData.lottery_video_url) {
+        console.log('✅ Using pre-generated lottery video:', userData.lottery_video_url);
+        talkingPhotoUrl = userData.lottery_video_url;
+      } else if (step.scenarioType === 'crime' && userData.crime_video_url) {
+        console.log('✅ Using pre-generated crime video:', userData.crime_video_url);
+        talkingPhotoUrl = userData.crime_video_url;
+      } else {
+        // Fallback to real-time generation if pre-generated content not available
+        console.log(`⚠️ Pre-generated content not found for ${step.scenarioType} scenario, generating in real-time`);
+        
+        // Select base image based on user gender
+        const baseImage = userData.gender === 'male' ? step.baseImageMale : step.baseImageFemale;
+        console.log('🎭 Selected base image:', { gender: userData.gender, baseImage });
+        
+        if (!baseImage) {
+          console.error('❌ No base image found for gender:', userData.gender);
+          return <div className="text-red-500">시나리오 이미지를 찾을 수 없습니다.</div>;
+        }
+
+        // Generate faceswap image
+        console.log(`🔄 Generating faceswap for ${step.scenarioType} scenario`);
+        const faceswapResult = await apiService.generateFaceswapImage(baseImage, userImageUrl);
+        console.log('✅ Faceswap result:', faceswapResult);
+        
+        // Generate talking photo with scenario-specific audio script
+        console.log(`🔄 Generating talking photo with script: "${step.audioScript}"`);
+        const talkingPhotoResult = await apiService.generateTalkingPhoto(faceswapResult.resultUrl, userData.name, voiceId, step.audioScript, step.scenarioType);
+        console.log('✅ Talking photo result:', talkingPhotoResult);
+        
+        talkingPhotoUrl = talkingPhotoResult.videoUrl;
+        isSample = talkingPhotoResult.isSample || false;
+        message = talkingPhotoResult.message || null;
+      }
 
       // Download function
       const handleDownload = async () => {
         try {
-          const response = await fetch(talkingPhotoResult.videoUrl);
+          const response = await fetch(talkingPhotoUrl);
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
@@ -258,9 +285,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             <h4 className="text-lg font-semibold text-orange-600">
               {step.scenarioType === 'lottery' ? '복권 당첨 시나리오' : '범죄 용의자 시나리오'}
             </h4>
-            {talkingPhotoResult.isSample && talkingPhotoResult.message && (
+            {isSample && message && (
               <div className="mb-4 p-3 bg-orange-100 border border-orange-300 rounded-lg">
-                <p className="text-orange-800 font-medium">{talkingPhotoResult.message}</p>
+                <p className="text-orange-800 font-medium">{message}</p>
               </div>
             )}
             <div className="w-64 h-96 md:w-80 md:h-[30rem] mx-auto bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
@@ -268,10 +295,11 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 controls 
                 autoPlay
                 className="w-full h-full object-contain"
-                src={talkingPhotoResult.videoUrl}
+                src={talkingPhotoUrl}
                 playsInline
                 preload="auto"
                 disablePictureInPicture
+                onEnded={() => setVideoEnded(true)}
               >
                 <p>브라우저가 동영상을 지원하지 않습니다.</p>
               </video>
@@ -333,9 +361,25 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         return <div className="text-red-500">음성 데이터가 불완전합니다.</div>;
       }
 
-      // Use voice dubbing with pre-recorded audio
-      console.log(`Generating voice call scenario: ${step.scenarioType}`);
-      const narrationResult = await apiService.generateVoiceDub(step.audioUrl, voiceId, step.scenarioType || 'default');
+      // Check if pre-generated audio exists
+      let audioData = null;
+      let audioType = 'audio/mpeg';
+
+      if (step.scenarioType === 'investment_call' && userData?.investment_call_audio_url) {
+        console.log('✅ Using pre-generated investment call audio:', userData.investment_call_audio_url);
+        // Use pre-generated audio URL directly
+        audioData = userData.investment_call_audio_url;
+      } else if (step.scenarioType === 'accident_call' && userData?.accident_call_audio_url) {
+        console.log('✅ Using pre-generated accident call audio:', userData.accident_call_audio_url);
+        // Use pre-generated audio URL directly  
+        audioData = userData.accident_call_audio_url;
+      } else {
+        // Fallback to real-time generation
+        console.log(`⚠️ Pre-generated audio not found for ${step.scenarioType}, generating in real-time`);
+        const narrationResult = await apiService.generateVoiceDub(step.audioUrl, voiceId, step.scenarioType || 'default');
+        audioData = `data:${narrationResult.audioType};base64,${narrationResult.audioData}`;
+        audioType = narrationResult.audioType;
+      }
 
       return (
         <div className="text-center">
@@ -358,7 +402,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 controls 
                 autoPlay
                 className="w-full mt-4"
-                src={`data:${narrationResult.audioType};base64,${narrationResult.audioData}`}
+                src={audioData}
               />
               <p className="text-xs text-gray-400">당신의 복제된 목소리로 재생됩니다</p>
             </div>
@@ -377,10 +421,23 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         return <div className="text-red-500">음성 데이터가 불완전합니다.</div>;
       }
 
-      console.log(`Generating video call scenario: ${step.scenarioType}`);
-      
-      // Use voice dubbing with pre-recorded audio (no video for now)
-      const narrationResult = await apiService.generateVoiceDub(step.audioUrl, voiceId, step.scenarioType || 'default');
+      // Check if pre-generated audio exists
+      let audioData = null;
+      let audioType = 'audio/mpeg';
+
+      if (step.scenarioType === 'investment_call' && userData?.investment_call_audio_url) {
+        console.log('✅ Using pre-generated investment call audio:', userData.investment_call_audio_url);
+        audioData = userData.investment_call_audio_url;
+      } else if (step.scenarioType === 'accident_call' && userData?.accident_call_audio_url) {
+        console.log('✅ Using pre-generated accident call audio:', userData.accident_call_audio_url);
+        audioData = userData.accident_call_audio_url;
+      } else {
+        // Fallback to real-time generation
+        console.log(`⚠️ Pre-generated audio not found for ${step.scenarioType}, generating in real-time`);
+        const narrationResult = await apiService.generateVoiceDub(step.audioUrl, voiceId, step.scenarioType || 'default');
+        audioData = `data:${narrationResult.audioType};base64,${narrationResult.audioData}`;
+        audioType = narrationResult.audioType;
+      }
 
       return (
         <div className="text-center">
@@ -403,7 +460,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 controls 
                 autoPlay
                 className="w-full mt-4"
-                src={`data:${narrationResult.audioType};base64,${narrationResult.audioData}`}
+                src={audioData}
               />
               <p className="text-xs text-gray-400">당신의 복제된 목소리로 재생됩니다</p>
             </div>
@@ -556,36 +613,67 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     );
   }
 
-  const getSectionTitle = (step: ModuleStep) => {
-    if (!step) return "안내 중...";
+  // const getSectionTitle = (step: ModuleStep) => {
+  //   if (!step) return "안내 중...";
     
-    // Module 1 (Fake News) sections
-    if (moduleTitle === "가짜 뉴스란?") {
-      if (step.type === 'info' || step.type === 'narration') {
-        return "1. 가짜 뉴스 개념";
-      } else if (step.type === 'video_case_study') {
-        return "2. 가짜 뉴스 사례";
-      } else if (step.type === 'faceswap_scenario') {
-        return "3. 가짜 뉴스 체험";
-      } else if (step.type === 'quiz' || step.type === 'video_identification_quiz') {
-        return "4. 가짜 뉴스 대응";
-      }
+  //   // Module 1 (Fake News) sections
+  //   if (moduleTitle === "가짜 뉴스란?") {
+  //     if (step.type === 'info' || step.type === 'narration') {
+  //       return "1. 가짜 뉴스 개념";
+  //     } else if (step.type === 'video_case_study') {
+  //       return "2. 가짜 뉴스 사례";
+  //     } else if (step.type === 'faceswap_scenario') {
+  //       return "3. 가짜 뉴스 체험";
+  //     } else if (step.type === 'quiz' || step.type === 'video_identification_quiz') {
+  //       return "4. 가짜 뉴스 대응";
+  //     }
+  //   }
+    
+  //   // Module 2 (Identity Theft) sections
+  //   if (moduleTitle === "신원 도용이란?") {
+  //     if (step.type === 'info' || step.type === 'narration') {
+  //       return "1. 신원도용 개념";
+  //     } else if (step.type === 'video_case_study') {
+  //       return "2. 신원도용 사례";
+  //     } else if (step.type === 'voice_call_scenario' || step.type === 'video_call_scenario') {
+  //       return "3. 신원도용 체험";
+  //     } else if (step.type === 'quiz' || step.type === 'video_identification_quiz') {
+  //       return "4. 신원도용 대응";
+  //     }
+  //   }
+    
+  //   return step.title;
+  // };
+
+  const getCurrentProgressSection = (step: ModuleStep) => {
+    if (!step) return "개념";
+    
+    // Check step ID patterns to determine section
+    const stepId = step.id;
+    
+    // Quiz sections are "퀴즈" (quiz)
+    if (stepId.includes('quiz') && step.type === 'quiz') {
+      return "퀴즈";
     }
     
-    // Module 2 (Identity Theft) sections
-    if (moduleTitle === "신원 도용이란?") {
-      if (step.type === 'info' || step.type === 'narration') {
-        return "1. 신원도용 개념";
-      } else if (step.type === 'video_case_study') {
-        return "2. 신원도용 사례";
-      } else if (step.type === 'voice_call_scenario' || step.type === 'video_call_scenario') {
-        return "3. 신원도용 체험";
-      } else if (step.type === 'quiz' || step.type === 'video_identification_quiz') {
-        return "4. 신원도용 대응";
-      }
+    // Detection tips are part of "대응" (countermeasures)
+    if (stepId.includes('detection')) {
+      return "대응";
     }
     
-    return step.title;
+    // Experience/scenario sections are "실습" (practice)
+    if (stepId.includes('scenario') || stepId.includes('experience') || 
+        step.type === 'faceswap_scenario' || step.type === 'voice_call_scenario' || step.type === 'video_call_scenario') {
+      return "실습";
+    }
+    
+    // Case study sections are "사례" (examples)
+    if (stepId.includes('case') || step.type === 'video_case_study') {
+      return "사례";
+    }
+    
+    // Everything else (intro, concepts, definitions) are "개념" (concepts)
+    return "개념";
   };
 
   const renderContentForStep = () => {
@@ -624,6 +712,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               playsInline
               preload="metadata"
               disablePictureInPicture
+              onEnded={() => setVideoEnded(true)}
             >
               <p>브라우저가 동영상을 지원하지 않습니다.</p>
             </video>
@@ -711,7 +800,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       showAppTitle={false}
     >
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <Card title={currentStep ? getSectionTitle(currentStep) : "안내 중..."}>
+        {/* Module Progress Bar */}
+        <ModuleProgressBar 
+          currentSection={getCurrentProgressSection(currentStep)}
+          moduleType={moduleTitle === "가짜 뉴스란?" ? 'fakeNews' : 'identityTheft'}
+          className="mb-6"
+        />
+        
+        <Card >
           
           {currentView === 'personaTransition' && currentStep ? (
             <>
@@ -748,9 +844,11 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                       variant="primary"
                     />
                   )} */}
-                  <Button onClick={handleNext} variant="primary" size="lg">
-                    {currentStepIndex === steps.length - 1 ? "모듈 완료" : "계속"}
-                  </Button>
+                  <ContinueButton 
+                    onClick={handleNext} 
+                    text={currentStepIndex === steps.length - 1 ? "모듈 완료" : "계속"}
+                    showAnimation={videoEnded}
+                  />
                 </div>
               )}
             </>
