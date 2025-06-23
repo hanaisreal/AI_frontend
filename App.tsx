@@ -83,9 +83,22 @@ const App: React.FC = () => {
         name: user.name, 
         age: user.age, 
         gender: user.gender, 
-        userId: user.id.toString() 
+        userId: user.id.toString(),
+        // Include scenario URLs from database
+        lottery_video_url: user.lottery_video_url,
+        crime_video_url: user.crime_video_url,
+        lottery_faceswap_url: user.lottery_faceswap_url,
+        crime_faceswap_url: user.crime_faceswap_url,
+        investment_call_audio_url: user.investment_call_audio_url,
+        accident_call_audio_url: user.accident_call_audio_url
       };
       console.log('Setting user data:', userData);
+      console.log('Including scenario URLs:', {
+        lottery_video_url: user.lottery_video_url,
+        crime_video_url: user.crime_video_url,
+        investment_call_audio_url: user.investment_call_audio_url,
+        accident_call_audio_url: user.accident_call_audio_url
+      });
       setUserDataState(userData);
       
       if (user.image_url) {

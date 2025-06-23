@@ -1,5 +1,13 @@
 import * as apiService from '../services/apiService';
 
+// Use the same cache as NarrationPlayer for better coordination
+declare global {
+  interface Window {
+    narrationCache: Map<string, string>;
+    preloadingPromises: Map<string, Promise<void>>;
+  }
+}
+
 /**
  * Preload narration audio one step ahead for instant experience
  * This function creates and caches audio blobs for immediate playback
@@ -12,35 +20,108 @@ export const preloadNarration = async (script: string, voiceId: string): Promise
 
   const scriptKey = `${script}-${voiceId}`;
   
+  // Initialize caches if they don't exist
+  if (!window.narrationCache) {
+    window.narrationCache = new Map();
+  }
+  if (!window.preloadingPromises) {
+    window.preloadingPromises = new Map();
+  }
+  
   // Check if already cached
-  const globalCache = (window as any).narrationCache;
-  if (globalCache && globalCache.has(scriptKey)) {
+  if (window.narrationCache.has(scriptKey)) {
     console.log('✅ Narration already preloaded:', scriptKey.substring(0, 50) + '...');
+    return;
+  }
+
+  // Check if already being preloaded by another instance
+  if (window.preloadingPromises.has(scriptKey)) {
+    console.log('⏳ Narration already being preloaded, waiting...:', scriptKey.substring(0, 50) + '...');
+    await window.preloadingPromises.get(scriptKey);
     return;
   }
 
   try {
     console.log(`🚀 Pre-loading narration: "${script.substring(0, 50)}..."`);
     
-    // Call original narration API to cache
-    const result = await apiService.generateNarration(script, voiceId);
+    // Create and store the preloading promise
+    const preloadPromise = (async () => {
+      // Call original narration API to cache
+      const result = await apiService.generateNarration(script, voiceId);
+      
+      // Store in the same cache format as NarrationPlayer
+      const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Store in global cache
+      window.narrationCache.set(scriptKey, audioUrl);
+      
+      console.log(`✅ Narration pre-loaded successfully: "${script.substring(0, 30)}..."`);
+    })();
+
+    // Store the promise so other instances can wait for it
+    window.preloadingPromises.set(scriptKey, preloadPromise);
     
-    // Store in the same cache format as NarrationPlayer
-    const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
-    const audioUrl = URL.createObjectURL(audioBlob);
+    // Wait for completion
+    await preloadPromise;
     
-    // Create global cache if it doesn't exist
-    if (!(window as any).narrationCache) {
-      (window as any).narrationCache = new Map();
-    }
+    // Clean up the promise from the pending map
+    window.preloadingPromises.delete(scriptKey);
     
-    (window as any).narrationCache.set(scriptKey, audioUrl);
-    
-    console.log(`✅ Narration pre-loaded successfully`);
   } catch (error) {
-    console.error(`⚠️ Pre-load failed:`, error);
+    console.error(`⚠️ Pre-load failed for "${script.substring(0, 30)}...":`, error);
+    // Clean up the promise from the pending map on error
+    window.preloadingPromises.delete(scriptKey);
     // Pre-load failure is non-critical, continue normally
   }
+};
+
+/**
+ * Check if narration is already cached or being preloaded
+ */
+export const isNarrationCachedOrPreloading = (script: string, voiceId: string): boolean => {
+  if (!script?.trim() || !voiceId) return false;
+  
+  const scriptKey = `${script}-${voiceId}`;
+  
+  // Check if cached
+  if (window.narrationCache?.has(scriptKey)) {
+    return true;
+  }
+  
+  // Check if being preloaded
+  if (window.preloadingPromises?.has(scriptKey)) {
+    return true;
+  }
+  
+  return false;
+};
+
+/**
+ * Wait for narration to be available (either from cache or preloading)
+ */
+export const waitForNarration = async (script: string, voiceId: string): Promise<string | null> => {
+  if (!script?.trim() || !voiceId) return null;
+  
+  const scriptKey = `${script}-${voiceId}`;
+  
+  // Check if already cached
+  if (window.narrationCache?.has(scriptKey)) {
+    return window.narrationCache.get(scriptKey)!;
+  }
+  
+  // Wait for preloading to complete if in progress
+  if (window.preloadingPromises?.has(scriptKey)) {
+    try {
+      await window.preloadingPromises.get(scriptKey);
+      return window.narrationCache?.get(scriptKey) || null;
+    } catch (error) {
+      console.error('Failed to wait for preloading:', error);
+      return null;
+    }
+  }
+  
+  return null;
 };
 
 /**

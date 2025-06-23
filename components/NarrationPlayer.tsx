@@ -130,6 +130,29 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         return;
       }
 
+      // Check if being preloaded by the new preloader - wait a bit for it to complete
+      const preloadingPromises = (window as any).preloadingPromises;
+      if (preloadingPromises && preloadingPromises.has(scriptKey)) {
+        console.log('NarrationPlayer: Waiting for preloading to complete ⏳');
+        setIsLoading(true);
+        try {
+          await preloadingPromises.get(scriptKey);
+          // After preloading completes, check cache again
+          if (globalCache && globalCache.has(scriptKey)) {
+            console.log('NarrationPlayer: Using cache after preloading completed ⚡');
+            const preloadedUrl = globalCache.get(scriptKey);
+            setError(null);
+            setAudioUrl(preloadedUrl);
+            setIsLoading(false);
+            completedCache.set(scriptKey, preloadedUrl);
+            return;
+          }
+        } catch (error) {
+          console.error('NarrationPlayer: Error waiting for preloading:', error);
+          // Continue with normal generation
+        }
+      }
+
       // Check if we already generated audio for this component instance
       if (lastGeneratedScriptRef.current === scriptKey) {
         console.log('NarrationPlayer: Skipping duplicate generation for same script in this component');
