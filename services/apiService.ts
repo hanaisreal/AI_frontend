@@ -173,20 +173,6 @@ export const getPreGeneratedScenarioContent = async (userId: number): Promise<{
   };
 };
 
-// Fix S3 permissions for existing voice dub audio files
-export const fixVoiceDubPermissions = async (userId: number) => {
-  console.log(`FRONTEND: Fixing voice dub permissions for user ${userId}`);
-  
-  const response = await fetch(`${API_BASE_URL}/api/fix-voice-dub-permissions/${userId}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  
-  return await handleApiResponse(response);
-};
-
 // Get scenario generation status
 export const getScenarioGenerationStatus = async (userId: number): Promise<{
   status: string;
