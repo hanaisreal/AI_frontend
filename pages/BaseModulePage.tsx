@@ -56,6 +56,19 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   const [videoEnded, setVideoEnded] = useState(false);
   const personaTransitionRef = useRef<any>(null);
 
+  // Reset module state when component mounts (switching between modules)
+  useEffect(() => {
+    console.log(`🔄 BaseModulePage mounted for module: ${moduleTitle}`);
+    // Reset to first step when switching modules to prevent stale state
+    if (globalCurrentStep >= steps.length) {
+      console.log(`⚠️ Resetting out-of-bounds global step ${globalCurrentStep} to 0 for ${moduleTitle}`);
+      setCurrentStepIndex(0);
+      setGlobalCurrentStep(0);
+    } else {
+      setCurrentStepIndex(globalCurrentStep || 0);
+    }
+  }, [moduleTitle, steps.length]); // Reset when module changes
+
   const currentStep = steps[currentStepIndex];
 
   // Preload next step's narration for instant experience
@@ -113,6 +126,10 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     if (globalCurrentStep !== currentStepIndex && globalCurrentStep < steps.length && currentStepIndex === 0) {
       console.log(`🔄 Initializing local step from global: ${globalCurrentStep}`);
       setCurrentStepIndex(globalCurrentStep);
+    } else if (globalCurrentStep >= steps.length && currentStepIndex === 0) {
+      // Safety check: if global step is out of bounds for this module, reset to 0
+      console.log(`⚠️ Global step ${globalCurrentStep} is out of bounds for module with ${steps.length} steps, resetting to 0`);
+      setCurrentStepIndex(0);
     }
   }, [globalCurrentStep, steps.length]); // Removed currentStepIndex to prevent loop
 
@@ -123,6 +140,11 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
 
     if (!currentStep) {
       console.log('⚠️ No current step found');
+      // Safety check: if step is out of bounds, reset to first step
+      if (currentStepIndex >= steps.length && steps.length > 0) {
+        console.log(`⚠️ Step index ${currentStepIndex} is out of bounds for module with ${steps.length} steps, resetting to 0`);
+        setCurrentStepIndex(0);
+      }
       return;
     }
     

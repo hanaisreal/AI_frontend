@@ -360,7 +360,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
     id: 'it_case2_video',
     title: '사례 2: 연예인 주식 추천',
     type: 'video_case_study',
-    videoUrl: 'https://d3srmxrzq4dz1v.cloudfront.net/video-url/identitytheft-case2.m4v'
+    videoUrl: 'https://d3srmxrzq4dz1v.cloudfront.net/video-url/identitytheft_case1.m4v'
   },
   // 8. 사례 2 wrap-up
   {
