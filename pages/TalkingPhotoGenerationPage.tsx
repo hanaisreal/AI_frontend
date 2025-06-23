@@ -108,24 +108,21 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
           console.log('🔍 Checking if talking photo already exists for user...');
           
           // Fetch current user data to check if talking photo URL exists
-          const response = await fetch(`http://localhost:8000/api/users/${userData.userId}`);
-          if (response.ok) {
-            const currentUserData = await response.json();
+          const userProgressData = await apiService.getUserProgress(parseInt(userData.userId));
+          
+          if (userProgressData?.talking_photo_url) {
+            console.log('✅ Talking photo already exists, using cached version');
+            console.log(`   - Existing URL: ${userProgressData.talking_photo_url}`);
+            console.log('   - Skipping regeneration to save API credits');
             
-            if (currentUserData.talking_photo_url) {
-              console.log('✅ Talking photo already exists, using cached version');
-              console.log(`   - Existing URL: ${currentUserData.talking_photo_url}`);
-              console.log('   - Skipping regeneration to save API credits');
-              
-              setGeneratedTalkingPhoto(currentUserData.talking_photo_url);
-              setTalkingPhotoUrl(currentUserData.talking_photo_url);
-              setStatusMessage(SCRIPTS.talkingPhotoGenerated);
-              setIsLoading(false);
-              
-              // Still pre-cache the deepfake introduction narration for better UX
-              setTimeout(preCacheDeepfakeIntroNarration, 500);
-              return true; // Indicates we found existing photo
-            }
+            setGeneratedTalkingPhoto(userProgressData.talking_photo_url);
+            setTalkingPhotoUrl(userProgressData.talking_photo_url);
+            setStatusMessage(SCRIPTS.talkingPhotoGenerated);
+            setIsLoading(false);
+            
+            // Still pre-cache the deepfake introduction narration for better UX
+            setTimeout(preCacheDeepfakeIntroNarration, 500);
+            return true; // Indicates we found existing photo
           }
         }
         return false; // No existing photo found
