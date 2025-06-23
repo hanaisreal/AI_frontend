@@ -47,6 +47,9 @@ export const SCRIPTS = {
   fakeNewsDetectionIntro: "정말 그럴듯하죠? 그렇다면 이런 가짜 뉴스에 속지 않으려면 어떻게 해야 할까요?",
   fakeNewsDetectionTips: "이런 가짜 영상들은 구분해내기 쉽지 않아요. 그래도 누가 영상이나 뉴스를 보내줬다고 해서, 무조건 믿으면 안 돼요. 누가 만들었는지, 공식 계정에 올라온 건지 꼭 출처를 확인하는 습관이 필요해요.",
   fakeNewsDetectionTips2: "딥페이크 영상은 이제 너무 정교해져서 얼굴 움직임이나 입모양만으로는 구별하기 어렵게 되었어요. 그래도 몇 가지 포인트를 살펴보면 가짜일 가능성을 의심해볼 수 있어요. 먼저, 얼굴 전체를 자세히 봐주세요. 비율이 조금 이상하거나 표정이 어색하게 반복되면 딥페이크일 수 있어요. 눈 깜빡임도 중요한 단서예요. 너무 자주 깜빡이거나 거의 깜빡이지 않으면 의심해보는 게 좋아요. 그리고 입 모양과 소리가 잘 맞는지도 확인해보세요. 립싱크처럼 말과 입이 어긋난다면 가짜일 수 있어요. 마지막으로, 피부 표현을 관찰해보세요. 피부가 너무 매끄럽거나, 주름이 거의 없다면 AI가 만든 영상일 가능성이 있습니다. 그리고 아직은 딥페이크 영상이 글씨를 자연스럽게 만들지 못하는 경우가 많아요. 화면 속 간판이나 자막의 글자가 이상하게 보인다면 꼭 한 번 더 의심해보세요.",
+  fakeNewsRevisitVideoIntro: "이제 앞서 봤던 딥페이크 영상을 다시 보여드릴거에요. 앵커의 마이크에 있는 글씨를 한번 주의 깊게 관찰해보세요.",
+  fakeNewsRevisitVideo1: "한국어 글씨가 정확하지 않은 게 보이시죠! 글씨를 주의 깊게 살펴보면 가짜 뉴스인지 아닌지 구별할 수 있어요. 이번엔 목소리와 표정에 집중해서 다음 영상을 봐볼게요.",
+  fakeNewsRevisitVideo2: "이건 구분하기 어렵죠~ 하지만 목소리에 집중하면 어색한 느낌이 들리죠. 앞으로 더욱 정교하게 만들어질 딥페이크 영상을 대비해서 이런 영상들이 있다는 것을 아는 건 중요해요.",
   fakeNewsQuizIntro: "지금까지 가짜 뉴스 사례, 그리고 실제로 내 얼굴과 목소리가 사용될 수 있는 상황까지 경험해보셨죠? 이제 배운 내용을 바탕으로 간단한 퀴즈를 풀어보며, 얼마나 잘 이해하셨는지 확인해볼 시간이에요. 천천히 생각해보고 정답을 골라보세요!",
   fakeNewsModuleEnd: "딥페이크로 만들어진 가짜뉴스의 놀라움과 위험성, 그리고 우리가 가져야 할 경각심에 대해 조금 더 이해가 되셨길 바랍니다.",
 
@@ -54,7 +57,7 @@ export const SCRIPTS = {
   // Module 2 (Identity Theft) - Updated detailed flow
   identityTheftIntro: "신원 도용이란 누군가가 다른 사람의 개인정보를 허가 없이 가져가서 자신의 이익을 위해 사용하는 것을 의미해요. 그런데 요즘은 이름이나 주민번호뿐 아니라, 얼굴이나 목소리까지 도용될 수 있어서 더 위험해졌어요. 딥페이크가 신원도용에 어떻게 악용될 수 있을까요?",
   identityTheftDef: "딥페이크와 생성형 AI를 활용해 여권이나 운전면허증 같은 가짜 신분증을 만들고, 그걸로 계좌 개설, 불법 거래, 생체 인증 우회까지 가능한 신원 도용 사기가 2025년에 300% 이상 급증하고 있어요.",
-  identityTheftCase1Intro: "딥페이크는 투자 사기뿐만 아니라, 로맨스 스캠 같은 범죄에도 적극 활용되고 있어요. 다음 영상에서 딥페이크가 어떤 식으로 사용되는지 함께 살펴볼게요.",
+  identityTheftCase1Intro: "딥페이크는 투자 사기뿐만 아니라, 로맨스 스캠 같은 범죄에도 적극 활용되고 있어요. 다음 영상에서 딥페이크가 어떤 식으로 로맨스 스캠에 사용되는지 함께 살펴볼게요.",
   identityTheftCase1WrapUp: "보셨듯이, 딥페이크 기술은 실시간 영상통화나 유튜브 방송처럼 위장해 사람을 속이기도 해요. 특히 연예인을 사칭해서 투자 정보를 흘리는 영상이 많아지고 있어서, 더더욱 주의가 필요합니다.",
   identityTheftCase2: "이번엔 유명 연예인인 송혜교와 정우성이 특정 주식을 추천하는 영상을 보여드릴게요. 얼마나 자연스럽게 만들어졌는지 함께 확인해보세요.",
   identityTheftCase2WrapUp: "꽤 그럴듯하지 않았나요? 딥페이크 기술에 대해 모른다면, 진짜라고 믿고 속을 수도 있을 만큼 정교하게 만들어졌어요. 특히 목소리까지 거의 완벽하게 흉내 낸 점, 인상 깊으셨죠?",
@@ -399,7 +402,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
   },
   // 12. 음성 변조 설명
   {
-    id: 'it_voice_modulation',
+    id: 'it_scenario1_voice_modulation',
     title: '음성 변조 설명',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftVoiceModulation,
@@ -428,7 +431,7 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
   },
   // 15. wrap-up
   {
-    id: 'it_wrap_up',
+    id: 'it_scenario_wrap_up',
     title: '사례 정리',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftWrapUp,
