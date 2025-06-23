@@ -392,18 +392,26 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       let audioData = null;
 
       if (step.scenarioType === 'investment_call' && userData?.investment_call_audio_url) {
-        console.log('✅ Using pre-generated investment call audio:', userData.investment_call_audio_url);
+        console.log('✅ Using pre-generated investment call audio:', userData.investment_call_audio_url.substring(0, 100) + '...');
+        console.log('📊 Audio URL type:', userData.investment_call_audio_url.startsWith('data:') ? 'Base64 Data URL' : 'Regular URL');
         audioData = userData.investment_call_audio_url;
       } else if (step.scenarioType === 'accident_call' && userData?.accident_call_audio_url) {
-        console.log('✅ Using pre-generated accident call audio:', userData.accident_call_audio_url);
+        console.log('✅ Using pre-generated accident call audio:', userData.accident_call_audio_url.substring(0, 100) + '...');
+        console.log('📊 Audio URL type:', userData.accident_call_audio_url.startsWith('data:') ? 'Base64 Data URL' : 'Regular URL');
         audioData = userData.accident_call_audio_url;
       } else {
         console.error(`❌ Pre-generated audio not found for ${step.scenarioType}`);
+        console.error('🔍 Available userData fields:', userData ? Object.keys(userData) : 'no userData');
+        console.error('🔍 investment_call_audio_url:', userData?.investment_call_audio_url);
+        console.error('🔍 accident_call_audio_url:', userData?.accident_call_audio_url);
         return (
           <div className="text-red-500 p-4 bg-red-50 rounded-lg">
             <div className="font-medium">시나리오 음성을 찾을 수 없습니다.</div>
             <div className="text-sm mt-2">
               {step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 아직 생성되지 않았습니다.
+            </div>
+            <div className="text-xs mt-2 text-gray-500">
+              디버그: scenarioType={step.scenarioType}, hasUserData={!!userData}
             </div>
           </div>
         );
@@ -439,6 +447,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                   console.log(`🎵 Voice call audio started playing, triggering preload`);
                   setTimeout(() => preloadNextNarration(currentStepIndex), 2000);
                 }}
+                onError={(e) => {
+                  console.error(`❌ Audio loading error for ${step.scenarioType}:`, e);
+                  console.error('🔍 Audio src:', audioData?.substring(0, 200));
+                  console.error('🔍 Error details:', e.currentTarget.error);
+                }}
+                onLoadStart={() => {
+                  console.log(`🔄 Audio loading started for ${step.scenarioType}`);
+                }}
               />
               <p className="text-xs text-gray-400">당신의 복제된 목소리로 재생됩니다</p>
             </div>
@@ -461,18 +477,26 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       let audioData = null;
 
       if (step.scenarioType === 'investment_call' && userData?.investment_call_audio_url) {
-        console.log('✅ Using pre-generated investment call audio:', userData.investment_call_audio_url);
+        console.log('✅ Using pre-generated investment call audio:', userData.investment_call_audio_url.substring(0, 100) + '...');
+        console.log('📊 Audio URL type:', userData.investment_call_audio_url.startsWith('data:') ? 'Base64 Data URL' : 'Regular URL');
         audioData = userData.investment_call_audio_url;
       } else if (step.scenarioType === 'accident_call' && userData?.accident_call_audio_url) {
-        console.log('✅ Using pre-generated accident call audio:', userData.accident_call_audio_url);
+        console.log('✅ Using pre-generated accident call audio:', userData.accident_call_audio_url.substring(0, 100) + '...');
+        console.log('📊 Audio URL type:', userData.accident_call_audio_url.startsWith('data:') ? 'Base64 Data URL' : 'Regular URL');
         audioData = userData.accident_call_audio_url;
       } else {
         console.error(`❌ Pre-generated audio not found for ${step.scenarioType}`);
+        console.error('🔍 Available userData fields:', userData ? Object.keys(userData) : 'no userData');
+        console.error('🔍 investment_call_audio_url:', userData?.investment_call_audio_url);
+        console.error('🔍 accident_call_audio_url:', userData?.accident_call_audio_url);
         return (
           <div className="text-red-500 p-4 bg-red-50 rounded-lg">
             <div className="font-medium">시나리오 음성을 찾을 수 없습니다.</div>
             <div className="text-sm mt-2">
               {step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 아직 생성되지 않았습니다.
+            </div>
+            <div className="text-xs mt-2 text-gray-500">
+              디버그: scenarioType={step.scenarioType}, hasUserData={!!userData}
             </div>
           </div>
         );
@@ -507,6 +531,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 onPlay={() => {
                   console.log(`🎵 Voice call audio started playing, triggering preload`);
                   setTimeout(() => preloadNextNarration(currentStepIndex), 2000);
+                }}
+                onError={(e) => {
+                  console.error(`❌ Audio loading error for ${step.scenarioType}:`, e);
+                  console.error('🔍 Audio src:', audioData?.substring(0, 200));
+                  console.error('🔍 Error details:', e.currentTarget.error);
+                }}
+                onLoadStart={() => {
+                  console.log(`🔄 Audio loading started for ${step.scenarioType}`);
                 }}
               />
               <p className="text-xs text-gray-400">당신의 복제된 목소리로 재생됩니다</p>
