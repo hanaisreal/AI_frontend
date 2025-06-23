@@ -22,26 +22,31 @@ interface SmartNarrationResponse {
 const getApiBaseUrl = () => {
   // If VITE_API_BASE_URL is explicitly set, use it
   if (import.meta.env.VITE_API_BASE_URL) {
+    console.log(`🔧 Using VITE_API_BASE_URL: ${import.meta.env.VITE_API_BASE_URL}`);
     return import.meta.env.VITE_API_BASE_URL;
   }
   
   // Auto-detect based on current hostname
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
+    console.log(`🔍 Detecting API URL for hostname: ${hostname}`);
     
     // Local development
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      console.log(`🏠 Local development detected`);
       return 'http://localhost:8000';
     }
     
-    // Vercel deployment
-    if (hostname.includes('vercel.app')) {
+    // Vercel deployment - be more specific
+    if (hostname.includes('vercel.app') || hostname.includes('ai-frontend')) {
+      console.log(`☁️ Vercel deployment detected`);
       return 'https://ai-backend-mu-self.vercel.app';
     }
   }
   
-  // Fallback
-  return 'http://localhost:8000';
+  // Production fallback - use production API
+  console.log(`🌐 Using production API fallback`);
+  return 'https://ai-backend-mu-self.vercel.app';
 };
 
 const API_BASE_URL = getApiBaseUrl();
