@@ -27,6 +27,7 @@ interface BaseModulePageProps {
   setCurrentStep: (step: number) => void;
   onGoBack: () => void;
   canGoBack: boolean;
+  refreshUserData: () => Promise<void>;
 }
 
 const BaseModulePage: React.FC<BaseModulePageProps> = ({
@@ -44,6 +45,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   setCurrentStep: setGlobalCurrentStep,
   onGoBack,
   canGoBack,
+  refreshUserData,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(globalCurrentStep || 0);
   const [isLoadingStep, setIsLoadingStep] = useState(false);
@@ -274,13 +276,31 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         console.log('✅ Using pre-generated crime video:', userData.crime_video_url);
         talkingPhotoUrl = userData.crime_video_url;
       } else {
+        // Try refreshing user data to get updated scenario URLs
+        console.log('🔄 Scenario content missing, attempting to refresh user data...');
+        try {
+          await refreshUserData();
+          console.log('✅ User data refreshed, checking again...');
+          
+          // After refresh, check again (note: userData might not be updated yet due to async state)
+          // The component will re-render when userData state is updated
+        } catch (refreshError) {
+          console.error('⚠️ Failed to refresh user data:', refreshError);
+        }
+        
         console.error(`❌ Pre-generated content not found for ${step.scenarioType} scenario`);
         return (
-          <div className="text-red-500 p-4 bg-red-50 rounded-lg">
-            <div className="font-medium">시나리오 영상을 찾을 수 없습니다.</div>
+          <div className="text-yellow-500 p-4 bg-yellow-50 rounded-lg">
+            <div className="font-medium">시나리오 영상을 준비 중입니다.</div>
             <div className="text-sm mt-2">
-              {step.scenarioType === 'lottery' ? '복권 당첨' : '범죄 용의자'} 시나리오가 아직 생성되지 않았습니다.
+              {step.scenarioType === 'lottery' ? '복권 당첨' : '범죄 용의자'} 시나리오가 생성 중입니다. 잠시 후 다시 시도해주세요.
             </div>
+            <button 
+              onClick={refreshUserData}
+              className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
+            >
+              새로고침
+            </button>
           </div>
         );
       }
@@ -400,19 +420,31 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         console.log('📊 Audio URL type:', userData.accident_call_audio_url.startsWith('data:') ? 'Base64 Data URL' : 'Regular URL');
         audioData = userData.accident_call_audio_url;
       } else {
+        // Try refreshing user data to get updated scenario audio URLs
+        console.log('🔄 Voice call audio content missing, attempting to refresh user data...');
+        try {
+          await refreshUserData();
+          console.log('✅ User data refreshed for voice call scenario');
+        } catch (refreshError) {
+          console.error('⚠️ Failed to refresh user data for voice call:', refreshError);
+        }
+        
         console.error(`❌ Pre-generated audio not found for ${step.scenarioType}`);
         console.error('🔍 Available userData fields:', userData ? Object.keys(userData) : 'no userData');
         console.error('🔍 investment_call_audio_url:', userData?.investment_call_audio_url);
         console.error('🔍 accident_call_audio_url:', userData?.accident_call_audio_url);
         return (
-          <div className="text-red-500 p-4 bg-red-50 rounded-lg">
-            <div className="font-medium">시나리오 음성을 찾을 수 없습니다.</div>
+          <div className="text-yellow-500 p-4 bg-yellow-50 rounded-lg">
+            <div className="font-medium">시나리오 음성을 준비 중입니다.</div>
             <div className="text-sm mt-2">
-              {step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 아직 생성되지 않았습니다.
+              {step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 생성 중입니다. 잠시 후 다시 시도해주세요.
             </div>
-            <div className="text-xs mt-2 text-gray-500">
-              디버그: scenarioType={step.scenarioType}, hasUserData={!!userData}
-            </div>
+            <button 
+              onClick={refreshUserData}
+              className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
+            >
+              새로고침
+            </button>
           </div>
         );
       }
@@ -485,19 +517,31 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         console.log('📊 Audio URL type:', userData.accident_call_audio_url.startsWith('data:') ? 'Base64 Data URL' : 'Regular URL');
         audioData = userData.accident_call_audio_url;
       } else {
+        // Try refreshing user data to get updated scenario audio URLs for video call
+        console.log('🔄 Video call audio content missing, attempting to refresh user data...');
+        try {
+          await refreshUserData();
+          console.log('✅ User data refreshed for video call scenario');
+        } catch (refreshError) {
+          console.error('⚠️ Failed to refresh user data for video call:', refreshError);
+        }
+        
         console.error(`❌ Pre-generated audio not found for ${step.scenarioType}`);
         console.error('🔍 Available userData fields:', userData ? Object.keys(userData) : 'no userData');
         console.error('🔍 investment_call_audio_url:', userData?.investment_call_audio_url);
         console.error('🔍 accident_call_audio_url:', userData?.accident_call_audio_url);
         return (
-          <div className="text-red-500 p-4 bg-red-50 rounded-lg">
-            <div className="font-medium">시나리오 음성을 찾을 수 없습니다.</div>
+          <div className="text-yellow-500 p-4 bg-yellow-50 rounded-lg">
+            <div className="font-medium">시나리오 음성을 준비 중입니다.</div>
             <div className="text-sm mt-2">
-              {step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 아직 생성되지 않았습니다.
+              {step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 생성 중입니다. 잠시 후 다시 시도해주세요.
             </div>
-            <div className="text-xs mt-2 text-gray-500">
-              디버그: scenarioType={step.scenarioType}, hasUserData={!!userData}
-            </div>
+            <button 
+              onClick={refreshUserData}
+              className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
+            >
+              새로고침
+            </button>
           </div>
         );
       }

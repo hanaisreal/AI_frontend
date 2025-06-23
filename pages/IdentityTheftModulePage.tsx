@@ -16,6 +16,7 @@ interface IdentityTheftModulePageProps {
   setCurrentStep: (step: number) => void;
   onGoBack: () => void;
   canGoBack: boolean;
+  refreshUserData: () => Promise<void>;
 }
 
 const IdentityTheftModulePage: React.FC<IdentityTheftModulePageProps> = (props) => {

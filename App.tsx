@@ -376,6 +376,53 @@ const App: React.FC = () => {
     }
   }, [module1Completed, userId, saveUserProgress]);
 
+  // Function to refresh userData from the API to get updated scenario URLs
+  const refreshUserData = useCallback(async () => {
+    if (!userId) {
+      console.log('No userId available for refresh');
+      return;
+    }
+    
+    try {
+      console.log('🔄 Refreshing user data from API for userId:', userId);
+      const user = await apiService.getUserProgress(userId);
+      
+      if (!user || !user.name) {
+        console.log('Invalid user data received during refresh');
+        return;
+      }
+      
+      // Update userData with scenario URLs from database
+      const updatedUserData = {
+        name: user.name,
+        age: user.age,
+        gender: user.gender,
+        userId: user.id.toString(),
+        // Include scenario URLs from database
+        lottery_video_url: user.lottery_video_url,
+        crime_video_url: user.crime_video_url,
+        lottery_faceswap_url: user.lottery_faceswap_url,
+        crime_faceswap_url: user.crime_faceswap_url,
+        investment_call_audio_url: user.investment_call_audio_url,
+        accident_call_audio_url: user.accident_call_audio_url,
+        pre_generation_status: user.pre_generation_status
+      };
+      
+      console.log('✅ Refreshed user data with scenario URLs:', {
+        lottery_video_url: !!updatedUserData.lottery_video_url,
+        crime_video_url: !!updatedUserData.crime_video_url,
+        investment_call_audio_url: !!updatedUserData.investment_call_audio_url,
+        accident_call_audio_url: !!updatedUserData.accident_call_audio_url,
+        pre_generation_status: updatedUserData.pre_generation_status
+      });
+      
+      setUserDataState(updatedUserData);
+      
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+    }
+  }, [userId]);
+
   const renderPage = () => {
     console.log('🎨 Rendering page:', Page[currentPage], 'enum value:', currentPage);
     console.log('Current state - userData:', !!userData, 'caricatureUrl:', !!caricatureUrl, 'talkingPhotoUrl:', !!talkingPhotoUrl, 'voiceId:', !!voiceId);
@@ -419,6 +466,7 @@ const App: React.FC = () => {
                   setCurrentStep={setCurrentStepOptimized}
                   onGoBack={goBack}
                   canGoBack={canGoBack}
+                  refreshUserData={refreshUserData}
                 />;
       case Page.ModuleSelection:
         return <ModuleSelectionPage 
@@ -441,6 +489,7 @@ const App: React.FC = () => {
                   setCurrentStep={setCurrentStepOptimized}
                   onGoBack={goBack}
                   canGoBack={canGoBack}
+                  refreshUserData={refreshUserData}
                 />;
       case Page.IdentityTheftModule:
         return <IdentityTheftModulePage 
@@ -455,6 +504,7 @@ const App: React.FC = () => {
                   setCurrentStep={setCurrentStepOptimized}
                   onGoBack={goBack}
                   canGoBack={canGoBack}
+                  refreshUserData={refreshUserData}
                 />;
       case Page.Completion:
         return <CompletionPage setCurrentPage={setCurrentPageOptimized} />;

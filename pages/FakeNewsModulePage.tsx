@@ -16,6 +16,7 @@ interface FakeNewsModulePageProps {
   setCurrentStep: (step: number) => void;
   onGoBack: () => void;
   canGoBack: boolean;
+  refreshUserData: () => Promise<void>;
 }
 
 const FakeNewsModulePage: React.FC<FakeNewsModulePageProps> = (props) => {

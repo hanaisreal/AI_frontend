@@ -18,6 +18,7 @@ interface DeepfakeIntroductionPageProps {
   setCurrentStep: (step: number) => void;
   onGoBack: () => void;
   canGoBack: boolean;
+  refreshUserData: () => Promise<void>;
 }
 
 const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
@@ -30,6 +31,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   setCurrentStep,
   onGoBack,
   canGoBack,
+  refreshUserData,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(currentStep || 0);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -257,6 +259,54 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   useEffect(() => {
     if (!userData?.userId || !voiceId) {
       return;
+    }
+    
+    // ✅ NEW: Trigger scenario generation when user reaches the "AI, 얼마나 똑똑해졌을까요?" step
+    if (currentStepData?.id === 'video-intro-narration' && currentStepData?.title === 'AI, 얼마나 똑똑해졌을까요?') {
+      console.log('🚀 Reached trigger step for scenario generation:', currentStepData.title);
+      console.log('🚀 Triggering scenario pre-generation in background...');
+      
+      // Trigger scenario generation in background (non-blocking)
+      const triggerScenarioGeneration = async () => {
+        try {
+          await apiService.startScenarioGeneration(voiceId);
+          console.log('✅ Scenario generation started successfully');
+          
+          // Set up periodic refresh to check for completed scenario generation
+          let refreshAttempts = 0;
+          const maxRefreshAttempts = 20; // Check for up to 10 minutes
+          
+          const periodicRefresh = setInterval(async () => {
+            refreshAttempts++;
+            console.log(`🔄 Periodic refresh attempt ${refreshAttempts}/${maxRefreshAttempts} for scenario URLs...`);
+            
+            try {
+              await refreshUserData();
+              
+              // Stop refreshing if we find scenario URLs or reach max attempts
+              if (refreshAttempts >= maxRefreshAttempts) {
+                console.log('⏰ Max refresh attempts reached, stopping periodic refresh');
+                clearInterval(periodicRefresh);
+              }
+            } catch (error) {
+              console.error('⚠️ Periodic refresh failed:', error);
+              if (refreshAttempts >= maxRefreshAttempts) {
+                clearInterval(periodicRefresh);
+              }
+            }
+          }, 30000); // Refresh every 30 seconds
+          
+          // Clean up interval when component unmounts
+          return () => {
+            clearInterval(periodicRefresh);
+          };
+          
+        } catch (error) {
+          console.error('⚠️ Failed to start scenario generation:', error);
+        }
+      };
+      
+      triggerScenarioGeneration();
     }
     
     // Preload for narration steps

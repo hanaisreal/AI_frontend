@@ -150,7 +150,7 @@ export const getPreGeneratedScenarioContent = async (userId: number): Promise<{
   accident_video_url?: string;
   investment_call_audio_url?: string;
   accident_call_audio_url?: string;
-  scenario_generation_status?: string;
+  pre_generation_status?: string;
 }> => {
   console.log(`FRONTEND: Getting pre-generated content for user ${userId}`);
   
@@ -174,7 +174,7 @@ export const getPreGeneratedScenarioContent = async (userId: number): Promise<{
     accident_video_url: user.accident_video_url,
     investment_call_audio_url: user.investment_call_audio_url,
     accident_call_audio_url: user.accident_call_audio_url,
-    scenario_generation_status: user.scenario_generation_status
+    pre_generation_status: user.pre_generation_status
   };
 };
 
