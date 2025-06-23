@@ -18,8 +18,36 @@ interface SmartNarrationResponse {
   message?: string;
 }
 
-// Base URL for your backend API
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// Smart API URL detection - works for both local development and Vercel deployment
+const getApiBaseUrl = () => {
+  // If VITE_API_BASE_URL is explicitly set, use it
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // Auto-detect based on current hostname
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    
+    // Local development
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:8000';
+    }
+    
+    // Vercel deployment
+    if (hostname.includes('vercel.app')) {
+      return 'https://ai-backend-mu-self.vercel.app';
+    }
+  }
+  
+  // Fallback
+  return 'http://localhost:8000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Debug logging
+console.log(`🌐 API Base URL: ${API_BASE_URL}`);
 
 const handleApiResponse = async (response: Response) => {
   if (!response.ok) {

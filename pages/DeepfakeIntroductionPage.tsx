@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import PageLayout from '../components/PageLayout.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
-import BackButton from '../components/BackButton.tsx';
 import ContinueButton from '../components/ContinueButton.tsx';
 import { Page, UserData } from '../types.ts';
-import { SCRIPTS, DEEPFAKE_PEOPLE_DATA, DEEPFAKE_IDENTIFICATION_VIDEO_URL, NARRATOR_VOICE_ID } from '../constants.tsx';
+import { SCRIPTS, DEEPFAKE_PEOPLE_DATA, DEEPFAKE_IDENTIFICATION_VIDEO_URL} from '../constants.tsx';
 import * as apiService from '../services/apiService.ts';
 import { scheduleNarrationPreload } from '../utils/narrationPreloader.ts';
 
@@ -34,7 +32,6 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   canGoBack,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(currentStep || 0);
-  const [preloadingNext, setPreloadingNext] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
 
   // Sync local step with global step tracking
@@ -49,6 +46,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     setVideoEnded(false);
   }, [currentStepIndex]);
 
+  // Define steps array
   const steps = [
     {
       id: 'video-intro-narration',
@@ -95,9 +93,6 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
               <p>브라우저가 동영상을 지원하지 않습니다.</p>
             </video>
           </div>
-          {/* <p className="text-gray-600 text-lg">
-            위 영상을 통해 딥페이크와 딥보이스 기술이 어떻게 작동하는지 확인하세요.
-          </p> */}
         </div>
       ),
     },
@@ -142,9 +137,6 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
               <p>브라우저가 동영상을 지원하지 않습니다.</p>
             </video>
           </div>
-          {/* <p className="text-gray-600 text-lg">
-            눈, 입의 움직임, 목소리 톤 등을 자세히 살펴보세요.
-          </p> */}
         </div>
       ),
     },
@@ -194,6 +186,10 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     },
   ];
 
+  // Current step data
+  const currentStepData = steps[currentStepIndex];
+
+  // Handler functions
   const handleNext = () => {
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
@@ -213,23 +209,33 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     }
   };
 
-  // Start scenario generation when reaching the first step
-  const startScenarioGeneration = useCallback(async () => {
-    if (!voiceId) {
-      console.log('⚠️ No voiceId available for scenario generation');
-      return;
-    }
+  // Pre-cache module selection scripts
+  const preCacheModuleSelectionScripts = useCallback(async () => {
+    if (!voiceId) return;
     
-    try {
-      console.log('🚀 Starting scenario generation during deepfake introduction...');
-      console.log(`   - Voice ID: ${voiceId}`);
-      console.log(`   - Step: AI, 얼마나 똑똑해졌을까요?`);
-      
-      const result = await apiService.startScenarioGeneration(voiceId);
-      console.log('✅ Scenario generation started successfully:', result);
-    } catch (error) {
-      console.error('❌ Failed to start scenario generation:', error);
-      // Non-critical error, continue with the flow
+    console.log('🎵 Pre-caching module selection scripts...');
+    
+    const scriptsToCache = [
+      { name: 'fakeNewsDef', script: SCRIPTS.fakeNewsDef },
+      { name: 'identityTheftIntro', script: SCRIPTS.identityTheftIntro }
+    ];
+    
+    for (const { name, script } of scriptsToCache) {
+      try {
+        console.log(`🎵 Pre-caching ${name}...`);
+        const result = await apiService.generateNarration(script, voiceId);
+        
+        const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        const scriptKey = `${script}-${voiceId}`;
+        (window as any).narrationCache = (window as any).narrationCache || new Map();
+        (window as any).narrationCache.set(scriptKey, audioUrl);
+        
+        console.log(`✅ Pre-cached ${name} successfully`);
+      } catch (error) {
+        console.error(`⚠️ Failed to pre-cache ${name}:`, error);
+      }
     }
   }, [voiceId]);
 
@@ -247,63 +253,61 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     return scheduleNarrationPreload(nextStep.narrationScript, voiceId, 2000);
   }, [steps, userData?.userId, voiceId]);
 
-  const currentStepData = steps[currentStepIndex];
-
-  // Trigger scenario generation on first step and preload narrations
+  // Narration preloading and module selection pre-caching
   useEffect(() => {
-    if (userData?.userId && voiceId) {
-      // Trigger scenario generation on the first step
-      if (currentStepIndex === 0 && currentStepData?.id === 'video-intro-narration') {
-        console.log('🎯 Reached first step - triggering scenario generation');
-        startScenarioGeneration();
-      }
-      // Preload for narration steps
-      if (currentStepData?.type === 'narration' && currentStepData?.narrationScript) {
-        console.log(`🎵 Scheduling voice preload from narration: ${currentStepData.id}`);
-        const preloadTimer = preloadNextNarration(currentStepIndex);
-        return () => {
-          if (preloadTimer) clearTimeout(preloadTimer);
-        };
-      }
-      
-      // Preload for info steps with video content (concept video, quiz videos)
-      if (currentStepData?.type === 'info' && currentStepData?.content) {
-        console.log(`🎵 Scheduling voice preload from info/video step: ${currentStepData.id}`);
-        const preloadTimer = preloadNextNarration(currentStepIndex);
-        return () => {
-          if (preloadTimer) clearTimeout(preloadTimer);
-        };
-      }
-
-      // Pre-generate module selection narration on the final step
-      if (currentStepData?.id === 'quiz-complete-narration' && currentStepData?.type === 'narration') {
-        console.log('🎵 Pre-generating module selection narration for final step');
-        const preloadTimer = setTimeout(async () => {
-          try {
-            console.log('🎵 Generating module selection narration one step ahead with user voice');
-            const result = await apiService.generateNarration(SCRIPTS.moduleSelection, voiceId);
-            
-            // Create audio blob and cache it
-            const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            
-            // Cache the audio for ModuleSelectionPage
-            if (!(window as any).narrationCache) {
-              (window as any).narrationCache = new Map();
-            }
-            const scriptKey = `${SCRIPTS.moduleSelection}-${voiceId}`;
-            (window as any).narrationCache.set(scriptKey, audioUrl);
-            
-            console.log('✅ Module selection narration pre-generated and cached');
-          } catch (error) {
-            console.error('⚠️ Failed to pre-generate module selection narration:', error);
-          }
-        }, 3000); // Start pre-generation after 3 seconds
-        
-        return () => clearTimeout(preloadTimer);
-      }
+    if (!userData?.userId || !voiceId) {
+      return;
     }
-  }, [currentStepIndex, preloadNextNarration, startScenarioGeneration, userData?.userId, voiceId, currentStepData]); // Updated dependencies
+    
+    // Preload for narration steps
+    if (currentStepData?.type === 'narration' && currentStepData?.narrationScript) {
+      console.log(`🎵 Scheduling voice preload from narration: ${currentStepData.id}`);
+      const preloadTimer = preloadNextNarration(currentStepIndex);
+      return () => {
+        if (preloadTimer) clearTimeout(preloadTimer);
+      };
+    }
+    
+    // Preload for info steps with video content (concept video, quiz videos)
+    if (currentStepData?.type === 'info' && currentStepData?.content) {
+      console.log(`🎵 Scheduling voice preload from info/video step: ${currentStepData.id}`);
+      const preloadTimer = preloadNextNarration(currentStepIndex);
+      return () => {
+        if (preloadTimer) clearTimeout(preloadTimer);
+      };
+    }
+
+    // Pre-generate module selection narration on the final step
+    if (currentStepData?.id === 'quiz-complete-narration' && currentStepData?.type === 'narration') {
+      console.log('🎵 Pre-generating module selection narration for final step');
+      const preloadTimer = setTimeout(async () => {
+        try {
+          console.log('🎵 Generating module selection narration one step ahead with user voice');
+          const result = await apiService.generateNarration(SCRIPTS.moduleSelection, voiceId);
+          
+          // Create audio blob and cache it
+          const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          // Cache the audio for ModuleSelectionPage
+          if (!(window as any).narrationCache) {
+            (window as any).narrationCache = new Map();
+          }
+          const scriptKey = `${SCRIPTS.moduleSelection}-${voiceId}`;
+          (window as any).narrationCache.set(scriptKey, audioUrl);
+          
+          console.log('✅ Module selection narration pre-generated and cached');
+          
+          // Also pre-cache other module selection scripts
+          preCacheModuleSelectionScripts();
+        } catch (error) {
+          console.error('⚠️ Failed to pre-generate module selection narration:', error);
+        }
+      }, 3000); // Start pre-generation after 3 seconds
+      
+      return () => clearTimeout(preloadTimer);
+    }
+  }, [currentStepIndex, currentStepData?.type, currentStepData?.id, currentStepData?.narrationScript, currentStepData?.content, userData?.userId, voiceId, preloadNextNarration, preCacheModuleSelectionScripts]);
 
   const renderStepContent = () => {
     switch (currentStepData.type) {
@@ -334,9 +338,6 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
               <h3 className="text-2xl font-bold mb-6 text-orange-600">{currentStepData.title}</h3>
               {currentStepData.content}
               <div className="mt-8 flex justify-center items-center space-x-4">
-                {/* {currentStepIndex > 0 && (
-                  <BackButton onClick={handlePrevious} size="lg" variant="primary" />
-                )} */}
                 <ContinueButton onClick={handleNext} showAnimation={videoEnded} />
               </div>
             </div>
@@ -350,9 +351,6 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
               <h3 className="text-2xl font-bold mb-6 text-orange-600">{currentStepData.title}</h3>
               {currentStepData.content}
               <div className="mt-8 flex justify-center items-center space-x-4">
-                {/* {currentStepIndex > 0 && (
-                  <BackButton onClick={handlePrevious} size="lg" variant="primary" />
-                )} */}
                 <ContinueButton onClick={handleNext} text="다음" showAnimation={true} />
               </div>
             </div>
@@ -373,16 +371,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   };
 
   return (
-    <PageLayout >
-      {/* Back Button */}
-      {/* {(canGoBack || currentStepIndex > 0) && currentStepData.type !== 'narration' && (
-        <div className="mb-6">
-          <BackButton onClick={handlePrevious} />
-        </div>
-      )} */}
-
-      
-
+    <PageLayout>
       {renderStepContent()}
     </PageLayout>
   );

@@ -8,7 +8,7 @@ export const NARRATOR_VOICE_ID = "z6Kj0hecH20CdetSElRT"; // Initial narrator voi
 export const SCRIPTS = {
   // Initial narrator voice scripts (using voice ID: z6Kj0hecH20CdetSElRT)
   onboardingWelcome: "딥페이크와 딥보이스 기술 체험에 오신 것을 진심으로 환영합니다. 이번 체험을 통해 AI 기술이 어떻게 작동하는지, 그리고 우리가 어떻게 대응해야 하는지 함께 알아보겠습니다.",
-  onboardingExplanation: "지금부터 인적사항을 적어주세요. 입력해주시는 사진과 음성은 여러분만의 캐릭터를 만들고, 캐릭터가 AI 기술에 대해 설명을 해줄거에요! 개인정보는 실습을 위해 활용되며, 안전하게 보호됩니다.",
+  onboardingExplanation: "지금부터 인적사항을 적어주세요. 입력해주시는 사진과 음성으로 여러분의 캐릭터를 만들고, 캐릭터가 AI 기술에 대해 설명을 해줄거에요! 개인정보는 실습을 위해 활용되며, 안전하게 보호됩니다.",
   
   welcome: "안녕하세요! 딥페이크와 딥보이스 기술 체험에 오신 것을 진심으로 환영합니다.",
   caricatureGenerated: "이제 당신만의 특별한 캐릭터가 완성됐어요! 정말 멋지죠?",
