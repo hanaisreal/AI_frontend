@@ -305,25 +305,105 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         );
       }
 
-      // Download function
+      // Download function with mobile compatibility - no navigation loss
       const handleDownload = async () => {
         try {
-          const response = await fetch(talkingPhotoUrl);
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `${step.scenarioType === 'lottery' ? '복권당첨' : '범죄용의자'}_시나리오_${userData.name}.mp4`;
-          link.target = '_blank'; // Prevent navigation
-          link.rel = 'noopener noreferrer'; // Security
-          link.style.display = 'none'; // Hide the link
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
+          // Check if we're on mobile
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          const fileName = `${step.scenarioType === 'lottery' ? '복권당첨' : '범죄용의자'}_시나리오_${userData.name}.mp4`;
+          
+          if (isMobile) {
+            // Mobile approach: Use share API if available, otherwise copy link
+            if (navigator.share) {
+              try {
+                await navigator.share({
+                  title: '딥페이크 시나리오 영상',
+                  text: `${fileName} - AI 딥페이크 교육용 영상`,
+                  url: talkingPhotoUrl
+                });
+                return;
+              } catch (shareError) {
+                console.log('Share API failed or cancelled:', shareError);
+              }
+            }
+            
+            // Fallback for mobile: Copy link to clipboard
+            try {
+              if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(talkingPhotoUrl);
+                alert(`영상 링크가 클립보드에 복사되었습니다.\n\n링크를 브라우저 주소창에 붙여넣고 이동한 후, 영상을 길게 눌러서 "동영상 저장"을 선택하세요.\n\n링크: ${talkingPhotoUrl.substring(0, 50)}...`);
+              } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = talkingPhotoUrl;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert(`영상 링크가 클립보드에 복사되었습니다.\n\n링크를 브라우저 주소창에 붙여넣고 이동한 후, 영상을 길게 눌러서 "동영상 저장"을 선택하세요.`);
+              }
+            } catch (clipboardError) {
+              console.error('Clipboard copy failed:', clipboardError);
+              // Last resort: Show the link
+              const userResponse = confirm(`모바일에서는 다음 링크를 복사하여 새 탭에서 열어주세요:\n\n${talkingPhotoUrl}\n\n링크를 복사하려면 확인을, 취소하려면 취소를 누르세요.`);
+              if (userResponse) {
+                // Try to select and copy the URL shown in prompt
+                prompt('아래 링크를 복사하여 새 탭에서 열어주세요:', talkingPhotoUrl);
+              }
+            }
+            
+          } else {
+            // Desktop: Use blob method with CORS handling
+            try {
+              const response = await fetch(talkingPhotoUrl, {
+                method: 'GET',
+                headers: {
+                  'Accept': 'video/mp4,video/*,*/*'
+                },
+                mode: 'cors'
+              });
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = fileName;
+              link.style.display = 'none';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+              
+              // Success message for desktop
+              setTimeout(() => {
+                alert('영상 다운로드가 시작되었습니다. 다운로드 폴더를 확인해주세요.');
+              }, 500);
+              
+            } catch (fetchError) {
+              console.warn('Blob download failed, falling back to direct link:', fetchError);
+              // Fallback to direct link method (still desktop)
+              const link = document.createElement('a');
+              link.href = talkingPhotoUrl;
+              link.download = fileName;
+              link.style.display = 'none';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              
+              setTimeout(() => {
+                alert('영상 다운로드가 시작되었습니다. 브라우저 설정에 따라 다운로드가 차단되었을 수 있습니다.');
+              }, 500);
+            }
+          }
         } catch (error) {
           console.error('Download failed:', error);
-          alert('다운로드에 실패했습니다. 다시 시도해주세요.');
+          alert('다운로드에 실패했습니다. 네트워크 연결을 확인하고 다시 시도해주세요.');
         }
       };
 
