@@ -84,7 +84,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       content: (
         <div className="text-center">
           <h3 className="text-2xl font-bold mb-6 text-orange-600">딥페이크와 딥보이스 기술이란?</h3>
-          <div className="aspect-video bg-gray-100 rounded-lg mb-6 flex items-center justify-center max-w-md sm:max-w-lg md:max-w-2xl mx-auto">
+          <div className="aspect-video bg-gray-100 rounded-lg mb-6 flex items-center justify-center max-w-4xl mx-auto">
             <video 
               controls 
               autoPlay
@@ -128,7 +128,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
           <p className="text-gray-600 text-lg mb-6">
             이 영상이 진짜인지 AI로 생성된 가짜 영상인지 판단해보세요.
           </p>
-          <div className="w-80 h-[30rem] md:w-[28rem] md:h-[42rem] mx-auto bg-gray-100 rounded-lg overflow-hidden">
+          <div className="w-full max-w-4xl h-60 md:h-80 mx-auto bg-gray-100 rounded-lg overflow-hidden">
             <video 
               controls 
               autoPlay
@@ -158,7 +158,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
           <p className="text-gray-600 text-lg mb-6">
           첫 번째 영상과 비교해서 어떤 차이점이 있는지 관찰해보세요.
           </p>
-          <div className="w-80 h-[30rem] md:w-[28rem] md:h-[42rem] mx-auto bg-gray-100 rounded-lg overflow-hidden">
+          <div className="w-full max-w-4xl h-60 md:h-80 mx-auto bg-gray-100 rounded-lg overflow-hidden">
             <video 
               controls 
               autoPlay

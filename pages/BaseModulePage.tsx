@@ -828,7 +828,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
           <h3 className="text-lg font-semibold text-orange-600">
             
           </h3>
-          <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden max-w-md sm:max-w-lg md:max-w-2xl mx-auto">
+          <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden max-w-4xl mx-auto">
             <video 
               controls 
               autoPlay
