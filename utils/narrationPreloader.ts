@@ -46,13 +46,13 @@ export const preloadNarration = async (script: string, voiceId: string): Promise
     
     // Create and store the preloading promise
     const preloadPromise = (async () => {
-      // Call original narration API to cache
-      const result = await apiService.generateNarration(script, voiceId);
-      
-      // Store in the same cache format as NarrationPlayer
-      const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
+    // Call original narration API to cache
+    const result = await apiService.generateNarration(script, voiceId);
+    
+    // Store in the same cache format as NarrationPlayer
+    const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
+    const audioUrl = URL.createObjectURL(audioBlob);
+    
       // Store in global cache
       window.narrationCache.set(scriptKey, audioUrl);
       

@@ -333,7 +333,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             <h4 className="text-lg font-semibold text-orange-600">
               {step.scenarioType === 'lottery' ? '복권 당첨 시나리오' : '범죄 용의자 시나리오'}
             </h4>
-            <div className="w-64 h-96 md:w-80 md:h-[30rem] mx-auto bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
+            <div className="w-80 h-[30rem] md:w-[28rem] md:h-[42rem] mx-auto bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
               <video 
                 controls 
                 autoPlay
@@ -828,7 +828,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
           <h3 className="text-lg font-semibold text-orange-600">
             
           </h3>
-          <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
+          <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden max-w-md sm:max-w-lg md:max-w-2xl mx-auto">
             <video 
               controls 
               autoPlay

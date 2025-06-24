@@ -86,7 +86,7 @@ const PersonaTransitionSlide = forwardRef<any, PersonaTransitionSlideProps>(({
             script={script}
             voiceId={voiceId}
             imageUrl={caricatureUrl}
-            talkingImageUrl={talkingPhotoUrl}
+            talkingImageUrl={talkingPhotoUrl ? talkingPhotoUrl : caricatureUrl}
             autoPlay={true}
             onEnd={() => {
               setCanContinue(true);
