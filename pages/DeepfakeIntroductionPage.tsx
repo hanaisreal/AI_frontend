@@ -123,7 +123,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     },
     {
       id: 'deepfake-quiz-1',
-      title: '돌튜브 영상 1: 진짜일까요?',
+      title: '영상 1: 딥페이크 영상일까요?',
       type: 'info',
       content: (
         <div className="text-center">
@@ -139,31 +139,47 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
             onVideoEnd={() => setVideoEnded(true)}
           />
           
-          {videoEnded && !userGuess && (
-            <div className="flex justify-center space-x-4 mb-6">
-              <button 
-                onClick={() => setUserGuess('real')}
-                className="px-8 py-3 bg-blue-500 text-white rounded-lg text-lg font-semibold hover:bg-blue-600 transition-colors"
-              >
-                진짜
-              </button>
-              <button 
-                onClick={() => setUserGuess('fake')}
-                className="px-8 py-3 bg-red-500 text-white rounded-lg text-lg font-semibold hover:bg-red-600 transition-colors"
-              >
-                가짜
-              </button>
+          {!userGuess && (
+            <div className="mt-8 mb-8 p-6 bg-gradient-to-r from-blue-50 to-red-50 rounded-xl border-2 border-gray-200 shadow-lg">
+              <h4 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                이 영상이 진짜일까요, 가짜일까요?
+              </h4>
+              <p className="text-gray-600 text-center mb-6">
+                영상을 보고 판단해보세요
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <button 
+                  onClick={() => setUserGuess('real')}
+                  className="px-12 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-xl font-bold hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <span>✓</span>
+                  <span>진짜</span>
+                </button>
+                <button 
+                  onClick={() => setUserGuess('fake')}
+                  className="px-12 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-xl font-bold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <span>✗</span>
+                  <span>가짜</span>
+                </button>
+              </div>
             </div>
           )}
           
           {userGuess && (
-            <div className="mb-6 p-4 rounded-lg border-2 border-orange-200 bg-orange-50">
-              <p className="text-lg font-semibold text-orange-800">
-                당신의 선택: <span className={userGuess === 'fake' ? 'text-red-600' : 'text-blue-600'}>
+            <div className="mt-6 mb-8 p-6 rounded-xl border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 shadow-lg">
+              <div className="flex items-center justify-center space-x-3 mb-4">
+                <span className="text-2xl">🤔</span>
+                <p className="text-xl font-bold text-orange-800">
+                  선택 완료!
+                </p>
+              </div>
+              <p className="text-lg font-semibold text-center text-gray-700 mb-3">
+                과연 진짜 <span className={`px-3 py-1 rounded-lg font-bold text-white ${userGuess === 'fake' ? 'bg-red-500' : 'bg-blue-500'}`}>
                   {userGuess === 'fake' ? '가짜' : '진짜'}
-                </span>
+                </span> 일까요?
               </p>
-              <p className="text-sm text-orange-700 mt-2">정답을 확인하려면 계속하기를 눌러주세요.</p>
+              <p className="text-base text-orange-700 text-center font-medium">정답을 확인하려면 계속하기를 눌러주세요</p>
             </div>
           )}
         </div>
@@ -178,7 +194,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     },
     {
       id: 'deepfake-quiz-2',
-      title: '돌튜브 영상 2: 이번엔 어떨까요?',
+      title: '영상 2: 딥페이크 영상일까요?',
       type: 'info',
       content: (
         <div className="text-center">
@@ -194,31 +210,47 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
             onVideoEnd={() => setVideoEnded(true)}
           />
           
-          {videoEnded && !userGuess && (
-            <div className="flex justify-center space-x-4 mb-6">
-              <button 
-                onClick={() => setUserGuess('real')}
-                className="px-8 py-3 bg-blue-500 text-white rounded-lg text-lg font-semibold hover:bg-blue-600 transition-colors"
-              >
-                진짜
-              </button>
-              <button 
-                onClick={() => setUserGuess('fake')}
-                className="px-8 py-3 bg-red-500 text-white rounded-lg text-lg font-semibold hover:bg-red-600 transition-colors"
-              >
-                가짜
-              </button>
+          {!userGuess && (
+            <div className="mt-8 mb-8 p-6 bg-gradient-to-r from-blue-50 to-red-50 rounded-xl border-2 border-gray-200 shadow-lg">
+              <h4 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                이 영상은 어떻게 생각하세요?
+              </h4>
+              <p className="text-gray-600 text-center mb-6">
+                첫 번째 영상과 비교하며 차이점을 찾아보세요
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <button 
+                  onClick={() => setUserGuess('real')}
+                  className="px-12 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-xl font-bold hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <span>✓</span>
+                  <span>진짜</span>
+                </button>
+                <button 
+                  onClick={() => setUserGuess('fake')}
+                  className="px-12 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-xl font-bold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <span>✗</span>
+                  <span>가짜</span>
+                </button>
+              </div>
             </div>
           )}
           
           {userGuess && (
-            <div className="mb-6 p-4 rounded-lg border-2 border-orange-200 bg-orange-50">
-              <p className="text-lg font-semibold text-orange-800">
-                당신의 선택: <span className={userGuess === 'fake' ? 'text-red-600' : 'text-blue-600'}>
+            <div className="mt-6 mb-8 p-6 rounded-xl border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 shadow-lg">
+              <div className="flex items-center justify-center space-x-3 mb-4">
+                <span className="text-2xl">🤔</span>
+                <p className="text-xl font-bold text-orange-800">
+                  선택 완료!
+                </p>
+              </div>
+              <p className="text-lg font-semibold text-center text-gray-700 mb-3">
+                과연 진짜 <span className={`px-3 py-1 rounded-lg font-bold text-white ${userGuess === 'fake' ? 'bg-red-500' : 'bg-blue-500'}`}>
                   {userGuess === 'fake' ? '가짜' : '진짜'}
-                </span>
+                </span> 일까요?
               </p>
-              <p className="text-sm text-orange-700 mt-2">정답을 확인하려면 계속하기를 눌러주세요.</p>
+              <p className="text-base text-orange-700 text-center font-medium">정답을 확인하려면 계속하기를 눌러주세요</p>
             </div>
           )}
         </div>
@@ -247,6 +279,9 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   const handleNext = () => {
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
+      // Reset states for new step
+      setVideoEnded(false);
+      setUserGuess(null);
     } else {
       // Go to module selection
       setCurrentPage(Page.ModuleSelection);
@@ -257,6 +292,9 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     if (currentStepIndex > 0) {
       console.log(`Going back from step ${currentStepIndex} to step ${currentStepIndex - 1}`);
       setCurrentStepIndex(currentStepIndex - 1);
+      // Reset states for new step
+      setVideoEnded(false);
+      setUserGuess(null);
     } else {
       // If at first step, use the global back function to go to previous page
       onGoBack();
