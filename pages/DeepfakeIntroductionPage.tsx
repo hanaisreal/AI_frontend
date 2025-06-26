@@ -417,12 +417,12 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       };
     }
 
-    // Pre-generate module selection narration on the final step
-    if (currentStepData?.id === 'quiz-complete-narration' && currentStepData?.type === 'narration') {
-      console.log('🎵 Pre-generating module selection narration for final step');
+    // Pre-generate module selection narration starting from the second quiz step
+    if ((currentStepData?.id === 'deepfake-quiz-2' || currentStepData?.id === 'quiz-complete-narration') && voiceId) {
+      console.log('🎵 Pre-generating module selection narration early for instant loading');
       const preloadTimer = setTimeout(async () => {
         try {
-          console.log('🎵 Generating module selection narration one step ahead with user voice');
+          console.log('🎵 Generating module selection narration early with user voice');
           const result = await apiService.generateNarration(SCRIPTS.moduleSelection, voiceId);
           
           // Create audio blob and cache it
@@ -443,7 +443,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
         } catch (error) {
           console.error('⚠️ Failed to pre-generate module selection narration:', error);
         }
-      }, 3000); // Start pre-generation after 3 seconds
+      }, 2000); // Start pre-generation after 2 seconds
       
       return () => clearTimeout(preloadTimer);
     }

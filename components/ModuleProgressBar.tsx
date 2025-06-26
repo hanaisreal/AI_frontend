@@ -95,13 +95,6 @@ const ModuleProgressBar: React.FC<ModuleProgressBarProps> = ({
         </div>
       </div>
 
-      {/* Module Title */}
-      <div className="text-center mt-4">
-        <p className="text-xs text-gray-500">
-          {moduleType === 'fakeNews' ? '가짜 뉴스 모듈' : '신원 도용 모듈'} • 
-          {currentIndex >= 0 ? ` ${currentIndex + 1}/${sections.length} 단계` : ' 준비 중...'}
-        </p>
-      </div>
     </div>
   );
 };

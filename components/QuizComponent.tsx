@@ -10,9 +10,10 @@ interface QuizComponentProps {
   onQuizComplete: (score: number, total: number) => void;
   voiceId?: string | null;
   onPrevious?: () => void; // Optional back button handler
+  onPreloadPostQuizNarration?: () => void; // Callback to pre-cache post-quiz narration
 }
 
-const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete, onPrevious }) => {
+const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete, onPrevious, onPreloadPostQuizNarration }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -39,6 +40,12 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
     setShowExplanation(false);
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      
+      // Pre-cache post-quiz narration when user reaches the second (final) quiz question
+      if (currentQuestionIndex === 0 && onPreloadPostQuizNarration) {
+        console.log('🎵 User reached second quiz question, pre-caching post-quiz narration...');
+        onPreloadPostQuizNarration();
+      }
     } else {
       onQuizComplete(score, questions.length);
     }

@@ -35,7 +35,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   showControls = true,
   imageUrl,
   talkingImageUrl,
-  onNarrationComplete,
   hideScript = false,
   showScript = true,
   chunkedDisplay = false,
@@ -261,8 +260,10 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       const audio = new Audio(audioUrl);
       audio.preload = 'auto';
       audio.loop = false; // Ensure no auto-replay
+      audio.volume = 1.0; // Set full volume
+      audio.muted = false; // Ensure audio is unmuted
       audio.onplay = () => {
-        console.log('NarrationPlayer: Audio started playing, duration:', audio.duration, 'chunks:', chunks.length);
+        console.log('NarrationPlayer: Audio started playing, duration:', audio.duration, 'volume:', audio.volume, 'muted:', audio.muted, 'chunks:', chunks.length);
         setError(null); // Clear any error when audio starts playing
         setIsPlaying(true);
         setShowReplayButton(false); // Hide replay button when audio starts
@@ -325,6 +326,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     if (isPlaying) {
       audioRef.current.pause();
     } else {
+      console.log('NarrationPlayer: Attempting to play audio, volume:', audioRef.current.volume, 'muted:', audioRef.current.muted);
       audioRef.current.play().catch(err => {
         console.error('NarrationPlayer: Failed to play audio:', err);
         setError('음성 재생에 실패했습니다.');
@@ -463,11 +465,12 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     if (audioRef.current) {
       console.log('NarrationPlayer: Replaying audio');
       audioRef.current.currentTime = 0;
-      setShowReplayButton(false);
       setCurrentChunkIndex(0); // Reset to first chunk
+      setIsPlaying(true); // Set playing state immediately
       audioRef.current.play().catch(err => {
         console.error('NarrationPlayer: Failed to replay audio:', err);
         setError('음성 재생에 실패했습니다.');
+        setIsPlaying(false);
       });
     }
   }, []);
@@ -553,7 +556,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                 {/* Full Video Blur Replay Button */}
                 {showReplayButton && (
                   <div 
-                    className="absolute inset-0 flex items-center justify-center rounded-3xl"
+                    className="absolute inset-0 flex items-center justify-center rounded-3xl transition-opacity duration-300"
                     style={{
                       backdropFilter: 'blur(12px)',
                       WebkitBackdropFilter: 'blur(12px)',
@@ -623,22 +626,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                           </p>
                         ))}
                       </div>
-                    </div>
-                    
-                    {/* Progress indicators */}
-                    <div className="mt-6 flex justify-center items-center space-x-3">
-                      {chunks.map((_, index) => (
-                        <div
-                          key={index}
-                          className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                            index === currentChunkIndex 
-                              ? 'bg-gradient-to-r from-orange-400 to-amber-400 scale-150 shadow-lg' 
-                              : index < currentChunkIndex 
-                                ? 'bg-gradient-to-r from-orange-300 to-amber-300 scale-110' 
-                                : 'bg-gray-300 scale-100'
-                          }`}
-                        />
-                      ))}
                     </div>
                     
                   </div>

@@ -214,7 +214,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
           break;
           
         case 'quiz':
-          preloadDelay = 8000; // Give user time to start engaging with quiz
+          preloadDelay = 2000; // Reduced delay - start preloading early when quiz appears
           break;
           
         case 'info':
@@ -928,6 +928,10 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
           onQuizComplete={handleQuizComplete} 
           voiceId={voiceId}
           onPrevious={currentStepIndex > 0 ? () => setCurrentStepIndex(prev => prev - 1) : undefined}
+          onPreloadPostQuizNarration={() => {
+            console.log('🎵 Quiz component triggered post-quiz narration pre-caching...');
+            preloadNextNarration(currentStepIndex);
+          }}
         />;
       
       case 'faceswap_scenario':

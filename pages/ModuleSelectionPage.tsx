@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import PageLayout from '../components/PageLayout.tsx';
@@ -23,6 +23,8 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
   voiceId,
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioEnded, setAudioEnded] = useState(false);
 
   // Play background narration when component mounts
   useEffect(() => {
@@ -37,6 +39,11 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
           console.log('🎵 Using cached module selection narration');
           if (audioRef.current) {
             audioRef.current.src = existingCache;
+            audioRef.current.onplay = () => setIsAudioPlaying(true);
+            audioRef.current.onended = () => {
+              setIsAudioPlaying(false);
+              setAudioEnded(true);
+            };
             audioRef.current.play().catch(console.error);
           }
         } else {
@@ -57,6 +64,11 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
           // Play the audio
           if (audioRef.current) {
             audioRef.current.src = audioUrl;
+            audioRef.current.onplay = () => setIsAudioPlaying(true);
+            audioRef.current.onended = () => {
+              setIsAudioPlaying(false);
+              setAudioEnded(true);
+            };
             audioRef.current.play().catch(console.error);
           }
         }
@@ -160,16 +172,25 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
   }
 
   return (
-    <PageLayout >
+    <PageLayout title="딥페이크가 어떻게 악용될까?">
       {/* Hidden audio element for background narration */}
       <audio ref={audioRef} hidden />
       
       <Card>
-        {/* <p className="text-slate-700 text-lg mb-10 text-center leading-relaxed">{SCRIPTS.moduleSelection}</p> */}
+        {/* Audio indicator with smooth transitions */}
+        <div className={`mb-8 text-center transition-all duration-500 ${
+          isAudioPlaying || audioEnded ? 'opacity-100 transform translate-y-0' : 
+          'opacity-0 transform translate-y-2'
+        }`}>
+          <p className={`text-orange-600 text-lg font-semibold ${
+            isAudioPlaying ? 'animate-pulse' : ''
+          }`}>📚 학습하고 싶은 주제를 선택해주세요</p>
+        </div>
+        
         <div className="space-y-6">
           <Button
             onClick={() => setCurrentPage(Page.FakeNewsModule)}
-            disabled={module1Completed}
+            disabled={module1Completed || !audioEnded}
             fullWidth
             size="lg"
             variant={module1Completed ? "secondary" : "primary"}
@@ -192,7 +213,7 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
           
           <Button
             onClick={() => setCurrentPage(Page.IdentityTheftModule)}
-            disabled={module2Completed}
+            disabled={module2Completed || !audioEnded}
             fullWidth
             size="lg"
             variant={module2Completed ? "secondary" : "primary"}
