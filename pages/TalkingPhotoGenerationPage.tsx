@@ -280,7 +280,6 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
                         controls
                         autoPlay
                         playsInline
-                        crossOrigin="anonymous"
                         preload="auto"
                         disablePictureInPicture
                         controlsList="nodownload"

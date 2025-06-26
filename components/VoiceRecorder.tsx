@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react';
 import useAudioRecorder, { RecordingState } from '../hooks/useAudioRecorder.ts';
 import Button from './Button.tsx';
-import Card from './Card.tsx';
 
 interface VoiceRecorderProps {
   onRecordingComplete: (audioBlob: Blob) => void;
   scriptToRead?: string;
   maxDuration?: number; // in seconds, e.g., 30
+  isActive?: boolean; // For highlighting when this field should be filled
 }
 
 const MIN_DURATION = 20; // Minimum 20 seconds for better voice cloning
 
-const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scriptToRead, maxDuration = 60 }) => {
+const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scriptToRead, maxDuration = 60, isActive = false }) => {
   const {
     recordingState,
     startRecording,
@@ -23,6 +23,18 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scri
     resetRecorder
   } = useAudioRecorder();
   const [isTooShort, setIsTooShort] = React.useState(false);
+  const [fontSize, setFontSize] = React.useState<'small' | 'medium' | 'large'>('medium');
+  
+  // Stop pulsing when user is actively interacting (recording or completed)
+  const shouldPulse = isActive && recordingState === RecordingState.IDLE;
+  
+  const getFontSizeClasses = () => {
+    switch (fontSize) {
+      case 'small': return 'text-lg leading-relaxed';
+      case 'medium': return 'text-xl leading-relaxed';
+      case 'large': return 'text-2xl leading-relaxed';
+    }
+  };
 
   useEffect(() => {
     if (audioBlob && recordingState === RecordingState.STOPPED) {
@@ -53,15 +65,59 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scri
   };
 
   return (
-    <Card className="w-full">
-      {scriptToRead && (
-        <div className="mb-6 p-4 bg-slate-100 rounded-lg border border-slate-200">
-          <p className="text-base font-semibold text-slate-700 mb-1">다음 스크립트를 큰 소리로 읽어주세요:</p>
-          <p className="text-slate-700 italic text-lg">"{scriptToRead}"</p>
-        </div>
-      )}
+    <div className="w-full">
+      <div className={`border-2 rounded-lg transition-all duration-300 ${
+        isActive 
+          ? `border-orange-300 bg-orange-50 shadow-md ${shouldPulse ? 'animate-pulse' : ''}` 
+          : 'border-slate-300 bg-slate-50 hover:border-orange-500 hover:bg-orange-50'
+      }`}>
+        {scriptToRead && (
+          <div className="p-4 border-b border-slate-200">
+            <div className="mb-3">
+              <p className="text-lg font-semibold text-slate-700 mb-2">여러분이 강의를 한다 생각하고 다음 대본을 큰 소리로 읽어주세요~</p>
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-sm text-slate-500">글자 크기:</span>
+                <button
+                  onClick={() => setFontSize('small')}
+                  className={`px-3 py-1 text-sm rounded transition-colors ${
+                    fontSize === 'small' 
+                      ? 'bg-orange-500 text-white' 
+                      : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  작게
+                </button>
+                <button
+                  onClick={() => setFontSize('medium')}
+                  className={`px-3 py-1 text-sm rounded transition-colors ${
+                    fontSize === 'medium' 
+                      ? 'bg-orange-500 text-white' 
+                      : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  보통
+                </button>
+                <button
+                  onClick={() => setFontSize('large')}
+                  className={`px-3 py-1 text-sm rounded transition-colors ${
+                    fontSize === 'large' 
+                      ? 'bg-orange-500 text-white' 
+                      : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  크게
+                </button>
+              </div>
+            </div>
+            <div className="max-w-full overflow-hidden">
+              <p className={`text-slate-700 ${getFontSizeClasses()} whitespace-pre-line break-words`}>
+                {scriptToRead}
+              </p>
+            </div>
+          </div>
+        )}
 
-      <div className="flex flex-col items-center space-y-6">
+        <div className="flex flex-col items-center space-y-6 p-4">
         {recordingState === RecordingState.IDLE && (
           <Button onClick={startRecording} variant="primary" size="lg" className="w-full md:w-auto">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
@@ -112,8 +168,9 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, scri
              {recordingState === RecordingState.PERMISSION_DENIED && <p className="mt-2 text-sm">마이크 접근을 허용하려면 브라우저의 사이트 설정을 확인하세요.</p>}
           </div>
         )}
+        </div>
       </div>
-    </Card>
+    </div>
   );
 };
 

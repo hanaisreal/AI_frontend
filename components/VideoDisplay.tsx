@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react';
-import Card from './Card.tsx';
 
 interface VideoDisplayProps {
   videoUrl?: string;
@@ -36,39 +35,39 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
     return () => video.removeEventListener('ended', handleEnded);
   }, [onVideoEnd]);
 
-  const getAspectRatioClass = () => {
+  const getVideoContainerClass = () => {
     switch (aspectRatio) {
       case '9:16':
-        return 'aspect-[9/16] max-w-md mx-auto';
+        return 'w-full max-w-none mx-auto min-h-[70vh] flex items-center justify-center';
       case 'square':
-        return 'aspect-square max-w-md mx-auto';
+        return 'w-full max-w-none mx-auto min-h-[60vh] flex items-center justify-center';
       case '16:9':
       default:
-        return 'aspect-video';
+        return 'w-full max-w-none min-h-[50vh] flex items-center justify-center';
     }
   };
 
   if (!videoUrl) {
     return (
-      <Card>
-        <div className="text-center text-gray-500 p-8">
-          <p>비디오를 로드할 수 없습니다.</p>
+      <div className="w-full min-h-[50vh] flex items-center justify-center bg-gray-100">
+        <div className="text-center text-gray-500">
+          <p className="text-lg">비디오를 로드할 수 없습니다.</p>
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card>
+    <div className="w-full">
       {title && (
-        <h3 className="text-xl font-bold text-center mb-4 text-orange-600">{title}</h3>
+        <h3 className="text-xl font-bold text-center mb-4 text-orange-600 px-4">{title}</h3>
       )}
       
-      <div className={`${getAspectRatioClass()} bg-black rounded-lg overflow-hidden`}>
+      <div className={`${getVideoContainerClass()} bg-black`}>
         <video
           ref={videoRef}
           src={videoUrl}
-          className="w-full h-full object-contain"
+          className="w-full max-w-full h-auto max-h-[90vh] object-contain"
           autoPlay={autoPlay}
           muted={!unmuted}
           controls={controls}
@@ -79,7 +78,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
           Your browser does not support the video tag.
         </video>
       </div>
-    </Card>
+    </div>
   );
 };
 

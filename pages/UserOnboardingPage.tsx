@@ -28,6 +28,17 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
 }) => {
   // Step management: 0 = welcome, 1 = explanation, 2 = form
   const [currentStep, setCurrentStep] = useState(0);
+  
+  // Define step titles
+  const stepTitles = [
+    "환영합니다",
+    "딥페이크 체험 안내 사항",
+    "사용자 정보 입력 및 음성 녹음"
+  ];
+  
+  const getCurrentTitle = () => {
+    return stepTitles[currentStep] || "사용자 정보 입력";
+  };
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
@@ -36,6 +47,27 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
   const [audioBlob, setAudioBlobLocal] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Helper function to determine which field should be highlighted
+  const getCurrentActiveField = () => {
+    if (!name.trim()) return 'name';
+    if (!age.trim()) return 'age';
+    if (!gender) return 'gender';
+    if (!imageFile) return 'image';
+    if (!audioBlob) return 'voice';
+    return null; // All fields completed
+  };
+
+  const getFieldClasses = (fieldName: string) => {
+    const activeField = getCurrentActiveField();
+    const baseClasses = "mt-1 block w-full border-2 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-lg text-slate-800 transition-all duration-300";
+    
+    if (activeField === fieldName) {
+      return `${baseClasses} bg-orange-50 border-orange-300 animate-pulse shadow-md`;
+    } else {
+      return `${baseClasses} bg-slate-50 border-slate-300 hover:border-orange-500 hover:bg-orange-50`;
+    }
+  };
 
   // Preload next step narration when current step starts
   useEffect(() => {
@@ -55,13 +87,22 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
     }
   }, [currentStep]);
 
-  const scriptForVoiceRecording = `오늘 날씨가 정말 좋네요. 햇살이 따뜻하고 바람도 시원해요. 
-이런 날에는 산책하기 딱 좋은 것 같아요. 
-커피 한 잔 마시면서 친구랑 이야기하는 것도 좋겠고요. 
-주말에는 뭐 하실 계획이세요? 
-저는 새로 나온 영화를 보러 가려고 해요. 
-요즘 영화관에서 상영하는 작품들이 꽤 재미있다고 하더라고요. 
-음식도 맛있게 먹고, 좋은 사람들과 시간을 보내는 게 최고인 것 같아요.`;
+  const scriptForVoiceRecording = `
+  안녕하세요, 여러분. 
+오늘은 인공지능 기술에 대해 함께 알아보는 시간을 가져보겠습니다.
+
+최근 AI 기술이 빠르게 발전하면서, 
+우리 일상생활에도 많은 변화가 일어나고 있습니다.
+스마트폰의 음성인식부터 자동차의 내비게이션까지, 
+AI는 이미 우리 곁에 가까이 있어요.
+
+하지만 이런 기술들이 항상 좋은 목적으로만 사용되는 것은 아닙니다.
+때로는 사람들을 속이거나 잘못된 정보를 퍼뜨리는 데 악용되기도 해요.
+그래서 우리가 이런 기술들을 올바르게 이해하고, 
+현명하게 대처하는 방법을 배우는 것이 중요합니다.
+
+오늘 함께 배우는 내용이 여러분께 도움이 되기를 바랍니다.
+`;
 
   const handleImageSelect = useCallback((file: File) => {
     setImageFile(file);
@@ -78,7 +119,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!name || !age || !gender || !imageFile || !audioBlob) {
+    if (!name.trim() || !age.trim() || !gender || !imageFile || !audioBlob) {
       setError("모든 필드를 작성하고, 이미지를 업로드하고, 목소리를 녹음해주세요.");
       return;
     }
@@ -104,7 +145,25 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
         voiceName: result.voiceName
       });
 
-      setCurrentPage(Page.CaricatureGeneration);
+      // Pre-cache narration for CaricatureGenerationIntro page
+      console.log('🎵 Pre-caching narration for CaricatureGenerationIntro...');
+      try {
+        const narrationResult = await apiService.generateNarration(SCRIPTS.caricatureGenerationStart, result.voiceId);
+        const audioBlob = new Blob([Uint8Array.from(atob(narrationResult.audioData), c => c.charCodeAt(0))], { type: narrationResult.audioType });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        // Cache the audio
+        if (!(window as any).narrationCache) {
+          (window as any).narrationCache = new Map();
+        }
+        const scriptKey = `${SCRIPTS.caricatureGenerationStart}-${result.voiceId}`;
+        (window as any).narrationCache.set(scriptKey, audioUrl);
+        console.log('✅ Pre-cached CaricatureGenerationIntro narration');
+      } catch (error) {
+        console.error('⚠️ Failed to pre-cache CaricatureGenerationIntro narration:', error);
+      }
+
+      setCurrentPage(Page.CaricatureGenerationIntro);
     } catch (err) {
       console.error("Onboarding error:", err);
       setError("온보딩 중 오류가 발생했습니다. 다시 시도해주세요. 백엔드 서버가 실행 중인지 확인하세요.");
@@ -154,30 +213,51 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
             <p className="text-slate-700 text-lg leading-relaxed mb-8 text-center">
               인적사항을 입력해주세요. 
             </p>
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="block text-base font-semibold text-slate-700 mb-1">성함</label>
+                <label htmlFor="name" className="block text-base font-semibold text-slate-700 mb-2">성함</label>
                 <input type="text" name="name" id="name" value={name} onChange={e => setName(e.target.value)} required 
-                       className="mt-1 block w-full bg-white border-slate-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-lg text-slate-800" />
+                       className={getFieldClasses('name')} />
               </div>
               <div>
-                <label htmlFor="age" className="block text-base font-semibold text-slate-700 mb-1">나이</label>
+                <label htmlFor="age" className="block text-base font-semibold text-slate-700 mb-2">나이</label>
                 <input type="number" name="age" id="age" value={age} onChange={e => setAge(e.target.value)} required
-                       className="mt-1 block w-full bg-white border-slate-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-lg text-slate-800" />
+                       className={getFieldClasses('age')} />
               </div>
               <div>
-                <label htmlFor="gender" className="block text-base font-semibold text-slate-700 mb-1">성별</label>
+                <label htmlFor="gender" className="block text-base font-semibold text-slate-700 mb-2">성별</label>
                 <select name="gender" id="gender" value={gender} onChange={e => setGender(e.target.value)} required
-                        className="mt-1 block w-full bg-white border-slate-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-lg text-slate-800 appearance-none">
+                        className={`${getFieldClasses('gender')} appearance-none`}>
                   <option value="">선택...</option>
                   <option value="female">여성</option>
                   <option value="male">남성</option>
                 </select>
               </div>
               
-              <FileUpload onFileSelect={handleImageSelect} label="사진 업로드" previewUrl={imagePreviewUrl} />
+              <div>
+                <FileUpload 
+                  onFileSelect={handleImageSelect} 
+                  label="사진 업로드" 
+                  previewUrl={imagePreviewUrl} 
+                  isActive={getCurrentActiveField() === 'image'}
+                />
+              </div>
               
-              <VoiceRecorder onRecordingComplete={handleRecordingComplete} scriptToRead={scriptForVoiceRecording} maxDuration={60} />
+              <div>
+                <VoiceRecorder 
+                  onRecordingComplete={handleRecordingComplete} 
+                  scriptToRead={scriptForVoiceRecording} 
+                  maxDuration={60} 
+                  isActive={getCurrentActiveField() === 'voice'}
+                />
+              </div>
+
+              {/* Show success message when all fields are completed */}
+              {getCurrentActiveField() === null && (
+                <p className="text-lg text-green-600 bg-green-100 p-4 rounded-lg border border-green-300 text-center font-semibold">
+                  제출하기 버튼을 눌러주세요.
+                </p>
+              )}
 
               {error && <p className="text-lg text-red-600 bg-red-100 p-4 rounded-lg border border-red-300">{error}</p>}
 
@@ -185,7 +265,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
                 제출 버튼을 누르면, 제공된 정보의 처리에 동의하는 것으로 간주됩니다.
               </p>
               <div className="mt-8 flex justify-center">
-                <Button type="submit" variant="primary" size="lg" disabled={!name || !age || !gender || !imageFile || !audioBlob || isLoading}>
+                <Button type="submit" variant="primary" size="lg" disabled={!name.trim() || !age.trim() || !gender || !imageFile || !audioBlob || isLoading}>
                   {isLoading ? '제출 중...' : '제출하기'}
                 </Button>
               </div>
@@ -199,7 +279,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
   };
 
   return (
-    <PageLayout >
+    <PageLayout title={getCurrentTitle()}>
       {renderCurrentStep()}
     </PageLayout>
   );

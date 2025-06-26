@@ -6,13 +6,15 @@ interface FileUploadProps {
   label?: string;
   acceptedFileTypes?: string; // e.g., "image/png, image/jpeg"
   previewUrl?: string | null;
+  isActive?: boolean; // For highlighting when this field should be filled
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ 
   onFileSelect, 
   label = "이미지 업로드", 
   acceptedFileTypes = "image/*",
-  previewUrl
+  previewUrl,
+  isActive = false
 }) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -33,7 +35,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
     <div className="w-full">
       <label className="block text-base font-semibold text-slate-700 mb-2">{label}</label>
       <div 
-        className="mt-1 flex flex-col items-center justify-center px-6 py-10 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer hover:border-orange-500 transition-colors bg-slate-50 hover:bg-orange-50"
+        className={`mt-1 flex flex-col items-center justify-center px-6 py-10 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
+          isActive 
+            ? 'border-orange-300 bg-orange-50 animate-pulse shadow-md' 
+            : 'border-slate-300 bg-slate-50 hover:border-orange-500 hover:bg-orange-50'
+        }`}
         onClick={handleClick}
       >
         <div className="space-y-2 text-center">

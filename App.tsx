@@ -6,7 +6,9 @@ import * as apiService from './services/apiService.ts';
 // Static imports for pages
 import LandingPage from './pages/LandingPage.tsx';
 import UserOnboardingPage from './pages/UserOnboardingPage.tsx';
+import CaricatureGenerationIntroPage from './pages/CaricatureGenerationIntroPage.tsx';
 import CaricatureGenerationPage from './pages/CaricatureGenerationPage.tsx';
+import TalkingPhotoGenerationIntroPage from './pages/TalkingPhotoGenerationIntroPage.tsx';
 import TalkingPhotoGenerationPage from './pages/TalkingPhotoGenerationPage.tsx';
 import ModuleSelectionPage from './pages/ModuleSelectionPage.tsx';
 import FakeNewsModulePage from './pages/FakeNewsModulePage.tsx';
@@ -438,12 +440,24 @@ const App: React.FC = () => {
                   setUserAudioBlob={setUserAudioBlob}
                   setVoiceId={setVoiceId}
                 />;
+      case Page.CaricatureGenerationIntro:
+        return <CaricatureGenerationIntroPage 
+                  setCurrentPage={setCurrentPageOptimized} 
+                  onGoBack={goBack}
+                  canGoBack={canGoBack}
+                />;
       case Page.CaricatureGeneration:
         return <CaricatureGenerationPage 
                   setCurrentPage={setCurrentPageOptimized} 
                   userImageUrl={userImageUrl} 
                   caricatureUrl={caricatureUrl}
                   setCaricatureUrl={setCaricatureUrl}
+                  onGoBack={goBack}
+                  canGoBack={canGoBack}
+                />;
+      case Page.TalkingPhotoGenerationIntro:
+        return <TalkingPhotoGenerationIntroPage 
+                  setCurrentPage={setCurrentPageOptimized} 
                   onGoBack={goBack}
                   canGoBack={canGoBack}
                 />;

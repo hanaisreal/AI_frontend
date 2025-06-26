@@ -43,7 +43,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setCurrentPage }) => {
   }, []);
 
   return (
-    <PageLayout>
+    <PageLayout title="딥페이크란 무엇일까">
       <Card>
         <div className="text-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-24 h-24 text-orange-500 mx-auto mb-8">

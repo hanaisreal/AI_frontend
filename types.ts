@@ -1,7 +1,9 @@
 export enum Page {
   Landing,
   UserOnboarding,
+  CaricatureGenerationIntro, // New pre-generation narration page
   CaricatureGeneration,
+  TalkingPhotoGenerationIntro, // New pre-generation narration page
   TalkingPhotoGeneration,
   DeepfakeIntroduction, // New page for the introduction to deepfake technology
   ModuleSelection,

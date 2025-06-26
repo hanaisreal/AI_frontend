@@ -7,6 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import ContinueButton from '../components/ContinueButton.tsx';
 import ModuleProgressBar from '../components/ModuleProgressBar.tsx';
+import VideoDisplay from '../components/VideoDisplay.tsx';
 import { Page, ModuleStep, QuizQuestion, UserData } from '../types.ts';
 import { QUIZZES, SCRIPTS, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
 import * as apiService from '../services/apiService.ts';
@@ -413,24 +414,18 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             <h4 className="text-lg font-semibold text-orange-600">
               {step.scenarioType === 'lottery' ? '복권 당첨 시나리오' : '범죄 용의자 시나리오'}
             </h4>
-            <div className="w-80 h-[30rem] md:w-[28rem] md:h-[42rem] mx-auto bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden">
-              <video 
-                controls 
-                autoPlay
-                className="w-full h-full object-contain"
-                src={talkingPhotoUrl} 
-                playsInline
-                preload="auto"
-                disablePictureInPicture
-                onLoadedData={() => {
-                  console.log(`✅ Talking photo video loaded for ${step.scenarioType}`);
-                  handleScenarioComplete();
-                }}
-                onEnded={handleVideoEnd}
-              >
-                <p>브라우저가 동영상을 지원하지 않습니다.</p>
-              </video>
-            </div>
+            <VideoDisplay 
+              videoUrl={talkingPhotoUrl}
+              aspectRatio="9:16"
+              unmuted={true}
+              autoPlay={true}
+              controls={true}
+              onVideoEnd={() => {
+                console.log(`✅ Talking photo video loaded for ${step.scenarioType}`);
+                handleScenarioComplete();
+                handleVideoEnd();
+              }}
+            />
             <div className="flex justify-center mt-4">
               <button
                 onClick={handleDownload}
@@ -908,20 +903,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
           <h3 className="text-lg font-semibold text-orange-600">
             
           </h3>
-          <div className="aspect-video bg-gray-100 rounded-lg border-2 border-orange-500 overflow-hidden max-w-4xl mx-auto">
-            <video 
-              controls 
-              autoPlay
-              className="w-full h-full object-cover"
-              src={currentStep.videoUrl}
-              playsInline
-              preload="metadata"
-              disablePictureInPicture
-              onEnded={handleVideoEnd}
-            >
-              <p>브라우저가 동영상을 지원하지 않습니다.</p>
-            </video>
-          </div>
+          <VideoDisplay 
+            videoUrl={currentStep.videoUrl}
+            aspectRatio="16:9"
+            unmuted={true}
+            autoPlay={true}
+            controls={true}
+            onVideoEnd={handleVideoEnd}
+          />
           <p className="text-sm text-slate-600 italic">
             이 영상은 AI 기술로 만들어진 가짜 영상입니다.
           </p>
@@ -1023,8 +1012,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
 
   return (
     <PageLayout
-      title={moduleTitle}
-      showAppTitle={false}
+      title={currentStep?.title || moduleTitle}
     >
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Module Progress Bar */}
@@ -1047,7 +1035,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 talkingPhotoUrl={talkingPhotoUrl}
                 voiceId={voiceId}
                 script={scriptForPersona}
-                showScript={false}
+                showScript={true}
                 chunkedDisplay={true}
               />
               {/* For detection tips, show content during persona narration */}
