@@ -1,9 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import { QuizQuestion } from '../types.ts';
 import Button from './Button.tsx';
-import BackButton from './BackButton.tsx';
 import ContinueButton from './ContinueButton.tsx';
 import Card from './Card.tsx';
+
+// Sound effect functions
+const playClickSound = () => {
+  // Create a simple click sound using Web Audio API
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } catch (error) {
+    console.log('Sound not supported');
+  }
+};
+
+const playCorrectSound = () => {
+  // Create a cheerful success sound
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator1 = audioContext.createOscillator();
+    const oscillator2 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator1.connect(gainNode);
+    oscillator2.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Happy chord progression
+    oscillator1.frequency.setValueAtTime(523, audioContext.currentTime); // C
+    oscillator1.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E
+    oscillator1.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G
+    
+    oscillator2.frequency.setValueAtTime(392, audioContext.currentTime); // G (lower)
+    oscillator2.frequency.setValueAtTime(523, audioContext.currentTime + 0.1); // C
+    oscillator2.frequency.setValueAtTime(659, audioContext.currentTime + 0.2); // E
+    
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+    
+    oscillator1.start(audioContext.currentTime);
+    oscillator2.start(audioContext.currentTime);
+    oscillator1.stop(audioContext.currentTime + 0.4);
+    oscillator2.stop(audioContext.currentTime + 0.4);
+  } catch (error) {
+    console.log('Sound not supported');
+  }
+};
+
+const playIncorrectSound = () => {
+  // Create a gentle disappointment sound
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Descending tone
+    oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
+    
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (error) {
+    console.log('Sound not supported');
+  }
+};
 
 interface QuizComponentProps {
   questions: QuizQuestion[];
@@ -23,15 +103,24 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
 
   const handleAnswerSelect = (answer: string) => {
     if (showExplanation) return;
+    playClickSound(); // Play click sound when user selects an answer
     setSelectedAnswer(answer);
   };
 
   const handleSubmitAnswer = () => {
     if (!selectedAnswer) return;
 
-    if (selectedAnswer === currentQuestion.correctAnswer) {
+    const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+    
+    if (isCorrect) {
       setScore(prevScore => prevScore + 1);
+      // Play success sound after a short delay to let UI update
+      setTimeout(() => playCorrectSound(), 100);
+    } else {
+      // Play incorrect sound after a short delay to let UI update
+      setTimeout(() => playIncorrectSound(), 100);
     }
+    
     setShowExplanation(true);
   };
 
@@ -107,7 +196,10 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
             showAnimation={true}
           />
         ) : (
-          <Button onClick={handleSubmitAnswer} variant="primary" disabled={!selectedAnswer} size="lg">
+          <Button onClick={() => {
+            playClickSound(); // Play click sound when submitting answer
+            handleSubmitAnswer();
+          }} variant="primary" disabled={!selectedAnswer} size="lg">
             답변 제출
           </Button>
         )}
