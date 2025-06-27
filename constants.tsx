@@ -6,7 +6,7 @@ export const NARRATOR_VOICE_ID = "z6Kj0hecH20CdetSElRT"; // Initial narrator voi
 export const SCRIPTS = {
   // Initial narrator voice scripts (using voice ID: z6Kj0hecH20CdetSElRT)
   onboardingWelcome: "딥페이크와 딥보이스 기술 체험에 오신 것을 진심으로 환영합니다. 이번 체험을 통해 AI 기술이 어떻게 작동하는지, 그리고 우리가 어떻게 대응해야 하는지 함께 알아보겠습니다.",
-  onboardingExplanation: "지금부터 인적사항을 적어주세요. 입력해주시는 사진과 음성으로 여러분의 캐릭터를 만들고, 캐릭터가 AI 기술에 대해 설명을 해줄거에요! 개인정보는 실습을 위해 활용되며, 안전하게 보호됩니다.",
+  onboardingExplanation: "지금부터 인적사항을 적어주세요. 입력해주시는 사진과 음성으로 여러분의 캐릭터를 만들고, 캐릭터가 AI 기술인 딥페이크과 딥보이스에 대해 설명을 해줄거에요! 개인정보는 실습을 위해 활용되며, 안전하게 보호됩니다.",
   
   welcome: "안녕하세요! 시작하기에 앞서서 스피커 볼륨을 높여주세요!",
   
@@ -15,7 +15,7 @@ export const SCRIPTS = {
   talkingPhotoGenerationStart: "완성된 캐릭터에 생명력을 불어넣어보겠습니다. 당신의 목소리를 이용해서 캐릭터가 실제로 말할 수 있도록 만들어드릴게요. 정말 신기한 기술이죠? 잠시만 기다려주세요!",
   
   caricatureGenerated: "이제 당신만의 특별한 캐릭터가 완성됐어요! 정말 멋지죠?",
-  talkingPhotoGenerated: "짜잔! 이제 실제 상황에서 이 기술들이 어떻게 쓰일 수 있는지 살펴볼까요?",
+  talkingPhotoGenerated: "짜잔! 이제 실제 상황에서 딥페이크, 딥보이스 기술이 어떻게 쓰일 수 있는지 제가 설명해드릴게요.",
   moduleSelection: "AI 기술로 생길 수 있는 위험 중, 어떤 내용이 더 궁금하신가요? 궁금한 주제를 선택하시면 쉽게 이해하실 수 있도록 알려드립니다.",
   module1Complete: "딥페이크가 가짜뉴스에 어떻게 악용될 수 있는지 알아보았습니다. 수고하셨어요!",
   module2Complete: "딥페이크가 신원도용에 어떻게 악용될 수 있는지 알아보았습니다. 수고하셨어요!",

@@ -20,9 +20,6 @@ import DeepfakeIntroductionPage from './pages/DeepfakeIntroductionPage.tsx';
 // LoadingSpinner and PageLayout are components, not pages for lazy loading in this context
 
 const App: React.FC = () => {
-  console.log('App component mounting...');
-  
-  
   // All hooks must be declared at the top level - never inside try/catch or conditionals
   const [currentPage, setCurrentPage] = useState<Page>(Page.Landing);
   const [userData, setUserDataState] = useState<UserData | null>(null);
@@ -49,12 +46,9 @@ const App: React.FC = () => {
   const loadUserProgress = useCallback(async (userIdParam: number) => {
     try {
       setIsLoadingProgress(true);
-      console.log('Fetching user data for ID:', userIdParam);
       const user = await apiService.getUserProgress(userIdParam);
-      console.log('Received user data:', user);
       
       if (!user || !user.name) {
-        console.log('Invalid or missing user data, clearing localStorage and redirecting to landing page');
         localStorage.removeItem('userId');
         setUserId(null);
         setCurrentPage(Page.Landing);
@@ -68,14 +62,6 @@ const App: React.FC = () => {
         return;
       }
 
-      console.log('User progress loaded successfully:', user);
-      console.log('API Response fields:', Object.keys(user));
-      console.log('current_page field:', user.current_page);
-      console.log('current_step field:', user.current_step);
-      console.log('caricature_url field:', user.caricature_url);
-      console.log('talking_photo_url field:', user.talking_photo_url);
-      console.log('Available Page enum values:', Object.keys(Page));
-      console.log('Page enum mapping:', Page);
 
       // Set user ID first
       setUserId(userIdParam);
@@ -94,78 +80,72 @@ const App: React.FC = () => {
         investment_call_audio_url: user.investment_call_audio_url,
         accident_call_audio_url: user.accident_call_audio_url
       };
-      console.log('Setting user data:', userData);
-      console.log('Including scenario URLs:', {
-        lottery_video_url: user.lottery_video_url,
-        crime_video_url: user.crime_video_url,
-        investment_call_audio_url: user.investment_call_audio_url,
-        accident_call_audio_url: user.accident_call_audio_url
-      });
       setUserDataState(userData);
       
       if (user.image_url) {
-        console.log('Setting image URL:', user.image_url);
         setUserImageUrlState(user.image_url);
       }
       if (user.voice_id) {
-        console.log('Setting voice ID:', user.voice_id);
         setVoiceIdState(user.voice_id);
       }
       if (user.caricature_url) {
-        console.log('Setting caricature URL:', user.caricature_url);
         setCaricatureUrlState(user.caricature_url);
       }
       if (user.talking_photo_url) {
-        console.log('Setting talking photo URL:', user.talking_photo_url);
         setTalkingPhotoUrlState(user.talking_photo_url);
       }
       
-      // Enhanced page restoration logic
+      // Enhanced page restoration logic with explicit mapping
       if (user.current_page) {
-        console.log('Raw current_page from API:', JSON.stringify(user.current_page));
-        console.log('Type of current_page:', typeof user.current_page);
+        let pageEnum: Page | undefined;
         
-        // Try direct mapping first
-        let pageEnum = Page[user.current_page as keyof typeof Page];
-        console.log('Direct enum mapping result:', pageEnum);
+        // Create explicit page name mapping to handle all cases
+        const pageNameToEnum: Record<string, Page> = {
+          'Landing': Page.Landing,
+          'UserOnboarding': Page.UserOnboarding,
+          'CaricatureGenerationIntro': Page.CaricatureGenerationIntro,
+          'CaricatureGeneration': Page.CaricatureGeneration,
+          'TalkingPhotoGenerationIntro': Page.TalkingPhotoGenerationIntro,
+          'TalkingPhotoGeneration': Page.TalkingPhotoGeneration,
+          'DeepfakeIntroduction': Page.DeepfakeIntroduction,
+          'ModuleSelection': Page.ModuleSelection,
+          'FakeNewsModule': Page.FakeNewsModule,
+          'IdentityTheftModule': Page.IdentityTheftModule,
+          'Completion': Page.Completion
+        };
         
-        // If direct mapping fails, try alternative approaches
-        if (pageEnum === undefined) {
-          // Try by numeric value if it's a number
-          if (typeof user.current_page === 'number') {
-            pageEnum = user.current_page as Page;
-            console.log('Numeric mapping result:', pageEnum);
+        // Try direct mapping first (with trimming)
+        if (typeof user.current_page === 'string') {
+          const trimmedPageName = user.current_page.trim();
+          if (pageNameToEnum[trimmedPageName]) {
+            pageEnum = pageNameToEnum[trimmedPageName];
           }
-          // Try by string value lookup
-          else if (typeof user.current_page === 'string') {
-            const pageKeys = Object.keys(Page).filter(key => isNaN(Number(key)));
-            console.log('Available page keys:', pageKeys);
-            const matchedKey = pageKeys.find(key => key.toLowerCase() === user.current_page.toLowerCase());
+          // Try case-insensitive mapping if direct mapping fails
+          else {
+            const lowerPageName = trimmedPageName.toLowerCase();
+            const matchedKey = Object.keys(pageNameToEnum).find(key => key.toLowerCase() === lowerPageName);
             if (matchedKey) {
-              pageEnum = Page[matchedKey as keyof typeof Page];
-              console.log('String match found:', matchedKey, 'maps to:', pageEnum);
+              pageEnum = pageNameToEnum[matchedKey];
             }
           }
         }
+        // Try numeric value if it's a number
+        else if (typeof user.current_page === 'number') {
+          pageEnum = user.current_page as Page;
+        }
         
-        if (pageEnum !== undefined && pageEnum >= 0 && pageEnum <= Object.keys(Page).length / 2) {
-          console.log(`✅ Restoring page to: ${user.current_page} (enum value: ${pageEnum})`);
+        if (pageEnum !== undefined && pageEnum >= 0 && pageEnum <= 10) {
           setCurrentPage(pageEnum);
         } else {
-          console.warn(`❌ Invalid page mapping for "${user.current_page}". Available pages:`, Object.keys(Page));
-          console.log('Defaulting to ModuleSelection');
           setCurrentPage(Page.ModuleSelection);
         }
       } else {
-         console.log('No current page saved, defaulting to ModuleSelection');
          setCurrentPage(Page.ModuleSelection);
       }
 
       if (user.current_step !== undefined) {
-        console.log('Setting current step:', user.current_step);
         setCurrentStep(user.current_step);
       } else {
-        console.log('No current step saved, defaulting to 0');
         setCurrentStep(0);
       }
       if (user.completed_modules && Array.isArray(user.completed_modules)) {
@@ -174,7 +154,6 @@ const App: React.FC = () => {
       }
       
     } catch (error) {
-      console.error('Failed to load user progress:', error);
       // Clear invalid user ID and start fresh
       localStorage.removeItem('userId');
       setUserId(null);
@@ -202,7 +181,6 @@ const App: React.FC = () => {
     // Create a key to identify unique save operations
     const saveKey = JSON.stringify({ userId, ...updates });
     if (lastSaveRef.current === saveKey) {
-      console.log('Duplicate save operation detected, skipping');
       return;
     }
     
@@ -234,16 +212,13 @@ const App: React.FC = () => {
         
         lastSaveRef.current = saveKey;
         await apiService.updateUserProgress(userId, progressUpdate);
-        console.log('User progress saved successfully');
       } catch (error) {
-        console.error('Failed to save user progress:', error);
         lastSaveRef.current = ''; // Reset on error to allow retry
       }
     }, 500); // 500ms debounce
   }, [userId, isInitialLoad]);
 
   const setCurrentPageOptimized = useCallback((page: Page) => {
-    console.log("Navigating to page:", Page[page]);
     
     // Add current page to history before navigating (unless it's the same page)
     if (page !== currentPage) {
@@ -268,7 +243,6 @@ const App: React.FC = () => {
   const goBack = useCallback(() => {
     if (navigationHistory.length > 0) {
       const previousPage = navigationHistory[navigationHistory.length - 1];
-      console.log("Going back to page:", Page[previousPage]);
       
       // Remove the last page from history
       setNavigationHistory(prev => prev.slice(0, -1));
@@ -287,7 +261,6 @@ const App: React.FC = () => {
 
   // Helper function to clear all user data and start fresh
   const clearAllDataAndStartFresh = useCallback(() => {
-    console.log('🧼 Clearing all user data and starting fresh');
     localStorage.removeItem('userId');
     setUserId(null);
     setCurrentPage(Page.Landing);
@@ -306,7 +279,6 @@ const App: React.FC = () => {
   }, []);
 
   const setCurrentStepOptimized = useCallback((step: number) => {
-    console.log("Setting current step:", step);
     setCurrentStep(step);
     if (userId) {
       saveUserProgress({ currentStep: step });
@@ -314,7 +286,6 @@ const App: React.FC = () => {
   }, [userId, saveUserProgress]);
 
   const setUserData = useCallback((data: UserData | any) => {
-    console.log("Setting user data:", data);
     
     // If this is called from saveUserInfo API, the data will have userId and success
     if (data && data.userId && data.success) {
@@ -322,7 +293,6 @@ const App: React.FC = () => {
       setUserId(userIdFromData);
       setUserDataState(data); // Also save the user's name, age, gender
       localStorage.setItem('userId', userIdFromData.toString());
-      console.log("User ID saved:", userIdFromData);
     } else {
       // Regular user data update (name, age, gender)
       setUserDataState(data);
@@ -330,22 +300,18 @@ const App: React.FC = () => {
   }, []);
 
   const setUserImageUrl = useCallback((url: string) => {
-    console.log("Setting user image URL:", url);
     setUserImageUrlState(url);
   }, []);
 
   const setUserAudioBlob = useCallback((blob: Blob) => {
-    console.log("Setting user audio blob, size:", blob.size);
     setUserAudioBlobState(blob);
   }, []);
   
   const setVoiceId = useCallback((id: string) => {
-    console.log("Setting voice ID:", id);
     setVoiceIdState(id);
   }, []);
 
   const setCaricatureUrl = useCallback((url: string) => {
-    console.log("Setting caricature URL:", url);
     setCaricatureUrlState(url);
     if (userId) {
       saveUserProgress({ caricatureUrl: url });
@@ -353,7 +319,6 @@ const App: React.FC = () => {
   }, [userId, saveUserProgress]);
 
   const setTalkingPhotoUrl = useCallback((url: string) => {
-    console.log("Setting talking photo URL:", url);
     setTalkingPhotoUrlState(url);
     if (userId) {
       saveUserProgress({ talkingPhotoUrl: url });
@@ -381,16 +346,13 @@ const App: React.FC = () => {
   // Function to refresh userData from the API to get updated scenario URLs
   const refreshUserData = useCallback(async () => {
     if (!userId) {
-      console.log('No userId available for refresh');
       return;
     }
     
     try {
-      console.log('🔄 Refreshing user data from API for userId:', userId);
       const user = await apiService.getUserProgress(userId);
       
       if (!user || !user.name) {
-        console.log('Invalid user data received during refresh');
         return;
       }
       
@@ -410,24 +372,14 @@ const App: React.FC = () => {
         pre_generation_status: user.pre_generation_status
       };
       
-      console.log('✅ Refreshed user data with scenario URLs:', {
-        lottery_video_url: !!updatedUserData.lottery_video_url,
-        crime_video_url: !!updatedUserData.crime_video_url,
-        investment_call_audio_url: !!updatedUserData.investment_call_audio_url,
-        accident_call_audio_url: !!updatedUserData.accident_call_audio_url,
-        pre_generation_status: updatedUserData.pre_generation_status
-      });
       
       setUserDataState(updatedUserData);
       
     } catch (error) {
-      console.error('Failed to refresh user data:', error);
     }
   }, [userId]);
 
   const renderPage = () => {
-    console.log('🎨 Rendering page:', Page[currentPage], 'enum value:', currentPage);
-    console.log('Current state - userData:', !!userData, 'caricatureUrl:', !!caricatureUrl, 'talkingPhotoUrl:', !!talkingPhotoUrl, 'voiceId:', !!voiceId);
     
     switch (currentPage) {
       case Page.Landing:
@@ -452,6 +404,7 @@ const App: React.FC = () => {
                   userImageUrl={userImageUrl} 
                   caricatureUrl={caricatureUrl}
                   setCaricatureUrl={setCaricatureUrl}
+                  voiceId={voiceId}
                   onGoBack={goBack}
                   canGoBack={canGoBack}
                 />;
@@ -460,6 +413,8 @@ const App: React.FC = () => {
                   setCurrentPage={setCurrentPageOptimized} 
                   onGoBack={goBack}
                   canGoBack={canGoBack}
+                  caricatureUrl={caricatureUrl}
+                  voiceId={voiceId}
                 />;
       case Page.TalkingPhotoGeneration:
         return <TalkingPhotoGenerationPage 
@@ -529,21 +484,16 @@ const App: React.FC = () => {
 
   // Load progress from localStorage on app start
   useEffect(() => {
-    console.log('Initial useEffect running...');
     try {
       const savedUserId = localStorage.getItem('userId');
-      console.log('Saved user ID from localStorage:', savedUserId);
       
       if (savedUserId && savedUserId !== 'null') {
-        console.log(`Found saved user ID: ${savedUserId}. Loading progress...`);
         loadUserProgress(Number(savedUserId));
       } else {
-        console.log("No saved user ID found. Starting fresh.");
         setIsLoadingProgress(false);
         setIsInitialLoad(false);
       }
     } catch (e) {
-      console.error('Error in initial useEffect:', e);
       setError('Failed to initialize app');
       setIsLoadingProgress(false);
       setIsInitialLoad(false);
@@ -552,16 +502,12 @@ const App: React.FC = () => {
 
   // Add a render effect to see what's being rendered
   useEffect(() => {
-    console.log('🔍 State Debug - Page:', Page[currentPage], 'Loading:', isLoadingProgress, 'User:', !!userData);
-    console.log('🔍 Browser Info - Safari:', /Safari/.test(navigator.userAgent), 'Chrome:', /Chrome/.test(navigator.userAgent));
-    console.log('🔍 localStorage userId:', localStorage.getItem('userId'));
   }, [currentPage, isLoadingProgress, userData]);
 
   // Move all remaining logic inside try block if needed
   try {
 
   } catch (e) {
-    console.error('Error in App component:', e);
     setError('Something went wrong. Please try refreshing the page.');
   }
   
@@ -597,7 +543,6 @@ const App: React.FC = () => {
       // Safari safety timeout - if still loading after 10 seconds, force landing page
       const timeout = setTimeout(() => {
         if (isLoadingProgress) {
-          console.log('⚠️ Loading timeout reached, forcing landing page');
           clearAllDataAndStartFresh();
         }
       }, 10000);

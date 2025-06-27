@@ -5,13 +5,14 @@ import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PageLayout from '../components/PageLayout.tsx';
 import * as apiService from '../services/apiService.ts'; 
 import { Page } from '../types.ts';
-import { SCRIPTS } from '../constants.tsx';
+import { SCRIPTS, NARRATOR_VOICE_ID } from '../constants.tsx';
 
 interface CaricatureGenerationPageProps {
   setCurrentPage: (page: Page) => void;
   userImageUrl: string | null;
   caricatureUrl: string | null;
   setCaricatureUrl: (url: string) => void;
+  voiceId: string | null;
   onGoBack: () => void;
   canGoBack: boolean;
 }
@@ -21,6 +22,7 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
   userImageUrl,
   caricatureUrl,
   setCaricatureUrl,
+  voiceId,
   onGoBack,
   canGoBack,
 }) => {
@@ -34,7 +36,6 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
     try {
       // Prevent multiple simultaneous generations
       if (hasStartedGeneration.current) {
-        console.log('🛑 Generation already in progress, skipping duplicate call');
         return;
       }
       
@@ -43,7 +44,6 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
       setError(null);
       setGeneratedCaricature(null);
       
-      console.log('🎨 Starting caricature generation...');
       setStatusMessage("이미지에서 얼굴 특징 분석 중...");
       await new Promise(resolve => setTimeout(resolve, 1500)); 
       
@@ -52,7 +52,6 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
       }
       
       const analysis = await apiService.analyzeFace(userImageUrl);
-      console.log("얼굴 분석 결과:", analysis.facialFeatures);
 
       setStatusMessage("캐릭터 생성 중...");
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -64,9 +63,7 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
       setCaricatureUrl(caricatureResult.caricatureUrl);
       setStatusMessage(SCRIPTS.caricatureGenerated);
       setIsLoading(false);
-      console.log('✅ Caricature generation completed successfully');
     } catch (err) {
-      console.error("캐리커처 생성 오류:", err);
       setError("캐리커처 생성에 실패했습니다. 네트워크 문제 또는 백엔드 서비스 사용 불가 때문일 수 있습니다. 다시 시도하거나, 가능하다면 이 단계를 건너뛰세요.");
       setStatusMessage("캐리커처 생성 중 오류 발생.");
     } finally {
@@ -76,51 +73,59 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
   };
 
   useEffect(() => {
-    console.log('🔄 CaricatureGenerationPage useEffect triggered');
-    console.log(`   - userImageUrl: ${userImageUrl ? 'EXISTS' : 'NULL'}`);
-    console.log(`   - caricatureUrl: ${caricatureUrl ? 'EXISTS' : 'NULL'}`);
-    console.log(`   - hasStartedGeneration: ${hasStartedGeneration.current}`);
-    
     if (!userImageUrl) {
-      console.log('❌ No user image URL, showing error');
       setError("사용자 이미지를 사용할 수 없습니다. 뒤로 돌아가 이미지를 업로드해주세요.");
       setIsLoading(false);
       return;
     }
 
-    // Pre-cache narration for TalkingPhotoGenerationIntro page
+    // Pre-cache narration for TalkingPhotoGenerationIntro page using narrator voice
     const preCacheNextNarration = async () => {
-      console.log('🎵 Pre-caching narration for TalkingPhotoGenerationIntro...');
       try {
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        const voiceId = userData.voiceId || localStorage.getItem('voiceId');
+        const narrationResult = await apiService.generateNarration(SCRIPTS.talkingPhotoGenerationStart, NARRATOR_VOICE_ID);
+        const audioBlob = new Blob([Uint8Array.from(atob(narrationResult.audioData), c => c.charCodeAt(0))], { type: narrationResult.audioType });
+        const audioUrl = URL.createObjectURL(audioBlob);
         
-        if (voiceId) {
-          const narrationResult = await apiService.generateNarration(SCRIPTS.talkingPhotoGenerationStart, voiceId);
-          const audioBlob = new Blob([Uint8Array.from(atob(narrationResult.audioData), c => c.charCodeAt(0))], { type: narrationResult.audioType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          
-          // Cache the audio
-          if (!(window as any).narrationCache) {
-            (window as any).narrationCache = new Map();
-          }
-          const scriptKey = `${SCRIPTS.talkingPhotoGenerationStart}-${voiceId}`;
-          (window as any).narrationCache.set(scriptKey, audioUrl);
-          console.log('✅ Pre-cached TalkingPhotoGenerationIntro narration');
-        } else {
-          console.warn('⚠️ No voiceId found for pre-caching');
+        // Cache the audio with narrator voice ID
+        if (!(window as any).narrationCache) {
+          (window as any).narrationCache = new Map();
         }
+        const scriptKey = `${SCRIPTS.talkingPhotoGenerationStart}-${NARRATOR_VOICE_ID}`;
+        (window as any).narrationCache.set(scriptKey, audioUrl);
       } catch (error) {
-        console.error('⚠️ Failed to pre-cache TalkingPhotoGenerationIntro narration:', error);
+        // Failed to pre-cache TalkingPhotoGenerationIntro narration
       }
     };
 
     // Start pre-caching in background
     preCacheNextNarration();
 
+    // Check for ongoing caricature generation from onboarding
+    const caricatureGenerationPromise = (window as any).caricatureGenerationPromise;
+    if (caricatureGenerationPromise) {
+      setStatusMessage("이미지 분석 중...");
+      setIsLoading(true);
+      
+      caricatureGenerationPromise
+        .then((caricatureUrl: string) => {
+          setGeneratedCaricature(caricatureUrl);
+          setCaricatureUrl(caricatureUrl);
+          setStatusMessage(SCRIPTS.caricatureGenerated);
+          setIsLoading(false);
+        })
+        .catch((error: any) => {
+          // Fall back to normal generation if background generation failed
+          generateCaricature();
+        })
+        .finally(() => {
+          // Clear the promise to avoid reuse
+          delete (window as any).caricatureGenerationPromise;
+        });
+      return;
+    }
+
     // If caricature already exists, show it instead of regenerating
     if (caricatureUrl) {
-      console.log('✅ Caricature already exists, using cached version');
       setGeneratedCaricature(caricatureUrl);
       setStatusMessage(SCRIPTS.caricatureGenerated);
       setIsLoading(false);
@@ -129,7 +134,6 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
 
     // Only generate if we haven't started yet
     if (!hasStartedGeneration.current) {
-      console.log('🚀 Starting caricature generation...');
       generateCaricature();
     }
   }, [userImageUrl]); // ✅ FIXED: Removed caricatureUrl from dependencies
@@ -159,7 +163,6 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
             <p className="text-slate-700 text-lg mb-8">{error}</p>
             <div className="flex justify-center gap-4">
               <Button onClick={() => {
-                console.log('🔄 User clicked retry button after error');
                 hasStartedGeneration.current = false; // Reset flag for retry
                 generateCaricature();
               }} variant="primary" size="lg">
@@ -187,7 +190,6 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
             </div>
             <div className="flex justify-center gap-4">
               <Button onClick={() => {
-                console.log('🔄 User clicked regenerate button');
                 hasStartedGeneration.current = false; // Reset flag for manual regeneration
                 generateCaricature();
               }} variant="secondary" size="lg">
@@ -197,7 +199,37 @@ const CaricatureGenerationPage: React.FC<CaricatureGenerationPageProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                 </svg>
               </Button>
-              <Button onClick={() => setCurrentPage(Page.TalkingPhotoGenerationIntro)} variant="primary" size="lg">
+              <Button onClick={() => {
+                // Start talking photo generation in background
+                if (generatedCaricature && voiceId) {
+                  console.log('FRONTEND: Starting background talking photo generation on caricature page');
+                  
+                  const talkingPhotoPromise = (async () => {
+                    try {
+                      console.log('FRONTEND: Background generation starting...');
+                      const talkingPhotoResult = await apiService.generateTalkingPhoto(
+                        generatedCaricature,
+                        localStorage.getItem('userName') || 'User', 
+                        voiceId,
+                        SCRIPTS.talkingPhotoGenerated,
+                        'intro'
+                      );
+                      
+                      console.log('FRONTEND: Background generation completed:', talkingPhotoResult.videoUrl);
+                      return talkingPhotoResult.videoUrl;
+                    } catch (error) {
+                      console.error('FRONTEND: Background generation failed:', error);
+                      throw error;
+                    }
+                  })();
+                  
+                  // Store the promise globally so TalkingPhotoGenerationPage can await it
+                  (window as any).talkingPhotoGenerationPromise = talkingPhotoPromise;
+                  console.log('FRONTEND: Background generation promise stored');
+                }
+                
+                setCurrentPage(Page.TalkingPhotoGenerationIntro);
+              }} variant="primary" size="lg">
                 <span className="sm:hidden">계속하기</span>
                 <span className="hidden sm:inline">말하게 만들기!</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2">

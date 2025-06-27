@@ -52,26 +52,44 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   // Chunked display state
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [chunks, setChunks] = useState<string[]>([]);
+  const [sentences, setSentences] = useState<string[]>([]);
+  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+  const [currentSentenceWords, setCurrentSentenceWords] = useState<string[]>([]);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [chunkTimings, setChunkTimings] = useState<number[]>([]);
   const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Replay functionality
   const [showReplayButton, setShowReplayButton] = useState(false);
 
-  // Split script into chunks when script changes
+  // Split script into sentences and words when script changes
   useEffect(() => {
     if (script && chunkedDisplay) {
-      // Split by comma, period, or other natural pauses
-      const scriptChunks = script.split(/[,.!?]/).map(chunk => chunk.trim()).filter(chunk => chunk.length > 0);
+      // Split by sentences (periods, exclamation marks, question marks)
+      const scriptSentences = script.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0);
+      setSentences(scriptSentences);
+      setCurrentSentenceIndex(0);
+      setCurrentWordIndex(0);
+      
+      // Initialize with first sentence words if available
+      if (scriptSentences.length > 0) {
+        const firstSentenceWords = scriptSentences[0].split(' ').filter(w => w.trim().length > 0);
+        setCurrentSentenceWords(firstSentenceWords);
+      } else {
+        setCurrentSentenceWords([]);
+      }
+      
+      // Also keep the old word-based chunks for timing calculations
+      const scriptChunks = script.split(' ').filter(chunk => chunk.trim().length > 0);
       setChunks(scriptChunks);
       setCurrentChunkIndex(0);
-      
-      // We'll calculate timing after we get the actual audio duration
-      // For now, set empty timings
       setChunkTimings([]);
       
-      console.log('NarrationPlayer: Created chunks:', scriptChunks);
     } else {
+      setSentences([]);
+      setCurrentSentenceWords([]);
+      setCurrentSentenceIndex(0);
+      setCurrentWordIndex(0);
       setChunks([]);
       setChunkTimings([]);
       setCurrentChunkIndex(0);
@@ -95,20 +113,16 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       }
 
       if (!voiceId) {
-        console.log('NarrationPlayer: No voiceId provided, skipping audio generation');
         setError('사용자 음성이 필요합니다. 음성 등록을 완료해주세요.');
         return;
       }
 
       // Check if we already have this audio cached
       const scriptKey = `${script}-${voiceId}`;
-      console.log(`NarrationPlayer: Cache key: ${scriptKey.substring(0, 100)}...`);
       
       // Check completed cache first
       if (completedCache.has(scriptKey)) {
-        console.log('NarrationPlayer: Using completed cache for script');
         const cachedUrl = completedCache.get(scriptKey)!;
-        console.log(`NarrationPlayer: Cached URL: ${cachedUrl.substring(0, 50)}...`);
         setError(null); // Clear any previous errors
         setAudioUrl(cachedUrl);
         setIsLoading(false);
@@ -118,9 +132,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       // Check global preload cache (from preloading)
       const globalCache = (window as any).narrationCache;
       if (globalCache && globalCache.has(scriptKey)) {
-        console.log('NarrationPlayer: Using PRELOADED cache for script ⚡');
         const preloadedUrl = globalCache.get(scriptKey);
-        console.log(`NarrationPlayer: Preloaded URL: ${preloadedUrl.substring(0, 50)}...`);
         setError(null);
         setAudioUrl(preloadedUrl);
         setIsLoading(false);
@@ -132,13 +144,11 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       // Check if being preloaded by the new preloader - wait a bit for it to complete
       const preloadingPromises = (window as any).preloadingPromises;
       if (preloadingPromises && preloadingPromises.has(scriptKey)) {
-        console.log('NarrationPlayer: Waiting for preloading to complete ⏳');
         setIsLoading(true);
         try {
           await preloadingPromises.get(scriptKey);
           // After preloading completes, check cache again
           if (globalCache && globalCache.has(scriptKey)) {
-            console.log('NarrationPlayer: Using cache after preloading completed ⚡');
             const preloadedUrl = globalCache.get(scriptKey);
             setError(null);
             setAudioUrl(preloadedUrl);
@@ -147,14 +157,12 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
             return;
           }
         } catch (error) {
-          console.error('NarrationPlayer: Error waiting for preloading:', error);
           // Continue with normal generation
         }
       }
 
       // Check if we already generated audio for this component instance
       if (lastGeneratedScriptRef.current === scriptKey) {
-        console.log('NarrationPlayer: Skipping duplicate generation for same script in this component');
         return;
       }
 
@@ -164,7 +172,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
 
         // Check if another component is already generating this audio
         if (audioCache.has(scriptKey)) {
-          console.log('NarrationPlayer: Waiting for existing generation to complete');
           const existingPromise = audioCache.get(scriptKey)!;
           const audioUrl = await existingPromise;
           
@@ -172,36 +179,21 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
             setError(null); // Clear any previous errors
             setAudioUrl(audioUrl);
             lastGeneratedScriptRef.current = scriptKey;
-            console.log(`NarrationPlayer: Using cached audio: ${audioUrl}`);
           }
           return;
         }
-
-        console.log(`NarrationPlayer: Generating audio with ElevenLabs for voiceId: ${voiceId}`);
         
         // Create promise and cache it immediately (using original working API)
         const generationPromise = apiService.generateNarration(script, voiceId)
           .then(result => {
             // Create blob URL from base64 data
-            console.log('NarrationPlayer: Creating audio blob from result:', {
-              audioType: result.audioType,
-              audioDataLength: result.audioData?.length,
-              audioDataPrefix: result.audioData?.substring(0, 50)
-            });
-            
             try {
               const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
               const audioUrl = URL.createObjectURL(audioBlob);
-              console.log('NarrationPlayer: Audio blob created successfully:', {
-                blobSize: audioBlob.size,
-                blobType: audioBlob.type,
-                audioUrl: audioUrl.substring(0, 50) + '...'
-              });
               completedCache.set(scriptKey, audioUrl);
               audioCache.delete(scriptKey); // Remove from pending cache
               return audioUrl;
             } catch (blobError) {
-              console.error('NarrationPlayer: Error creating audio blob:', blobError);
               throw new Error('Failed to create audio blob: ' );
             }
           })
@@ -215,15 +207,12 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         const audioUrl = await generationPromise;
         
         if (!isCancelled) {
-          console.log(`NarrationPlayer: Setting new audioUrl: ${audioUrl.substring(0, 50)}...`);
           setError(null); // Clear any previous errors on successful generation
           setAudioUrl(audioUrl);
           lastGeneratedScriptRef.current = scriptKey;
-          console.log(`NarrationPlayer: Audio generated successfully (blob URL)`);
         }
       } catch (err) {
         if (!isCancelled) {
-          console.error('NarrationPlayer: Failed to generate narration:', err);
           setError('음성 생성에 실패했습니다. 다시 시도해주세요.');
           setAudioUrl(null);
         }
@@ -254,8 +243,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         audioRef.current = null;
       }
       
-      console.log(`NarrationPlayer: Creating new audio element with URL: ${audioUrl.substring(0, 50)}...`);
-      
       // Create new audio element with the current URL
       const audio = new Audio(audioUrl);
       audio.preload = 'auto';
@@ -263,7 +250,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       audio.volume = 1.0; // Set full volume
       audio.muted = false; // Ensure audio is unmuted
       audio.onplay = () => {
-        console.log('NarrationPlayer: Audio started playing, duration:', audio.duration, 'volume:', audio.volume, 'muted:', audio.muted, 'chunks:', chunks.length);
         setError(null); // Clear any error when audio starts playing
         setIsPlaying(true);
         setShowReplayButton(false); // Hide replay button when audio starts
@@ -271,10 +257,15 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         
         // Start chunk timing tracking if chunked display is enabled
         if (chunkedDisplay && chunks.length > 0) {
-          console.log('NarrationPlayer: Starting chunked timing with simple even distribution');
-          // Reset to first chunk when starting
+          // Reset to first sentence and word when starting
           setCurrentChunkIndex(0);
-          // Start timing with simple even distribution
+          setCurrentSentenceIndex(0);
+          setCurrentWordIndex(0);
+          if (sentences.length > 0) {
+            const firstSentenceWords = sentences[0].split(' ').filter(w => w.trim().length > 0);
+            setCurrentSentenceWords(firstSentenceWords);
+          }
+          // Start timing with sentence-based distribution
           startChunkTiming();
         }
       };
@@ -289,9 +280,13 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         setIsPlaying(false);
         if (onPause) onPause(); // Call onPause when ended to switch back to static image
         
-        // Stop chunk timing and show last chunk
+        // Stop chunk timing and show last sentence completely
         stopChunkTiming();
-        if (chunkedDisplay && chunks.length > 0) {
+        if (chunkedDisplay && sentences.length > 0) {
+          setCurrentSentenceIndex(sentences.length - 1);
+          const lastSentenceWords = sentences[sentences.length - 1].split(' ').filter(w => w.trim().length > 0);
+          setCurrentSentenceWords(lastSentenceWords);
+          setCurrentWordIndex(lastSentenceWords.length - 1);
           setCurrentChunkIndex(chunks.length - 1);
         }
         
@@ -302,23 +297,13 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         if (onEnd) onEnd();
       };
       
-      // Add loadedmetadata event for debugging
+      // Add loadedmetadata event
       audio.onloadedmetadata = () => {
-        console.log('NarrationPlayer: Audio metadata loaded, duration:', audio.duration, 'chunkedDisplay:', chunkedDisplay, 'chunks:', chunks.length);
+        // Audio metadata loaded
       };
       audio.onerror = (e) => {
-        console.error('NarrationPlayer: Audio playback error:', e);
-        console.error('Audio error details:', {
-          error: e,
-          audioSrc: audio.src,
-          audioReadyState: audio.readyState,
-          audioNetworkState: audio.networkState,
-          audioError: audio.error
-        });
-        
         // Don't show error to user for now since backend is working correctly
         // Most "errors" are browser autoplay restrictions, not real failures
-        console.log('NarrationPlayer: Audio error logged but not displayed to user');
       };
       audioRef.current = audio;
     }
@@ -326,9 +311,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      console.log('NarrationPlayer: Attempting to play audio, volume:', audioRef.current.volume, 'muted:', audioRef.current.muted);
       audioRef.current.play().catch(err => {
-        console.error('NarrationPlayer: Failed to play audio:', err);
         setError('음성 재생에 실패했습니다.');
       });
     }
@@ -336,7 +319,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
 
   const handleRetry = useCallback(() => {
     if (script && voiceId) {
-      console.log('NarrationPlayer: Retrying audio generation');
       setError(null);
       setAudioUrl(null);
       setIsPlaying(false);
@@ -351,10 +333,9 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     }
   }, [script, voiceId]);
 
-  // Track audioUrl changes for debugging and reset auto-play flag
+  // Track audioUrl changes and reset auto-play flag
   useEffect(() => {
     if (audioUrl) {
-      console.log(`NarrationPlayer: audioUrl changed to: ${audioUrl.substring(0, 50)}...`);
       // Reset auto-play flag when audioUrl changes
       hasAutoPlayed.current = false;
       // Clear any previous errors when new audio is available
@@ -365,7 +346,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   // Auto-play when audio is ready (always auto-play, not just when autoPlay prop is true)
   useEffect(() => {
     if (audioUrl && !isPlaying && !isLoading && !hasAutoPlayed.current) {
-      console.log('NarrationPlayer: Auto-playing generated audio');
       hasAutoPlayed.current = true;
       handlePlayPause(); // Play immediately without delay
     }
@@ -383,9 +363,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   
   // Chunk timing functions
   const startChunkTiming = useCallback(() => {
-    if (!audioRef.current || chunks.length === 0) return;
-    
-    console.log('NarrationPlayer: Starting chunk timing with', chunks.length, 'chunks');
+    if (!audioRef.current || chunks.length === 0 || sentences.length === 0) return;
     
     const updateChunk = () => {
       if (!audioRef.current) return;
@@ -395,21 +373,66 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       
       if (!totalDuration || chunks.length === 0 || audioRef.current.paused) return;
       
-      let newChunkIndex = 0;
-      
-      // Simple even distribution - more reliable than character-based timing
-      const timePerChunk = totalDuration / chunks.length;
-      newChunkIndex = Math.min(Math.floor(currentTime / timePerChunk), chunks.length - 1);
-      
-      if (newChunkIndex !== currentChunkIndex && newChunkIndex < chunks.length) {
-        //console.log(`NarrationPlayer: Switching to chunk ${newChunkIndex} at time ${currentTime.toFixed(2)}s / ${totalDuration.toFixed(2)}s: "${chunks[newChunkIndex]}"`);
-        setCurrentChunkIndex(newChunkIndex);
-      }
+             // Use actual audio timing, add visual pauses only
+       const timePerWord = totalDuration / chunks.length;
+       const globalWordIndex = Math.min(Math.floor(currentTime / timePerWord), chunks.length - 1);
+       
+       // Find which sentence this word belongs to
+       let wordCount = 0;
+       let targetSentenceIndex = 0;
+       let targetWordIndex = 0;
+       
+       for (let i = 0; i < sentences.length; i++) {
+         const sentenceWords = sentences[i].split(' ').filter(w => w.trim().length > 0);
+         const sentenceStartWord = wordCount;
+         const sentenceEndWord = wordCount + sentenceWords.length - 1;
+         
+         if (globalWordIndex >= sentenceStartWord && globalWordIndex <= sentenceEndWord) {
+           targetSentenceIndex = i;
+           targetWordIndex = globalWordIndex - sentenceStartWord;
+           break;
+         } else if (globalWordIndex > sentenceEndWord) {
+           // We've passed this sentence - check if we should pause
+           const timePastSentence = currentTime - ((sentenceEndWord + 1) * timePerWord);
+           const pauseDuration = 0.8; // 800ms pause
+           
+           if (timePastSentence < pauseDuration && i < sentences.length - 1) {
+             // We're in the pause after this sentence - show complete sentence
+             targetSentenceIndex = i;
+             targetWordIndex = sentenceWords.length - 1;
+             break;
+           }
+         }
+         
+         wordCount += sentenceWords.length;
+       }
+       
+       // Safety fallback for end of script
+       if (targetSentenceIndex >= sentences.length) {
+         targetSentenceIndex = sentences.length - 1;
+         const lastSentenceWords = sentences[targetSentenceIndex].split(' ').filter(w => w.trim().length > 0);
+         targetWordIndex = lastSentenceWords.length - 1;
+       }
+       
+       // Update sentence if changed
+       if (targetSentenceIndex !== currentSentenceIndex) {
+         setCurrentSentenceIndex(targetSentenceIndex);
+         const newSentenceWords = sentences[targetSentenceIndex].split(' ').filter(w => w.trim().length > 0);
+         setCurrentSentenceWords(newSentenceWords);
+         setCurrentWordIndex(targetWordIndex);
+       } else if (targetWordIndex !== currentWordIndex) {
+         setCurrentWordIndex(targetWordIndex);
+       }
+       
+       // Update global chunk index
+       if (globalWordIndex !== currentChunkIndex) {
+         setCurrentChunkIndex(globalWordIndex);
+       }
     };
     
-    // Update chunk every 100ms
+    // Update every 100ms for smooth progression
     timeUpdateIntervalRef.current = setInterval(updateChunk, 100);
-  }, [currentChunkIndex, chunks]);
+  }, [currentChunkIndex, chunks, sentences, currentSentenceIndex, currentWordIndex]);
   
   const stopChunkTiming = useCallback(() => {
     if (timeUpdateIntervalRef.current) {
@@ -429,8 +452,14 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     stopChunkTiming();
     if (chunkedDisplay) {
       setCurrentChunkIndex(0);
+      setCurrentSentenceIndex(0);
+      setCurrentWordIndex(0);
+      if (sentences.length > 0) {
+        const firstSentenceWords = sentences[0].split(' ').filter(w => w.trim().length > 0);
+        setCurrentSentenceWords(firstSentenceWords);
+      }
     }
-  }, [onPause, stopChunkTiming, chunkedDisplay]);
+  }, [onPause, stopChunkTiming, chunkedDisplay, sentences]);
 
   // Cleanup effect when script changes
   useEffect(() => {
@@ -450,7 +479,6 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     return () => {
       // Clean up audio element when component unmounts completely
       if (audioRef.current) {
-        console.log('NarrationPlayer: Cleaning up audio on component unmount');
         audioRef.current.pause();
         audioRef.current.src = '';
         audioRef.current = null;
@@ -463,17 +491,21 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
   // Replay function
   const handleReplay = useCallback(() => {
     if (audioRef.current) {
-      console.log('NarrationPlayer: Replaying audio');
       audioRef.current.currentTime = 0;
       setCurrentChunkIndex(0); // Reset to first chunk
+      setCurrentSentenceIndex(0);
+      setCurrentWordIndex(0);
+      if (sentences.length > 0) {
+        const firstSentenceWords = sentences[0].split(' ').filter(w => w.trim().length > 0);
+        setCurrentSentenceWords(firstSentenceWords);
+      }
       setIsPlaying(true); // Set playing state immediately
       audioRef.current.play().catch(err => {
-        console.error('NarrationPlayer: Failed to replay audio:', err);
         setError('음성 재생에 실패했습니다.');
         setIsPlaying(false);
       });
     }
-  }, []);
+  }, [sentences]);
 
   // Expose stopAudio method to parent components
   useImperativeHandle(ref, () => ({
@@ -549,7 +581,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                   src={imageUrl}
                   alt="AI 캐릭터"
                   className="rounded-3xl w-72 h-72 md:w-80 md:h-80 object-cover mx-auto"
-                  onLoad={() => console.log('NarrationPlayer: Image loaded')}
+                  onLoad={() => {}}
                   style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}
                 />
                 
@@ -601,33 +633,40 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
           {/* Script display - conditionally visible */}
           {(hideScript ? false : showScript) && (
             <div className="mt-6">
-              {chunkedDisplay && chunks.length > 0 ? (
+              {chunkedDisplay && sentences.length > 0 && currentSentenceWords.length > 0 ? (
                 <div className="w-full">
                   <div className="text-center">
-                    {/* Text container with proper height and positioning */}
-                    <div className="relative min-h-[5rem] sm:min-h-[4rem] flex items-center justify-center px-2 sm:px-4">
-                      <div className="w-full max-w-none">
-                        {chunks.map((chunk, index) => (
-                          <p 
-                            key={`chunk-${index}`}
-                            className={`text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed font-medium transition-all duration-700 ease-in-out ${
-                              index === currentChunkIndex 
-                                ? 'opacity-100 transform translate-y-0 relative scale-100' 
-                                : 'opacity-0 transform translate-y-3 absolute inset-0 scale-95'
-                            }`}
-                            style={{
-                              textShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                              wordBreak: 'keep-all',
-                              overflowWrap: 'break-word',
-                              whiteSpace: 'pre-wrap'
-                            }}
-                          >
-                            {chunk}
-                          </p>
-                        ))}
+                    {/* Sentence-based word display with fade-in effects */}
+                    <div className="min-h-[8rem] sm:min-h-[6rem] flex items-center justify-center px-2 sm:px-4">
+                      <div className="w-full max-w-4xl">
+                        <p 
+                          className="text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed font-medium"
+                          style={{
+                            textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                            wordBreak: 'keep-all',
+                            overflowWrap: 'break-word',
+                            whiteSpace: 'pre-wrap'
+                          }}
+                        >
+                          {currentSentenceWords.map((word, index) => (
+                            <span
+                              key={`${currentSentenceIndex}-${index}`}
+                              className={`inline-block transition-all duration-300 ease-in-out ${
+                                index <= currentWordIndex 
+                                  ? 'opacity-100 transform translate-y-0' 
+                                  : 'opacity-0 transform translate-y-2'
+                              }`}
+                              style={{
+                                transitionDelay: `${Math.max(0, (index - Math.max(0, currentWordIndex - 2)) * 100)}ms`
+                              }}
+                            >
+                              {word}
+                              {index < currentSentenceWords.length - 1 && ' '}
+                            </span>
+                          ))}
+                        </p>
                       </div>
                     </div>
-                    
                   </div>
                 </div>
               ) : (

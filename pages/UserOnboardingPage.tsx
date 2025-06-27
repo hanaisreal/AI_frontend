@@ -32,7 +32,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
   // Define step titles
   const stepTitles = [
     "환영합니다",
-    "딥페이크 체험 안내 사항",
+    "안내 사항",
     "사용자 정보 입력 및 음성 녹음"
   ];
   
@@ -81,7 +81,6 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
 
     const nextScript = getNextScript();
     if (nextScript) {
-      console.log(`🎵 Scheduling preload for step ${currentStep + 1}`);
       const preloadTimer = scheduleNarrationPreload(nextScript, NARRATOR_VOICE_ID, 2000);
       return () => clearTimeout(preloadTimer);
     }
@@ -120,7 +119,7 @@ AI는 이미 우리 곁에 가까이 있어요.
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!name.trim() || !age.trim() || !gender || !imageFile || !audioBlob) {
-      setError("모든 필드를 작성하고, 이미지를 업로드하고, 목소리를 녹음해주세요.");
+      
       return;
     }
     setError(null);
@@ -138,34 +137,56 @@ AI는 이미 우리 곁에 가까이 있어요.
       setVoiceId(result.voiceId);
       setUserAudioBlob(audioBlob);
 
-      console.log("✅ Complete onboarding successful:", {
-        userId: result.userId,
-        imageUrl: result.imageUrl,
-        voiceId: result.voiceId,
-        voiceName: result.voiceName
-      });
+      // Complete onboarding successful
 
-      // Pre-cache narration for CaricatureGenerationIntro page
-      console.log('🎵 Pre-caching narration for CaricatureGenerationIntro...');
-      try {
-        const narrationResult = await apiService.generateNarration(SCRIPTS.caricatureGenerationStart, result.voiceId);
-        const audioBlob = new Blob([Uint8Array.from(atob(narrationResult.audioData), c => c.charCodeAt(0))], { type: narrationResult.audioType });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        
-        // Cache the audio
-        if (!(window as any).narrationCache) {
-          (window as any).narrationCache = new Map();
+      // Pre-cache narration and start caricature generation in parallel
+      
+      const preloadPromises = [];
+      
+      // 1. Pre-cache narration for CaricatureGenerationIntro page
+      const narrationPromise = (async () => {
+        try {
+          const narrationResult = await apiService.generateNarration(SCRIPTS.caricatureGenerationStart, NARRATOR_VOICE_ID);
+          const audioBlob = new Blob([Uint8Array.from(atob(narrationResult.audioData), c => c.charCodeAt(0))], { type: narrationResult.audioType });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          // Cache the audio with narrator voice ID
+          if (!(window as any).narrationCache) {
+            (window as any).narrationCache = new Map();
+          }
+          const scriptKey = `${SCRIPTS.caricatureGenerationStart}-${NARRATOR_VOICE_ID}`;
+          (window as any).narrationCache.set(scriptKey, audioUrl);
+        } catch (error) {
+          // Failed to pre-cache CaricatureGenerationIntro narration
         }
-        const scriptKey = `${SCRIPTS.caricatureGenerationStart}-${result.voiceId}`;
-        (window as any).narrationCache.set(scriptKey, audioUrl);
-        console.log('✅ Pre-cached CaricatureGenerationIntro narration');
-      } catch (error) {
-        console.error('⚠️ Failed to pre-cache CaricatureGenerationIntro narration:', error);
-      }
-
+      })();
+      
+      // 2. Start caricature generation in background
+      const caricaturePromise = (async () => {
+        try {
+          // First analyze the face
+          const faceAnalysisResult = await apiService.analyzeFace(result.imageUrl);
+          
+          // Then generate caricature
+          const caricatureResult = await apiService.generateCaricature(faceAnalysisResult.facialFeatures, "Create a caricature based on the user's facial features");
+          
+          return caricatureResult.caricatureUrl;
+          
+        } catch (error) {
+          throw error; // Let the generation page handle the error
+        }
+      })();
+      
+      // Store the promise globally so CaricatureGenerationPage can await it
+      (window as any).caricatureGenerationPromise = caricaturePromise;
+      
+      preloadPromises.push(narrationPromise, caricaturePromise);
+      
+      // Wait for narration (critical for next page), but don't wait for caricature
+      await narrationPromise;
+      
       setCurrentPage(Page.CaricatureGenerationIntro);
     } catch (err) {
-      console.error("Onboarding error:", err);
       setError("온보딩 중 오류가 발생했습니다. 다시 시도해주세요. 백엔드 서버가 실행 중인지 확인하세요.");
     } finally {
       setIsLoading(false);

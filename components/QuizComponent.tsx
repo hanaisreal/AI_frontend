@@ -29,7 +29,7 @@ const playClickSound = () => {
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.05);
   } catch (error) {
-    console.log('Sound not supported');
+    // Sound not supported
   }
 };
 
@@ -62,7 +62,7 @@ const playCorrectSound = () => {
     oscillator1.stop(audioContext.currentTime + 0.4);
     oscillator2.stop(audioContext.currentTime + 0.4);
   } catch (error) {
-    console.log('Sound not supported');
+    // Sound not supported
   }
 };
 
@@ -86,7 +86,7 @@ const playIncorrectSound = () => {
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.3);
   } catch (error) {
-    console.log('Sound not supported');
+    // Sound not supported
   }
 };
 
@@ -113,13 +113,11 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
     const preCacheExplanationNarrations = async () => {
       if (!voiceId) return;
       
-      console.log('🎵 Pre-caching quiz explanation narrations...');
       const cache = new Map<string, string>();
       
       for (const question of questions) {
         if (question.explanation) {
           try {
-            console.log(`🎵 Generating explanation narration for question: ${question.id}`);
             const result = await apiService.generateNarration(question.explanation, voiceId);
             
             // Create audio blob and URL
@@ -127,15 +125,13 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
             const audioUrl = URL.createObjectURL(audioBlob);
             
             cache.set(question.id, audioUrl);
-            console.log(`✅ Explanation narration cached for question: ${question.id}`);
           } catch (error) {
-            console.error(`⚠️ Failed to cache explanation narration for question ${question.id}:`, error);
+            // Failed to cache explanation narration
           }
         }
       }
       
       setExplanationNarrationCache(cache);
-      console.log('✅ All quiz explanation narrations pre-cached');
     };
 
     preCacheExplanationNarrations();
@@ -145,8 +141,6 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
   const playExplanationNarration = (questionId: string) => {
     const audioUrl = explanationNarrationCache.get(questionId);
     if (audioUrl) {
-      console.log(`🎵 Playing explanation narration for question: ${questionId}`);
-      
       // Stop any currently playing audio
       if (audioRef.current) {
         audioRef.current.pause();
@@ -157,12 +151,10 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
       const audio = new Audio(audioUrl);
       audio.volume = 0.8; // Slightly lower volume for explanation
       audio.play().catch(err => {
-        console.error('Failed to play explanation narration:', err);
+        // Failed to play explanation narration
       });
       
       audioRef.current = audio;
-    } else {
-      console.log(`⚠️ No cached narration found for question: ${questionId}`);
     }
   };
 
@@ -209,7 +201,6 @@ const QuizComponent: React.FC<QuizComponentProps> = ({ questions, onQuizComplete
       
       // Pre-cache post-quiz narration when user reaches the second (final) quiz question
       if (currentQuestionIndex === 0 && onPreloadPostQuizNarration) {
-        console.log('🎵 User reached second quiz question, pre-caching post-quiz narration...');
         onPreloadPostQuizNarration();
       }
     } else {

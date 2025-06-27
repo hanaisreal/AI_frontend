@@ -61,10 +61,8 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
 
   // Reset module state when component mounts (switching between modules)
   useEffect(() => {
-    console.log(`🔄 BaseModulePage mounted for module: ${moduleTitle}`);
     // Reset to first step when switching modules to prevent stale state
     if (globalCurrentStep >= steps.length) {
-      console.log(`⚠️ Resetting out-of-bounds global step ${globalCurrentStep} to 0 for ${moduleTitle}`);
       setCurrentStepIndex(0);
       setGlobalCurrentStep(0);
     } else {
@@ -78,7 +76,6 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   const preloadNextNarration = useCallback(async (currentStepIndex: number) => {
     const nextStepIndex = currentStepIndex + 1;
     if (nextStepIndex >= steps.length) {
-      console.log(`🎵 No next step to preload (current: ${currentStepIndex}, total: ${steps.length})`);
       return; // No next step
     }
     
@@ -86,30 +83,20 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     
     // Enhanced logic: preload narration for any step that has narrationScript
     if (!nextStep.narrationScript) {
-      console.log(`🎵 Next step ${nextStep.id} (${nextStep.type}) has no narrationScript, skipping preload`);
       return;
     }
     
     if (!userData?.userId || !voiceId) {
-      console.log(`🎵 Missing user data for preload: userId=${userData?.userId}, voiceId=${voiceId ? 'exists' : 'missing'}`);
       return;
     }
     
     try {
       setPreloadingNext(true);
-      console.log(`🚀 Pre-loading narration for step ${nextStep.id} (${nextStep.type})`);
-      console.log(`  - User ID: ${userData.userId}`);
-      console.log(`  - Step ID: ${nextStep.id}`);
-      console.log(`  - Step Type: ${nextStep.type}`);
-      console.log(`  - Script: "${nextStep.narrationScript?.substring(0, 50)}..."`);
-      console.log(`  - Voice ID: ${voiceId}`);
       
       // Use the new preloader utility for better coordination
       await preloadNarration(nextStep.narrationScript, voiceId);
       
-      console.log(`✅ Pre-loaded narration for step ${nextStep.id} (${nextStep.type}) using preloader`);
     } catch (error) {
-      console.error(`⚠️ Pre-load failed for step ${nextStep.id}:`, error);
       // Pre-load failure is non-critical, continue normally
     } finally {
       setPreloadingNext(false);
@@ -119,7 +106,6 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   // Sync local step with global step tracking (one-way sync to prevent loops)
   useEffect(() => {
     if (currentStepIndex !== globalCurrentStep) {
-      console.log(`🔄 Syncing step: local ${currentStepIndex} → global ${globalCurrentStep}`);
       setGlobalCurrentStep(currentStepIndex);
     }
   }, [currentStepIndex, globalCurrentStep, setGlobalCurrentStep]);
@@ -127,31 +113,25 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   // Initialize local step from global step only once
   useEffect(() => {
     if (globalCurrentStep !== currentStepIndex && globalCurrentStep < steps.length && currentStepIndex === 0) {
-      console.log(`🔄 Initializing local step from global: ${globalCurrentStep}`);
       setCurrentStepIndex(globalCurrentStep);
     } else if (globalCurrentStep >= steps.length && currentStepIndex === 0) {
       // Safety check: if global step is out of bounds for this module, reset to 0
-      console.log(`⚠️ Global step ${globalCurrentStep} is out of bounds for module with ${steps.length} steps, resetting to 0`);
       setCurrentStepIndex(0);
     }
   }, [globalCurrentStep, steps.length]); // Removed currentStepIndex to prevent loop
 
   useEffect(() => {
-    console.log(`🔄 Step changed to index ${currentStepIndex}: ${currentStep?.title || 'No step'}`);
     setInteractiveContent(null); 
     setStepError(null);
 
     if (!currentStep) {
-      console.log('⚠️ No current step found');
       // Safety check: if step is out of bounds, reset to first step
       if (currentStepIndex >= steps.length && steps.length > 0) {
-        console.log(`⚠️ Step index ${currentStepIndex} is out of bounds for module with ${steps.length} steps, resetting to 0`);
         setCurrentStepIndex(0);
       }
       return;
     }
     
-    console.log(`🎨 Setting up step: ${currentStep.title} (type: ${currentStep.type})`);
     setIsLoadingStep(true);
     
     // Video case studies and some other types should skip persona transition
@@ -161,15 +141,12 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         currentStep.type === 'voice_call_scenario' || 
         currentStep.type === 'video_call_scenario' ||
         currentStep.type === 'quiz') {
-      console.log(`🔄 Skipping persona transition for ${currentStep.type} step`);
       setCurrentView('content');
     } else if (currentStep.type === 'info' && currentStep.narrationScript) {
       // Info steps with narrationScript (like detection tips) should have persona transition
-      console.log(`🔄 Using persona transition for info step with script:`, currentStep.narrationScript?.substring(0, 50) + '...');
       setCurrentView('personaTransition');
       setScriptForPersona(currentStep.narrationScript || '');
     } else {
-      console.log(`🔄 Using persona transition for ${currentStep.type} step with script:`, currentStep.narrationScript?.substring(0, 50) + '...');
       setCurrentView('personaTransition');
       // Use the narrationScript directly from the step
       setScriptForPersona(currentStep.narrationScript || '');
@@ -188,7 +165,6 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   useEffect(() => {
     if (!isLoadingStep && userData?.userId && voiceId) {
       // Universal preloading for ALL step types - ensures seamless audio experience
-      console.log(`🎵 Setting up universal narration preload for step: ${currentStep?.id} (type: ${currentStep?.type})`);
       
       let preloadDelay = 3000; // Default delay
       
@@ -231,8 +207,6 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
           preloadDelay = 3000; // Safe default for any other step types
       }
       
-      console.log(`🎵 Scheduling narration preload with ${preloadDelay}ms delay for ${currentStep?.type} step`);
-      
       const preloadTimer = setTimeout(() => {
         preloadNextNarration(currentStepIndex);
       }, preloadDelay);
@@ -244,26 +218,8 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   // Scenario processing functions
   const processFaceswapScenario = async (step: ModuleStep) => {
     try {
-      console.log('🔍 Using pre-generated faceswap scenario:', {
-        userData,
-        step: {
-          scenarioType: step.scenarioType,
-          audioScript: step.audioScript
-        }
-      });
-
-      // Debug: Check specific fields
-      console.log('🔍 Debugging scenario URLs:', {
-        scenarioType: step.scenarioType,
-        hasLotteryUrl: !!userData?.lottery_video_url,
-        lotteryUrl: userData?.lottery_video_url,
-        hasCrimeUrl: !!userData?.crime_video_url,
-        crimeUrl: userData?.crime_video_url,
-        allUserDataKeys: userData ? Object.keys(userData) : 'no userData'
-      });
 
       if (!userData) {
-        console.error('❌ Missing user data:', { userData: !!userData });
         return <div className="text-red-500">사용자 데이터가 불완전합니다.</div>;
       }
 
@@ -271,25 +227,20 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
       let talkingPhotoUrl = null;
 
       if (step.scenarioType === 'lottery' && userData.lottery_video_url) {
-        console.log('✅ Using pre-generated lottery video:', userData.lottery_video_url);
         talkingPhotoUrl = userData.lottery_video_url;
       } else if (step.scenarioType === 'crime' && userData.crime_video_url) {
-        console.log('✅ Using pre-generated crime video:', userData.crime_video_url);
         talkingPhotoUrl = userData.crime_video_url;
       } else {
         // Try refreshing user data to get updated scenario URLs
-        console.log('🔄 Scenario content missing, attempting to refresh user data...');
         try {
           await refreshUserData();
-          console.log('✅ User data refreshed, checking again...');
           
           // After refresh, check again (note: userData might not be updated yet due to async state)
           // The component will re-render when userData state is updated
         } catch (refreshError) {
-          console.error('⚠️ Failed to refresh user data:', refreshError);
+          // Failed to refresh user data
         }
         
-        console.error(`❌ Pre-generated content not found for ${step.scenarioType} scenario`);
         return (
           <div className="text-yellow-500 p-4 bg-yellow-50 rounded-lg">
             <div className="font-medium">시나리오 영상을 준비 중입니다.</div>
@@ -421,7 +372,6 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               autoPlay={true}
               controls={true}
               onVideoEnd={() => {
-                console.log(`✅ Talking photo video loaded for ${step.scenarioType}`);
                 handleScenarioComplete();
                 handleVideoEnd();
               }}

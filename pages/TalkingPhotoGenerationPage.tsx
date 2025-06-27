@@ -77,8 +77,6 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
     // Function to pre-cache deepfake introduction narration
     const preCacheDeepfakeIntroNarration = async () => {
       try {
-        console.log('🚀 Pre-caching deepfake introduction narration...');
-        
         // Generate the deepfake intro start narration using user's custom voice
         const result = await apiService.generateNarration(SCRIPTS.deepfakeIntroStart, voiceId);
         
@@ -90,11 +88,7 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
         // Initialize global cache if it doesn't exist
         (window as any).narrationCache = (window as any).narrationCache || new Map();
         (window as any).narrationCache.set(scriptKey, audioUrl);
-        
-        console.log('✅ Pre-cached deepfake introduction narration with user voice');
-        console.log(`  - Cache key: ${scriptKey.substring(0, 50)}...`);
       } catch (error) {
-        console.error('⚠️ Pre-cache failed for deepfake introduction narration:', error);
         // Pre-cache failure is non-critical, continue normally
       }
     };
@@ -105,16 +99,10 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
     const checkExistingTalkingPhoto = async () => {
       try {
         if (userData?.userId) {
-          console.log('🔍 Checking if talking photo already exists for user...');
-          
           // Fetch current user data to check if talking photo URL exists
           const userProgressData = await apiService.getUserProgress(parseInt(userData.userId));
           
           if (userProgressData?.talking_photo_url) {
-            console.log('✅ Talking photo already exists, using cached version');
-            console.log(`   - Existing URL: ${userProgressData.talking_photo_url}`);
-            console.log('   - Skipping regeneration to save API credits');
-            
             setGeneratedTalkingPhoto(userProgressData.talking_photo_url);
             setTalkingPhotoUrl(userProgressData.talking_photo_url);
             setStatusMessage(SCRIPTS.talkingPhotoGenerated);
@@ -127,7 +115,6 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
         }
         return false; // No existing photo found
       } catch (error) {
-        console.error('⚠️ Error checking existing talking photo:', error);
         return false; // Continue with generation on error
       }
     };
@@ -138,21 +125,53 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
     hasStartedGeneration.current = true;
 
     const generate = async () => {
-      // First check if talking photo already exists
+      // First check for ongoing talking photo generation from TalkingPhotoGenerationIntroPage
+      const talkingPhotoGenerationPromise = (window as any).talkingPhotoGenerationPromise;
+      if (talkingPhotoGenerationPromise) {
+        console.log('FRONTEND: Found background generation promise, waiting for completion...');
+        setStatusMessage(progressSteps[0]);
+        setIsLoading(true);
+        
+        try {
+          const talkingPhotoUrl = await talkingPhotoGenerationPromise;
+          console.log('FRONTEND: Background generation completed successfully:', talkingPhotoUrl);
+          setGeneratedTalkingPhoto(talkingPhotoUrl);
+          setTalkingPhotoUrl(talkingPhotoUrl);
+          setStatusMessage(SCRIPTS.talkingPhotoGenerated);
+          setIsLoading(false);
+          
+          // Pre-cache the deepfake introduction narration for better UX
+          setTimeout(preCacheDeepfakeIntroNarration, 500);
+          return;
+        } catch (error) {
+          console.error('FRONTEND: Background generation failed, falling back to normal generation:', error);
+          // Fall back to normal generation if background generation failed
+          // Continue to next checks...
+        } finally {
+          // Clear the promise to avoid reuse
+          delete (window as any).talkingPhotoGenerationPromise;
+        }
+      } else {
+        console.log('FRONTEND: No background generation promise found, starting normal generation');
+      }
+
+      // Second check if talking photo already exists in database
       const hasExistingPhoto = await checkExistingTalkingPhoto();
       if (hasExistingPhoto) {
         return; // Skip generation
       }
 
       try {
-        console.log('🎬 Starting talking photo generation...');
-        console.log(`   - Caricature URL: ${caricatureUrl}`);
-        console.log(`   - User: ${userData?.name}`);
-        console.log(`   - Voice ID: ${voiceId}`);
-        
+        console.log('FRONTEND: Starting fresh talking photo generation (no background generation available)');
         setStatusMessage(progressSteps[0]); // Start with first progress step
         setCurrentStep(0);
-        const result = await apiService.generateTalkingPhoto(caricatureUrl, userData?.name || "사용자", voiceId!);
+        const result = await apiService.generateTalkingPhoto(
+          caricatureUrl, 
+          userData?.name || "사용자", 
+          voiceId,
+          SCRIPTS.talkingPhotoGenerated,
+          'generation'
+        );
         
         setTalkingPhotoUrl(result.videoUrl);
         setGeneratedTalkingPhoto(result.videoUrl); 
@@ -165,15 +184,11 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
           setStatusMessage(SCRIPTS.talkingPhotoGenerated);
         }
 
-        console.log('✅ Talking photo generation completed');
-        console.log(`   - Video URL: ${result.videoUrl}`);
-        console.log(`   - Is Sample: ${result.isSample || false}`);
-
         // Pre-cache the deepfake introduction narration for instant experience
         setTimeout(preCacheDeepfakeIntroNarration, 1000);
         
       } catch (err) {
-        console.error("말하는 사진 생성 오류:", err);
+        console.error('FRONTEND: Fresh talking photo generation failed:', err);
         setError("말하는 사진 생성에 실패했습니다. 네트워크 또는 서비스 문제일 수 있습니다. 다시 시도해주세요.");
         setStatusMessage("말하는 사진 생성 중 오류 발생.");
       } finally {
@@ -186,31 +201,15 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
 
   // Handler for continue button - triggers scenario generation and navigation
   const handleContinueToDeepfake = async () => {
-    console.log('\n' + '='.repeat(60));
-    console.log('🚀 FRONTEND: Starting scenario generation from TalkingPhoto continue button...');
-    console.log(`   - Voice ID: ${voiceId}`);
-    console.log(`   - User ID: ${userData?.userId}`);
-    console.log(`   - Trigger: Continue button clicked`);
-    console.log('='.repeat(60));
-
     // Start scenario generation in background (fire and forget)
     if (voiceId && userData?.userId) {
       apiService.startScenarioGeneration(voiceId)
         .then(result => {
-          console.log('\n✅ FRONTEND: Scenario generation started successfully!');
-          console.log('   - API Response:', result);  
-          console.log('   - Status:', result.status);
-          console.log('🎬 Background processing started on server...');
-          console.log('   - Face swaps, talking photos, and voice dubs will be generated');
-          console.log('   - All URLs will be saved to database automatically');
-          console.log('💡 Check server console for detailed generation logs');
+          // Background processing started on server
         })
         .catch(error => {
-          console.error('\n❌ FRONTEND: Failed to start scenario generation:', error);
-          console.error('   - This is non-critical, user experience continues normally');
+          // This is non-critical, user experience continues normally
         });
-    } else {
-      console.warn('⚠️ Missing required data for scenario generation, skipping');
     }
 
     // Navigate immediately (don't wait for background task)
@@ -284,16 +283,12 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
                         disablePictureInPicture
                         controlsList="nodownload"
                         onError={(e) => {
-                            console.error('Video load error:', e);
-                            console.error('Video src:', generatedTalkingPhoto);
-                            console.error('Video error code:', e.currentTarget.error?.code);
-                            console.error('Video error message:', e.currentTarget.error?.message);
                             setVideoError(true);
                         }}
-                        onLoadStart={() => console.log('Video loading started from:', generatedTalkingPhoto)}
-                        onLoadedData={() => console.log('Video data loaded successfully')}
-                        onCanPlay={() => console.log('Video ready to play')}
-                        onPlay={() => console.log('Video started playing')}
+                        onLoadStart={() => {}}
+                        onLoadedData={() => {}}
+                        onCanPlay={() => {}}
+                        onPlay={() => {}}
                     />
                 ) : (
                     <div className="w-64 h-96 md:w-80 md:h-[30rem] bg-gray-200 rounded-lg border-4 border-orange-500 flex flex-col items-center justify-center">
@@ -303,7 +298,6 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
                         </p>
                         <button 
                             onClick={() => {
-                                console.log('Retrying video load from:', generatedTalkingPhoto);
                                 setVideoError(false);
                             }}
                             className="mt-4 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
@@ -317,7 +311,6 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
                             className="mt-2 text-sm text-blue-600 hover:underline"
                             onClick={(e) => {
                                 e.preventDefault();
-                                console.log('Opening direct link:', generatedTalkingPhoto);
                                 window.open(generatedTalkingPhoto, '_blank');
                             }}
                         >

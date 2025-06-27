@@ -29,12 +29,25 @@ const ScriptNarrationSlide: React.FC<ScriptNarrationSlideProps> = ({
     setDisplayedText('');
     setIsComplete(false);
     
+    if (!script || typeof script !== 'string') {
+      setDisplayedText('Script not available');
+      setIsComplete(true);
+      return;
+    }
+    
     const words = script.split(' ');
     let currentIndex = 0;
     
     const interval = setInterval(() => {
       if (currentIndex < words.length) {
-        setDisplayedText(prev => prev + (currentIndex === 0 ? '' : ' ') + words[currentIndex]);
+        const currentWord = words[currentIndex];
+        // Only add the word if it's not undefined, null, or empty
+        if (currentWord != null && currentWord.trim() !== '') {
+          setDisplayedText(prev => {
+            const needsSpace = prev.length > 0;
+            return prev + (needsSpace ? ' ' : '') + currentWord;
+          });
+        }
         currentIndex++;
       } else {
         clearInterval(interval);
@@ -45,57 +58,48 @@ const ScriptNarrationSlide: React.FC<ScriptNarrationSlideProps> = ({
     return () => clearInterval(interval);
   }, [script]);
 
-  // Audio generation and playback
+  // Audio playback using pre-cached audio
   useEffect(() => {
     if (voiceId && autoPlay) {
-      generateAndPlayAudio();
+      playPreCachedAudio();
     }
   }, [script, voiceId, autoPlay]);
 
-  const generateAndPlayAudio = async () => {
+  const playPreCachedAudio = async () => {
     if (!voiceId) return;
     
     try {
       setIsPlaying(true);
-      console.log('🎵 Generating narration for script-only slide...');
       
-      const result = await apiService.generateNarration(script, voiceId);
+      // Check for pre-cached audio
+      const scriptKey = `${script}-${voiceId}`;
+      const globalCache = (window as any).narrationCache;
       
-      // Create audio from base64 data
-      const audioBlob = new Blob([Uint8Array.from(atob(result.audioData), c => c.charCodeAt(0))], { type: result.audioType });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      const audio = new Audio(audioUrl);
-      setAudioElement(audio);
-      
-      audio.onended = () => {
+      if (globalCache && globalCache.has(scriptKey)) {
+        const audioUrl = globalCache.get(scriptKey);
+        
+        const audio = new Audio(audioUrl);
+        setAudioElement(audio);
+        
+        audio.onended = () => {
+          setIsPlaying(false);
+        };
+        
+        audio.onerror = (e) => {
+          setIsPlaying(false);
+        };
+        
+        await audio.play();
+      } else {
         setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
-      };
-      
-      audio.onerror = (e) => {
-        console.error('Audio playback error:', e);
-        setIsPlaying(false);
-      };
-      
-      await audio.play();
-      console.log('✅ Audio playback started');
+      }
       
     } catch (error) {
-      console.error('Failed to generate or play audio:', error);
       setIsPlaying(false);
     }
   };
 
-  const handleReplay = () => {
-    if (audioElement) {
-      audioElement.currentTime = 0;
-      audioElement.play();
-      setIsPlaying(true);
-    } else {
-      generateAndPlayAudio();
-    }
-  };
+  // Removed handleReplay function - no longer needed
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -120,21 +124,7 @@ const ScriptNarrationSlide: React.FC<ScriptNarrationSlideProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-center items-center space-x-4">
-        {voiceId && (
-          <Button 
-            onClick={handleReplay} 
-            variant="secondary" 
-            size="md"
-            disabled={isPlaying}
-          >
-            {isPlaying ? '재생 중...' : '다시 듣기'}
-            <svg className="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-            </svg>
-          </Button>
-        )}
-        
+      <div className="flex justify-center items-center">
         <ContinueButton 
           onClick={onNext}
           showAnimation={isComplete}

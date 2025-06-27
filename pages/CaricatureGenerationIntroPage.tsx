@@ -1,9 +1,9 @@
 import React from 'react';
 import PageLayout from '../components/PageLayout.tsx';
 import Card from '../components/Card.tsx';
-import ScriptNarrationSlide from '../components/ScriptNarrationSlide.tsx';
+import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import { Page } from '../types.ts';
-import { SCRIPTS } from '../constants.tsx';
+import { SCRIPTS, NARRATOR_VOICE_ID, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
 
 interface CaricatureGenerationIntroPageProps {
   setCurrentPage: (page: Page) => void;
@@ -13,8 +13,6 @@ interface CaricatureGenerationIntroPageProps {
 
 const CaricatureGenerationIntroPage: React.FC<CaricatureGenerationIntroPageProps> = ({
   setCurrentPage,
-  onGoBack,
-  canGoBack,
 }) => {
   const handleNext = () => {
     setCurrentPage(Page.CaricatureGeneration);
@@ -23,12 +21,15 @@ const CaricatureGenerationIntroPage: React.FC<CaricatureGenerationIntroPageProps
   return (
     <PageLayout title="캐릭터 생성 준비">
       <Card>
-        <ScriptNarrationSlide
-          script={SCRIPTS.caricatureGenerationStart}
+        <PersonaTransitionSlide
           onNext={handleNext}
-          title="당신만의 캐릭터를 만들어보세요"
-          voiceId={null} // No voice for this intro page
-          autoPlay={false}
+          userData={null}
+          caricatureUrl={PLACEHOLDER_USER_IMAGE} // Use placeholder for narrator
+          voiceId={NARRATOR_VOICE_ID}
+          talkingPhotoUrl={null}
+          script={SCRIPTS.caricatureGenerationStart}
+          showScript={true}
+          chunkedDisplay={true}
         />
       </Card>
     </PageLayout>
