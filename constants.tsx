@@ -89,7 +89,7 @@ export const QUIZZES: { [key: string]: QuizQuestion[] } = {
         "실제 뉴스 방송을 복사한다"
       ],
       correctAnswer: "AI가 얼굴을 바꿔서 만든다",
-      explanation: "딥페이크는 인공지능 기술을 이용해 얼굴을 다른 사람의 얼굴로 바꾸는 방식으로 가짜 영상을 만들어냅니다."
+      explanation: "딥페이크는 인공지능 기술을 이용해 얼굴을 다른 사람의 얼굴로 바꾸는 방식으로 가짜 영상을 만들어내요."
     },
   ],
   fakeNewsQuiz2: [
@@ -103,7 +103,7 @@ export const QUIZZES: { [key: string]: QuizQuestion[] } = {
         "영상이 멋있으면 믿는다"
       ],
       correctAnswer: "출처를 꼭 확인한다",
-      explanation: "가짜 뉴스에 속지 않으려면 누가 만들었는지, 믿을 만한 기관에서 나온 것인지 출처를 꼭 확인해야 합니다."
+      explanation: "가짜 뉴스에 속지 않으려면 누가 만들었는지, 믿을 만한 기관에서 나온 것인지 출처를 꼭 확인해야 해요."
     }
   ],
   identityTheftQuiz1: [
