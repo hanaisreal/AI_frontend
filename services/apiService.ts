@@ -20,6 +20,7 @@ interface SmartNarrationResponse {
 
 // Smart API URL detection - works for both local development and Vercel deployment
 const getApiBaseUrl = () => {
+  
   // If VITE_API_BASE_URL is explicitly set, use it
   if (import.meta.env.VITE_API_BASE_URL) {
     console.log(`🔧 Using VITE_API_BASE_URL: ${import.meta.env.VITE_API_BASE_URL}`);
@@ -240,7 +241,15 @@ export const completeOnboarding = async (
     body: formData,
   });
   
-  const result = await handleApiResponse(response);
+  console.log(`FRONTEND: Response status: ${response.status}`);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('FRONTEND: Complete onboarding failed with error:', errorText);
+    throw new Error(`API Error ${response.status}: ${errorText}`);
+  }
+  
+  const result = await response.json();
   return {
     success: result.success,
     userId: result.userId,
@@ -347,6 +356,28 @@ export const getUserProgress = async (userId: number) => {
   const data = await handleApiResponse(response);
   console.log('API Response data:', data);
   return data;
+};
+
+export const startVoiceGeneration = async (voiceId: string): Promise<{
+  message: string;
+  status: string;
+  user_data: {
+    name: string;
+  };
+}> => {
+  console.log(`FRONTEND: Starting voice generation for voice ID: ${voiceId}`);
+  
+  const response = await fetch(`${API_BASE_URL}/api/start-voice-generation`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ voiceId }),
+  });
+  
+  const result = await handleApiResponse(response);
+  console.log('Voice generation started:', result);
+  return result;
 };
 
 export const startScenarioGeneration = async (voiceId: string): Promise<{

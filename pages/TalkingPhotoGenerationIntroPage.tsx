@@ -4,7 +4,6 @@ import Card from '../components/Card.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import { Page } from '../types.ts';
 import { SCRIPTS, NARRATOR_VOICE_ID, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
-import * as apiService from '../services/apiService.ts';
 
 interface TalkingPhotoGenerationIntroPageProps {
   setCurrentPage: (page: Page) => void;
@@ -16,10 +15,6 @@ interface TalkingPhotoGenerationIntroPageProps {
 
 const TalkingPhotoGenerationIntroPage: React.FC<TalkingPhotoGenerationIntroPageProps> = ({
   setCurrentPage,
-  onGoBack,
-  canGoBack,
-  caricatureUrl,
-  voiceId,
 }) => {
   const handleNext = async () => {
     setCurrentPage(Page.TalkingPhotoGeneration);

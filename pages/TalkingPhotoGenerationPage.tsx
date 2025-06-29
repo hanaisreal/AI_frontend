@@ -205,7 +205,7 @@ const TalkingPhotoGenerationPage: React.FC<TalkingPhotoGenerationPageProps> = ({
     if (voiceId && userData?.userId) {
       apiService.startScenarioGeneration(voiceId)
         .then(result => {
-          // Background processing started on server
+          // Voice dubbing should be triggered in the background
         })
         .catch(error => {
           // This is non-critical, user experience continues normally
