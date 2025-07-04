@@ -108,10 +108,74 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
     setDebugInfo(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${message}`]); // Keep last 5 messages
   }, []);
 
-  const handleImageSelect = useCallback((file: File) => {
+  // Compress image before upload (especially important for iPhone photos)
+  const compressImage = useCallback((file: File, maxSizeMB = 2, quality = 0.7): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions (max 1200px width/height)
+        const maxDimension = 1200;
+        let { width, height } = img;
+        
+        if (width > height && width > maxDimension) {
+          height = (height * maxDimension) / width;
+          width = maxDimension;
+        } else if (height > maxDimension) {
+          width = (width * maxDimension) / height;
+          height = maxDimension;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw compressed image
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
+            
+            addDebugInfo(`🗜️ 이미지 압축: ${(file.size/1024/1024).toFixed(1)}MB → ${(compressedFile.size/1024/1024).toFixed(1)}MB`);
+            resolve(compressedFile);
+          } else {
+            addDebugInfo(`⚠️ 이미지 압축 실패, 원본 사용`);
+            resolve(file);
+          }
+        }, 'image/jpeg', quality);
+      };
+      
+      img.onerror = () => {
+        addDebugInfo(`❌ 이미지 로드 실패, 원본 사용`);
+        resolve(file);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  }, [addDebugInfo]);
+
+  const handleImageSelect = useCallback(async (file: File) => {
     console.log('📸 Image selected:', file.name, file.size, file.type);
     addDebugInfo(`📸 이미지 선택: ${file.name} (${(file.size/1024/1024).toFixed(1)}MB, ${file.type})`);
-    setImageFile(file);
+    
+    // Compress image if it's too large (especially for iPhone photos)
+    let processedFile = file;
+    if (file.size > 3 * 1024 * 1024) { // If larger than 3MB
+      addDebugInfo(`🗜️ 이미지가 큽니다. 압축 중...`);
+      try {
+        processedFile = await compressImage(file);
+      } catch (error) {
+        console.error('❌ Image compression failed:', error);
+        addDebugInfo(`❌ 이미지 압축 실패: ${error}`);
+      }
+    }
+    
+    setImageFile(processedFile);
     
     // iOS-compatible image preview generation
     const reader = new FileReader();
@@ -129,13 +193,13 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
     
     // iOS Safari compatibility for HEIC files
     try {
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(processedFile);
     } catch (error) {
       console.error('❌ FileReader error:', error);
       addDebugInfo('❌ FileReader 오류 발생');
       setImagePreviewUrl(PLACEHOLDER_USER_IMAGE);
     }
-  }, [addDebugInfo]);
+  }, [addDebugInfo, compressImage]);
 
   const handleRecordingComplete = useCallback((blob: Blob) => {
     console.log('🎵 Audio recording completed:', blob.size, blob.type);
@@ -247,9 +311,9 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
           errorMessage = isIOS 
             ? "iOS Safari에서 이미지 파일 형식 오류가 발생했습니다. 다른 이미지를 선택해주세요."
             : "이미지 파일 형식이 올바르지 않습니다. 다른 이미지를 선택해주세요.";
-        } else if (err.message.includes('file too large')) {
+        } else if (err.message.includes('file too large') || err.message.includes('413') || err.message.includes('Request Entity Too Large')) {
           errorMessage = isIOS 
-            ? "파일 크기가 너무 큽니다. iOS에서는 더 작은 파일을 사용해주세요."
+            ? "파일 크기가 너무 큽니다. iPhone 사진은 자동으로 압축되지만, 더 작은 파일을 선택하거나 다시 시도해주세요."
             : "파일 크기가 너무 큽니다. 더 작은 파일을 사용해주세요.";
         } else if (err.message.includes('corrupted or empty')) {
           errorMessage = "파일이 손상되었거나 비어있습니다. 다른 파일을 선택해주세요.";

@@ -68,7 +68,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           {fileName ? (
             <p className="text-sm text-slate-500">{fileName}</p>
           ) : (
-            <p className="text-sm text-slate-500">PNG, JPG, GIF 최대 10MB</p>
+            <p className="text-sm text-slate-500">PNG, JPG, GIF (iPhone 사진 자동 압축)</p>
           )}
         </div>
       </div>
