@@ -25,6 +25,8 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [audioEnded, setAudioEnded] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [audioLoaded, setAudioLoaded] = useState(false);
 
   // Play background narration when component mounts
   useEffect(() => {
@@ -44,7 +46,14 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
               setIsAudioPlaying(false);
               setAudioEnded(true);
             };
-            audioRef.current.play().catch(console.error);
+            audioRef.current.onloadeddata = () => setAudioLoaded(true);
+            
+            // Try to play with autoplay detection
+            audioRef.current.play().catch((error) => {
+              console.warn('🚫 Autoplay blocked:', error);
+              setAutoplayBlocked(true);
+              setAudioLoaded(true);
+            });
           }
         } else {
           // Generate new audio with user's voice
@@ -69,12 +78,31 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
               setIsAudioPlaying(false);
               setAudioEnded(true);
             };
-            audioRef.current.play().catch(console.error);
+            audioRef.current.onloadeddata = () => setAudioLoaded(true);
+            
+            // Try to play with autoplay detection
+            audioRef.current.play().catch((error) => {
+              console.warn('🚫 Autoplay blocked:', error);
+              setAutoplayBlocked(true);
+              setAudioLoaded(true);
+            });
           }
         }
       } catch (error) {
         console.error('Failed to play module selection narration:', error);
+        setAudioLoaded(true);
+        setAutoplayBlocked(true);
       }
+    };
+
+    // Add a safety timeout to prevent infinite waiting
+    const safetyTimeout = setTimeout(() => {
+      if (!audioEnded && !isAudioPlaying) {
+        console.warn('⏰ Audio safety timeout - enabling buttons');
+        setAudioLoaded(true);
+        setAutoplayBlocked(true);
+      }
+    }, 5000); // 5 seconds timeout
     };
 
     // Pre-cache first narrations of both modules
@@ -147,6 +175,7 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
 
     // Cleanup function
     return () => {
+      clearTimeout(safetyTimeout);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -177,20 +206,58 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
       <audio ref={audioRef} hidden />
       
       <Card>
-        {/* Audio indicator with smooth transitions */}
+        {/* Audio indicator and manual controls */}
         <div className={`mb-8 text-center transition-all duration-500 ${
-          isAudioPlaying || audioEnded ? 'opacity-100 transform translate-y-0' : 
+          isAudioPlaying || audioEnded || autoplayBlocked ? 'opacity-100 transform translate-y-0' : 
           'opacity-0 transform translate-y-2'
         }`}>
-          <p className={`text-orange-600 text-lg font-semibold ${
-            isAudioPlaying ? 'animate-pulse' : ''
-          }`}>📚 학습하고 싶은 주제를 선택해주세요</p>
+          {autoplayBlocked && !audioEnded ? (
+            <div className="space-y-3">
+              <p className="text-orange-600 text-lg font-semibold">🔊 오디오 재생이 차단되었습니다</p>
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.play().then(() => {
+                      setAutoplayBlocked(false);
+                      setIsAudioPlaying(true);
+                    }).catch(console.error);
+                  }
+                }}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                🎵 오디오 재생하기
+              </button>
+              <div className="text-sm text-gray-600">또는 아래 버튼을 바로 선택하셔도 됩니다</div>
+            </div>
+          ) : (
+            <p className={`text-orange-600 text-lg font-semibold ${
+              isAudioPlaying ? 'animate-pulse' : ''
+            }`}>📚 학습하고 싶은 주제를 선택해주세요</p>
+          )}
         </div>
+        
+        {/* Skip audio option when it's playing but user wants to proceed */}
+        {isAudioPlaying && (
+          <div className="mb-6 text-center">
+            <button
+              onClick={() => {
+                setAudioEnded(true);
+                setIsAudioPlaying(false);
+                if (audioRef.current) {
+                  audioRef.current.pause();
+                }
+              }}
+              className="text-sm text-gray-600 hover:text-gray-800 underline"
+            >
+              ⏭️ 오디오 건너뛰기
+            </button>
+          </div>
+        )}
         
         <div className="space-y-6">
           <Button
             onClick={() => setCurrentPage(Page.FakeNewsModule)}
-            disabled={module1Completed || !audioEnded}
+            disabled={module1Completed || (!audioEnded && !autoplayBlocked && audioLoaded)}
             fullWidth
             size="lg"
             variant={module1Completed ? "secondary" : "primary"}
@@ -213,7 +280,7 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
           
           <Button
             onClick={() => setCurrentPage(Page.IdentityTheftModule)}
-            disabled={module2Completed || !audioEnded}
+            disabled={module2Completed || (!audioEnded && !autoplayBlocked && audioLoaded)}
             fullWidth
             size="lg"
             variant={module2Completed ? "secondary" : "primary"}
