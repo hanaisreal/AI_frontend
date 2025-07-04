@@ -258,10 +258,42 @@ export const completeOnboarding = async (
   formData.append('image', imageFile);
   formData.append('voice', audioBlob, audioFilename);
   
-  const response = await fetch(`${API_BASE_URL}/api/complete-onboarding`, {
+  // iOS-specific fetch configuration
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const fetchOptions: RequestInit = {
     method: 'POST',
     body: formData,
+  };
+  
+  // Add iOS-specific headers and timeout
+  if (isIOS) {
+    console.log('📱 iOS device detected - using iOS-optimized fetch settings');
+    // iOS Safari sometimes needs these headers
+    fetchOptions.headers = {
+      'Accept': 'application/json',
+      // Don't set Content-Type for FormData - let browser set it with boundary
+    };
+  }
+  
+  console.log('🚀 Sending onboarding request with FormData...');
+  console.log('📊 FormData contents:');
+  for (let [key, value] of formData.entries()) {
+    if (value instanceof File || value instanceof Blob) {
+      console.log(`   - ${key}: ${value.constructor.name} (${value.size} bytes, type: ${value.type})`);
+    } else {
+      console.log(`   - ${key}: ${value}`);
+    }
+  }
+  
+  // Add timeout wrapper for iOS
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('Request timeout - network may be slow')), 120000); // 2 minutes
   });
+  
+  const response = await Promise.race([
+    fetch(`${API_BASE_URL}/api/complete-onboarding`, fetchOptions),
+    timeoutPromise
+  ]);
   
   console.log(`FRONTEND: Response status: ${response.status}`);
   

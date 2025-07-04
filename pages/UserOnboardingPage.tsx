@@ -47,6 +47,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
   const [audioBlob, setAudioBlobLocal] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]); // For mobile debugging
 
   // Helper function to determine which field should be highlighted
   const getCurrentActiveField = () => {
@@ -103,18 +104,44 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
 오늘 함께 배우는 내용이 여러분께 도움이 되기를 바랍니다. 그럼 함께 시작 해볼까요?
 `;
 
+  const addDebugInfo = useCallback((message: string) => {
+    setDebugInfo(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${message}`]); // Keep last 5 messages
+  }, []);
+
   const handleImageSelect = useCallback((file: File) => {
+    console.log('📸 Image selected:', file.name, file.size, file.type);
+    addDebugInfo(`📸 이미지 선택: ${file.name} (${(file.size/1024/1024).toFixed(1)}MB, ${file.type})`);
     setImageFile(file);
+    
+    // iOS-compatible image preview generation
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreviewUrl(reader.result as string);
+      console.log('✅ Image preview generated successfully');
+      addDebugInfo('✅ 이미지 미리보기 생성 완료');
     };
-    reader.readAsDataURL(file);
-  }, []);
+    reader.onerror = (error) => {
+      console.error('❌ Image preview failed:', error);
+      addDebugInfo('❌ 이미지 미리보기 실패');
+      // Still set the file even if preview fails
+      setImagePreviewUrl(PLACEHOLDER_USER_IMAGE);
+    };
+    
+    // iOS Safari compatibility for HEIC files
+    try {
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('❌ FileReader error:', error);
+      addDebugInfo('❌ FileReader 오류 발생');
+      setImagePreviewUrl(PLACEHOLDER_USER_IMAGE);
+    }
+  }, [addDebugInfo]);
 
   const handleRecordingComplete = useCallback((blob: Blob) => {
+    console.log('🎵 Audio recording completed:', blob.size, blob.type);
+    addDebugInfo(`🎵 음성 녹음 완료: ${(blob.size/1024/1024).toFixed(1)}MB, ${blob.type}`);
     setAudioBlobLocal(blob);
-  }, []);
+  }, [addDebugInfo]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -123,13 +150,25 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
       return;
     }
     setError(null);
+    setDebugInfo([]); // Clear previous debug info
     setIsLoading(true);
+    
+    // Show device and browser info on screen
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const browser = navigator.userAgent.includes('Safari') ? 'Safari' : 
+                   navigator.userAgent.includes('Chrome') ? 'Chrome' : 
+                   navigator.userAgent.includes('Firefox') ? 'Firefox' : 'Unknown';
+    
+    addDebugInfo(`📱 기기: ${isIOS ? 'iOS' : 'Desktop'}, 브라우저: ${browser}`);
+    addDebugInfo(`🚀 온보딩 제출 시작 (${name}, ${age}세, ${gender})`);
 
     try {
       const userData = { name, age, gender };
       
       // Complete onboarding in one atomic operation
+      addDebugInfo(`📡 API 호출 중... (이미지: ${(imageFile.size/1024/1024).toFixed(1)}MB, 음성: ${(audioBlob.size/1024/1024).toFixed(1)}MB)`);
       const result = await apiService.completeOnboarding(userData, imageFile, audioBlob);
+      addDebugInfo(`✅ API 응답 성공: 사용자 ID ${result.userId}`);
       
       // Set all the data from the single response
       setUserData({ ...userData, userId: result.userId, success: result.success });
@@ -189,19 +228,39 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
     } catch (err) {
       console.error("Onboarding error:", err);
       
+      // Add error to debug info for mobile visibility
+      addDebugInfo(`❌ 오류 발생: ${err instanceof Error ? err.message : String(err)}`);
+      
       // More specific error messages for iOS users
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       let errorMessage = "온보딩 중 오류가 발생했습니다. 다시 시도해주세요.";
       
       if (err instanceof Error) {
+        // Show the actual error message for debugging
+        addDebugInfo(`🔍 상세 오류: ${err.message.substring(0, 100)}...`);
+        
         if (err.message.includes('Voice file must be an audio file')) {
           errorMessage = isIOS 
             ? "iOS Safari에서 음성 파일 형식 오류가 발생했습니다. 다시 녹음해주세요."
             : "음성 파일 형식이 올바르지 않습니다. 다시 녹음해주세요.";
+        } else if (err.message.includes('Image file must be an image')) {
+          errorMessage = isIOS 
+            ? "iOS Safari에서 이미지 파일 형식 오류가 발생했습니다. 다른 이미지를 선택해주세요."
+            : "이미지 파일 형식이 올바르지 않습니다. 다른 이미지를 선택해주세요.";
+        } else if (err.message.includes('file too large')) {
+          errorMessage = isIOS 
+            ? "파일 크기가 너무 큽니다. iOS에서는 더 작은 파일을 사용해주세요."
+            : "파일 크기가 너무 큽니다. 더 작은 파일을 사용해주세요.";
+        } else if (err.message.includes('corrupted or empty')) {
+          errorMessage = "파일이 손상되었거나 비어있습니다. 다른 파일을 선택해주세요.";
         } else if (err.message.includes('network') || err.message.includes('fetch')) {
-          errorMessage = "네트워크 연결을 확인하고 다시 시도해주세요.";
+          errorMessage = isIOS 
+            ? "네트워크 연결을 확인하고 다시 시도해주세요. iOS Safari에서는 WiFi 연결을 권장합니다."
+            : "네트워크 연결을 확인하고 다시 시도해주세요.";
         } else if (err.message.includes('timeout')) {
-          errorMessage = "요청 시간이 초과되었습니다. 다시 시도해주세요.";
+          errorMessage = isIOS 
+            ? "요청 시간이 초과되었습니다. iOS에서는 네트워크가 느릴 수 있습니다. 다시 시도해주세요."
+            : "요청 시간이 초과되었습니다. 다시 시도해주세요.";
         }
       }
       
@@ -302,7 +361,21 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
                 </p>
               )}
 
-              {error && <p className="text-lg text-red-600 bg-red-100 p-4 rounded-lg border border-red-300">{error}</p>}
+              {error && (
+                <div className="space-y-3">
+                  <p className="text-lg text-red-600 bg-red-100 p-4 rounded-lg border border-red-300">{error}</p>
+                  
+                  {/* Debug info only shows when there's an error */}
+                  {debugInfo.length > 0 && (
+                    <div className="bg-gray-100 p-3 rounded-lg border border-gray-300">
+                      <p className="text-sm font-semibold text-gray-700 mb-2">오류 상세 정보:</p>
+                      {debugInfo.map((info, index) => (
+                        <p key={index} className="text-xs text-gray-600 mb-1">{info}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <p className="text-center text-slate-500 text-sm mt-4">
                 제출 버튼을 누르면, 제공된 정보의 처리에 동의하는 것으로 간주됩니다.
