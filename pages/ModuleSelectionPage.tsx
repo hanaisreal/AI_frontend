@@ -103,7 +103,6 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
         setAutoplayBlocked(true);
       }
     }, 5000); // 5 seconds timeout
-    };
 
     // Pre-cache first narrations of both modules
     const preCacheModuleNarrations = async () => {
