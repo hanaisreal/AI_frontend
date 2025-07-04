@@ -229,12 +229,34 @@ export const completeOnboarding = async (
 }> => {
   console.log('FRONTEND: Calling /complete-onboarding with all user data');
   
+  // Determine appropriate filename based on audio format
+  const getAudioFilename = (blob: Blob): string => {
+    const mimeType = blob.type;
+    console.log('🎵 Audio blob MIME type:', mimeType);
+    
+    if (mimeType.includes('mp4')) {
+      return 'voice_recording.m4a';
+    } else if (mimeType.includes('webm')) {
+      return 'voice_recording.webm';
+    } else if (mimeType.includes('wav')) {
+      return 'voice_recording.wav';
+    } else if (mimeType.includes('ogg')) {
+      return 'voice_recording.ogg';
+    } else {
+      // Default to m4a for iOS compatibility
+      return 'voice_recording.m4a';
+    }
+  };
+  
+  const audioFilename = getAudioFilename(audioBlob);
+  console.log('📁 Using audio filename:', audioFilename);
+  
   const formData = new FormData();
   formData.append('name', userData.name);
   formData.append('age', userData.age.toString());
   formData.append('gender', userData.gender);
   formData.append('image', imageFile);
-  formData.append('voice', audioBlob, 'voice_recording.wav');
+  formData.append('voice', audioBlob, audioFilename);
   
   const response = await fetch(`${API_BASE_URL}/api/complete-onboarding`, {
     method: 'POST',

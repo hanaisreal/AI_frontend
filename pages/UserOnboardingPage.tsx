@@ -90,17 +90,17 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
   안녕하세요, 여러분. 
 오늘은 인공지능 기술에 대해 함께 알아보는 시간을 가져보겠습니다.
 
-최근 AI 기술이 빠르게 발전하면서, 
+최근 인공지능 기술이 빠르게 발전하면서, 
 우리 일상생활에도 많은 변화가 일어나고 있습니다.
-스마트폰의 음성인식부터 자동차의 내비게이션까지, 
-AI는 이미 우리 곁에 가까이 있어요.
+음성인식부터 자동 번역기, 자동 주차까지, 
+인공지능은 이미 우리 곁에 가까이 있어요.
 
 하지만 이런 기술들이 항상 좋은 목적으로만 사용되는 것은 아닙니다.
 때로는 사람들을 속이거나 잘못된 정보를 퍼뜨리는 데 악용되기도 해요.
 그래서 우리가 이런 기술들을 올바르게 이해하고, 
 현명하게 대처하는 방법을 배우는 것이 중요합니다.
 
-오늘 함께 배우는 내용이 여러분께 도움이 되기를 바랍니다.
+오늘 함께 배우는 내용이 여러분께 도움이 되기를 바랍니다. 그럼 함께 시작 해볼까요?
 `;
 
   const handleImageSelect = useCallback((file: File) => {
@@ -187,7 +187,29 @@ AI는 이미 우리 곁에 가까이 있어요.
       
       setCurrentPage(Page.CaricatureGenerationIntro);
     } catch (err) {
-      setError("온보딩 중 오류가 발생했습니다. 다시 시도해주세요. 백엔드 서버가 실행 중인지 확인하세요.");
+      console.error("Onboarding error:", err);
+      
+      // More specific error messages for iOS users
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      let errorMessage = "온보딩 중 오류가 발생했습니다. 다시 시도해주세요.";
+      
+      if (err instanceof Error) {
+        if (err.message.includes('Voice file must be an audio file')) {
+          errorMessage = isIOS 
+            ? "iOS Safari에서 음성 파일 형식 오류가 발생했습니다. 다시 녹음해주세요."
+            : "음성 파일 형식이 올바르지 않습니다. 다시 녹음해주세요.";
+        } else if (err.message.includes('network') || err.message.includes('fetch')) {
+          errorMessage = "네트워크 연결을 확인하고 다시 시도해주세요.";
+        } else if (err.message.includes('timeout')) {
+          errorMessage = "요청 시간이 초과되었습니다. 다시 시도해주세요.";
+        }
+      }
+      
+      if (isIOS) {
+        errorMessage += " iOS Safari에서 문제가 발생할 수 있습니다.";
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

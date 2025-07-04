@@ -59,7 +59,54 @@ const useAudioRecorder = (): AudioRecorderResult => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setRecordingState(RecordingState.RECORDING);
       
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      // Comprehensive browser and format detection for iOS compatibility
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      const isChrome = /chrome/i.test(navigator.userAgent);
+      const isFirefox = /firefox/i.test(navigator.userAgent);
+      
+      let mediaRecorderOptions = {};
+      
+      console.log('🔍 Browser detection:', { isIOS, isSafari, isChrome, isFirefox });
+      
+      if (isIOS) {
+        // iOS browsers - test formats in order of preference
+        const iosFormats = [
+          'audio/mp4',
+          'audio/mp4; codecs="mp4a.40.2"',
+          'audio/webm',
+          'audio/webm; codecs="opus"',
+          'audio/ogg; codecs="opus"'
+        ];
+        
+        for (const format of iosFormats) {
+          if (MediaRecorder.isTypeSupported(format)) {
+            mediaRecorderOptions = { mimeType: format };
+            console.log(`✅ iOS: Using ${format}`);
+            break;
+          } else {
+            console.log(`❌ iOS: ${format} not supported`);
+          }
+        }
+      } else {
+        // Desktop browsers
+        const desktopFormats = [
+          'audio/webm; codecs="opus"',
+          'audio/webm',
+          'audio/mp4',
+          'audio/ogg; codecs="opus"'
+        ];
+        
+        for (const format of desktopFormats) {
+          if (MediaRecorder.isTypeSupported(format)) {
+            mediaRecorderOptions = { mimeType: format };
+            console.log(`✅ Desktop: Using ${format}`);
+            break;
+          }
+        }
+      }
+      
+      mediaRecorderRef.current = new MediaRecorder(stream, mediaRecorderOptions);
       audioChunksRef.current = [];
 
       mediaRecorderRef.current.ondataavailable = (event) => {
@@ -67,7 +114,9 @@ const useAudioRecorder = (): AudioRecorderResult => {
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const completeBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' }); // Or 'audio/webm' etc.
+        // Use the same MIME type that was used for recording
+        const recordedMimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
+        const completeBlob = new Blob(audioChunksRef.current, { type: recordedMimeType });
         setAudioBlob(completeBlob);
         const url = URL.createObjectURL(completeBlob);
         setAudioUrl(url);
