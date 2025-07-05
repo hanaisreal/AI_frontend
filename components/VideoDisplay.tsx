@@ -38,12 +38,12 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
   const getVideoContainerClass = () => {
     switch (aspectRatio) {
       case '9:16':
-        return 'w-full max-w-none mx-auto min-h-[70vh] flex items-center justify-center';
+        return 'w-full max-w-none mx-auto flex items-center justify-center';
       case 'square':
-        return 'w-full max-w-none mx-auto min-h-[60vh] flex items-center justify-center';
+        return 'w-full max-w-none mx-auto flex items-center justify-center';
       case '16:9':
       default:
-        return 'w-full max-w-none min-h-[50vh] flex items-center justify-center';
+        return 'w-full max-w-none flex items-center justify-center';
     }
   };
 
@@ -67,7 +67,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
         <video
           ref={videoRef}
           src={videoUrl}
-          className="w-full max-w-full h-auto max-h-[90vh] object-contain"
+          className="w-full max-w-none h-auto object-contain"
           autoPlay={autoPlay}
           muted={!unmuted}
           controls={controls}
