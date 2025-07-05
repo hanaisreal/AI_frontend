@@ -212,7 +212,6 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
         }`}>
           {autoplayBlocked && !audioEnded ? (
             <div className="space-y-3">
-              <p className="text-orange-600 text-lg font-semibold">🔊 오디오 재생이 차단되었습니다</p>
               <button
                 onClick={() => {
                   if (audioRef.current) {
