@@ -485,10 +485,26 @@ const App: React.FC = () => {
   // Load progress from localStorage on app start
   useEffect(() => {
     try {
-      const savedUserId = localStorage.getItem('userId');
+      // Check URL path for user ID (e.g., /28 for user ID 28)
+      const pathname = window.location.pathname;
+      const pathParts = pathname.split('/').filter(part => part.length > 0);
+      const userIdFromPath = pathParts[0]; // Get first part of path
       
-      if (savedUserId && savedUserId !== 'null') {
-        loadUserProgress(Number(savedUserId));
+      let userIdToLoad: string | null = null;
+      
+      if (userIdFromPath && /^\d+$/.test(userIdFromPath)) {
+        // If path contains a valid number, use it as user ID
+        userIdToLoad = userIdFromPath;
+        localStorage.setItem('userId', userIdFromPath);
+        // Clean up the URL to show just the root path
+        window.history.replaceState({}, document.title, '/');
+      } else {
+        // Otherwise, try to get from localStorage
+        userIdToLoad = localStorage.getItem('userId');
+      }
+      
+      if (userIdToLoad && userIdToLoad !== 'null') {
+        loadUserProgress(Number(userIdToLoad));
       } else {
         setIsLoadingProgress(false);
         setIsInitialLoad(false);

@@ -33,9 +33,9 @@ const getApiBaseUrl = () => {
     console.log(`🔍 Detecting API URL for hostname: ${hostname}`);
     
     // Local development
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '192.168.0.19') {
       console.log(`🏠 Local development detected`);
-      return 'http://localhost:8000';
+      return `http://${hostname}:8000`;
     }
     
     // Vercel deployment - be more specific
@@ -278,8 +278,8 @@ export const completeOnboarding = async (
   console.log('🚀 Sending onboarding request with FormData...');
   console.log('📊 FormData contents:');
   for (let [key, value] of formData.entries()) {
-    if (value instanceof File || value instanceof Blob) {
-      console.log(`   - ${key}: ${value.constructor.name} (${value.size} bytes, type: ${value.type})`);
+    if ((value as any) instanceof File || (value as any) instanceof Blob) {
+      console.log(`   - ${key}: ${(value as any).constructor.name} (${(value as File).size} bytes, type: ${(value as File).type})`);
     } else {
       console.log(`   - ${key}: ${value}`);
     }
