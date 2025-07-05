@@ -223,9 +223,9 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
                 }}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                🎵 오디오 재생하기
+                🎵 설명듣기
               </button>
-              <div className="text-sm text-gray-600">또는 아래 버튼을 바로 선택하셔도 됩니다</div>
+              
             </div>
           ) : (
             <p className={`text-orange-600 text-lg font-semibold ${
