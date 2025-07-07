@@ -190,9 +190,12 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             <p className="text-xl md:text-2xl text-slate-700 mb-8 leading-relaxed">{SCRIPTS.allModulesComplete}</p>
-            <Button onClick={() => setCurrentPage(Page.Landing)} variant="primary" size="lg">
-              시작으로 돌아가기
-            </Button>
+            <div className="flex justify-center">
+              <Button onClick={() => setCurrentPage(Page.Landing)} variant="primary" size="lg">
+                시작으로 돌아가기
+              </Button>
+            </div>
+            
           </div>
         </Card>
       </PageLayout>

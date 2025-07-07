@@ -485,17 +485,25 @@ const App: React.FC = () => {
   // Load progress from localStorage on app start
   useEffect(() => {
     try {
-      // Check URL path for user ID (e.g., /28 for user ID 28)
+      // Check URL path for user ID (e.g., /28 for user ID 28) or /new for new user
       const pathname = window.location.pathname;
       const pathParts = pathname.split('/').filter(part => part.length > 0);
-      const userIdFromPath = pathParts[0]; // Get first part of path
+      const firstPathPart = pathParts[0]; // Get first part of path
       
       let userIdToLoad: string | null = null;
       
-      if (userIdFromPath && /^\d+$/.test(userIdFromPath)) {
+      if (firstPathPart === 'new') {
+        // If path is /new, go to landing page for new user creation
+        setCurrentPage(Page.Landing);
+        setIsLoadingProgress(false);
+        setIsInitialLoad(false);
+        // Clean up the URL to show just the root path
+        window.history.replaceState({}, document.title, '/');
+        return;
+      } else if (firstPathPart && /^\d+$/.test(firstPathPart)) {
         // If path contains a valid number, use it as user ID
-        userIdToLoad = userIdFromPath;
-        localStorage.setItem('userId', userIdFromPath);
+        userIdToLoad = firstPathPart;
+        localStorage.setItem('userId', firstPathPart);
         // Clean up the URL to show just the root path
         window.history.replaceState({}, document.title, '/');
       } else {
