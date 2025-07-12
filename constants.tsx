@@ -11,7 +11,7 @@ export const SCRIPTS = {
   welcome: "안녕하세요! 시작하기에 앞서서 스피커 볼륨을 높여주세요!",
   
   // Pre-generation explanations
-  caricatureGenerationStart: "이제 당신의 사진을 바탕으로 특별한 캐릭터를 만들어보겠습니다. AI가 당신의 얼굴 특징을 분석해서 귀여운 캐릭터로 변신시켜드릴게요. 잠시만 기다려주세요!",
+  caricatureGenerationStart: "이제 당신의 사진을 바탕으로 당신과 비슷한 캐릭터를 만들어보겠습니다. AI가 당신의 얼굴 특징을 분석해서 귀여운 캐릭터로 변신시켜드릴게요. 잠시만 기다려주세요!",
   talkingPhotoGenerationStart: "완성된 캐릭터에 생명력을 불어넣어보겠습니다. 당신의 목소리를 이용해서 캐릭터가 실제로 말할 수 있도록 만들어드릴게요. 정말 신기한 기술이죠? 잠시만 기다려주세요!",
   
   caricatureGenerated: "이제 당신만의 특별한 캐릭터가 완성됐어요! 정말 멋지죠?",
