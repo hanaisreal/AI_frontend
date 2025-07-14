@@ -286,8 +286,8 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       console.log('🔍 DEBUG: On step 1, checking voice generation trigger conditions:');
       console.log(`   - voiceId: ${voiceId}`);
       console.log(`   - voiceGenerationTriggered: ${voiceGenerationTriggered}`);
-      console.log(`   - investmentCallAudioUrl exists: ${!!userData?.investmentCallAudioUrl}`);
-      console.log(`   - accidentCallAudioUrl exists: ${!!userData?.accidentCallAudioUrl}`);
+      console.log(`   - investment_call_audio_url exists: ${!!userData?.investment_call_audio_url}`);
+      console.log(`   - accident_call_audio_url exists: ${!!userData?.accident_call_audio_url}`);
     }
     
     // 🎤 Trigger voice generation when clicking SECOND next button (step 1→2 transition)
@@ -295,8 +295,8 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     if (currentStepIndex === 1 && 
         voiceId && 
         !voiceGenerationTriggered &&
-        !userData?.investmentCallAudioUrl && 
-        !userData?.accidentCallAudioUrl) {
+        !userData?.investment_call_audio_url && 
+        !userData?.accident_call_audio_url) {
       console.log('🎤 SECOND NEXT BUTTON: Triggering voice generation (Step 1→2 transition)');
       console.log('🎤 From "딥페이크 기술이란?" to "딥보이스 기술이란?"');
       setVoiceGenerationTriggered(true);
@@ -392,8 +392,8 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     if (currentStepData?.id === 'video-intro-narration' && 
         currentStepData?.title === 'AI, 얼마나 똑똑해졌을까요?' && 
         !scenarioGenerationTriggered &&
-        !userData?.lotteryVideoUrl && 
-        !userData?.crimeVideoUrl) {
+        !userData?.lottery_video_url && 
+        !userData?.crime_video_url) {
       console.log('🚀 Reached trigger step for scenario generation:', currentStepData.title);
       console.log('🚀 Triggering scenario pre-generation in background...');
       
@@ -442,11 +442,11 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       
       triggerScenarioGeneration();
     } else if (currentStepData?.id === 'video-intro-narration' && 
-               (scenarioGenerationTriggered || userData?.lotteryVideoUrl || userData?.crimeVideoUrl)) {
+               (scenarioGenerationTriggered || userData?.lottery_video_url || userData?.crime_video_url)) {
       console.log('🚀 Scenario generation skipped - already triggered or videos exist');
       console.log(`   - scenarioGenerationTriggered: ${scenarioGenerationTriggered}`);
-      console.log(`   - lotteryVideoUrl exists: ${!!userData?.lotteryVideoUrl}`);
-      console.log(`   - crimeVideoUrl exists: ${!!userData?.crimeVideoUrl}`);
+      console.log(`   - lottery_video_url exists: ${!!userData?.lottery_video_url}`);
+      console.log(`   - crime_video_url exists: ${!!userData?.crime_video_url}`);
     }
     
     // Voice generation now handled in handleNext() function instead of useEffect
