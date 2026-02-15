@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from './Button';
+import { isEnglish } from '../lang';
 
 // CSS for modern zoom animation
 const continueButtonStyles = `
@@ -27,11 +28,13 @@ interface ContinueButtonProps {
 const ContinueButton: React.FC<ContinueButtonProps> = ({
   onClick,
   disabled = false,
-  text = '계속하기',
+  text,
   showAnimation = false,
   size = 'lg',
   className = '',
 }) => {
+  const defaultText = isEnglish() ? 'Continue' : '계속하기';
+  const buttonText = text || defaultText;
   return (
     <>
       <style>{continueButtonStyles}</style>
@@ -49,7 +52,7 @@ const ContinueButton: React.FC<ContinueButtonProps> = ({
           animation: 'pulse-zoom 2s ease-in-out infinite',
         } : {}}
       >
-        {text}
+        {buttonText}
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
           fill="none" 

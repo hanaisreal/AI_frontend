@@ -9,7 +9,7 @@ import ContinueButton from '../components/ContinueButton.tsx';
 import ModuleProgressBar from '../components/ModuleProgressBar.tsx';
 import VideoDisplay from '../components/VideoDisplay.tsx';
 import { Page, ModuleStep, QuizQuestion, UserData } from '../types.ts';
-import { QUIZZES, SCRIPTS, PLACEHOLDER_USER_IMAGE, UI_TEXT } from '../lang';
+import { QUIZZES, SCRIPTS, PLACEHOLDER_USER_IMAGE, UI_TEXT, isEnglish } from '../lang';
 import * as apiService from '../services/apiService.ts';
 import { preloadNarration } from '../utils/narrationPreloader.ts';
 
@@ -220,7 +220,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     try {
 
       if (!userData) {
-        return <div className="text-red-500">사용자 데이터가 불완전합니다.</div>;
+        return <div className="text-red-500">{isEnglish() ? 'Incomplete user data.' : '사용자 데이터가 불완전합니다.'}</div>;
       }
 
       // Always use pre-generated content from database
@@ -243,15 +243,17 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         
         return (
           <div className="text-yellow-500 p-4 bg-yellow-50 rounded-lg">
-            <div className="font-medium">시나리오 영상을 준비 중입니다.</div>
+            <div className="font-medium">{isEnglish() ? 'Preparing scenario video.' : '시나리오 영상을 준비 중입니다.'}</div>
             <div className="text-sm mt-2">
-              {step.scenarioType === 'lottery' ? '복권 당첨' : '범죄 용의자'} 시나리오가 생성 중입니다. 잠시 후 다시 시도해주세요.
+              {isEnglish()
+                ? `${step.scenarioType === 'lottery' ? 'Lottery winner' : 'Crime suspect'} scenario is being generated. Please try again shortly.`
+                : `${step.scenarioType === 'lottery' ? '복권 당첨' : '범죄 용의자'} 시나리오가 생성 중입니다. 잠시 후 다시 시도해주세요.`}
             </div>
-            <button 
+            <button
               onClick={refreshUserData}
               className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
             >
-              새로고침
+              {isEnglish() ? 'Refresh' : '새로고침'}
             </button>
           </div>
         );
@@ -262,15 +264,17 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         try {
           // Check if we're on mobile
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-          const fileName = `${step.scenarioType === 'lottery' ? '복권당첨' : '범죄용의자'}_시나리오_${userData.name}.mp4`;
+          const fileName = isEnglish()
+            ? `${step.scenarioType === 'lottery' ? 'LotteryWinner' : 'CrimeSuspect'}_Scenario_${userData.name}.mp4`
+            : `${step.scenarioType === 'lottery' ? '복권당첨' : '범죄용의자'}_시나리오_${userData.name}.mp4`;
           
           if (isMobile) {
             // Mobile approach: Use share API if available, otherwise copy link
             if (navigator.share) {
               try {
                 await navigator.share({
-                  title: '딥페이크 시나리오 영상',
-                  text: `${fileName} - AI 딥페이크 교육용 영상`,
+                  title: isEnglish() ? 'Deepfake Scenario Video' : '딥페이크 시나리오 영상',
+                  text: isEnglish() ? `${fileName} - AI Deepfake Educational Video` : `${fileName} - AI 딥페이크 교육용 영상`,
                   url: talkingPhotoUrl
                 });
                 return;
@@ -283,7 +287,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             try {
               if (navigator.clipboard && window.isSecureContext) {
                 await navigator.clipboard.writeText(talkingPhotoUrl);
-                alert(`영상 링크가 클립보드에 복사되었습니다.\n\n링크를 브라우저 주소창에 붙여넣고 이동한 후, 영상을 길게 눌러서 "동영상 저장"을 선택하세요.\n\n링크: ${talkingPhotoUrl.substring(0, 50)}...`);
+                alert(isEnglish()
+                  ? `Video link copied to clipboard.\n\nPaste the link in your browser, then long-press the video to select "Save Video".\n\nLink: ${talkingPhotoUrl.substring(0, 50)}...`
+                  : `영상 링크가 클립보드에 복사되었습니다.\n\n링크를 브라우저 주소창에 붙여넣고 이동한 후, 영상을 길게 눌러서 "동영상 저장"을 선택하세요.\n\n링크: ${talkingPhotoUrl.substring(0, 50)}...`);
               } else {
                 // Fallback for older browsers
                 const textArea = document.createElement('textarea');
@@ -294,15 +300,19 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
-                alert(`영상 링크가 클립보드에 복사되었습니다.\n\n링크를 브라우저 주소창에 붙여넣고 이동한 후, 영상을 길게 눌러서 "동영상 저장"을 선택하세요.`);
+                alert(isEnglish()
+                  ? `Video link copied to clipboard.\n\nPaste the link in your browser, then long-press the video to select "Save Video".`
+                  : `영상 링크가 클립보드에 복사되었습니다.\n\n링크를 브라우저 주소창에 붙여넣고 이동한 후, 영상을 길게 눌러서 "동영상 저장"을 선택하세요.`);
               }
             } catch (clipboardError) {
               console.error('Clipboard copy failed:', clipboardError);
               // Last resort: Show the link
-              const userResponse = confirm(`모바일에서는 다음 링크를 복사하여 새 탭에서 열어주세요:\n\n${talkingPhotoUrl}\n\n링크를 복사하려면 확인을, 취소하려면 취소를 누르세요.`);
+              const userResponse = confirm(isEnglish()
+                ? `On mobile, copy this link and open it in a new tab:\n\n${talkingPhotoUrl}\n\nClick OK to copy, or Cancel to dismiss.`
+                : `모바일에서는 다음 링크를 복사하여 새 탭에서 열어주세요:\n\n${talkingPhotoUrl}\n\n링크를 복사하려면 확인을, 취소하려면 취소를 누르세요.`);
               if (userResponse) {
                 // Try to select and copy the URL shown in prompt
-                prompt('아래 링크를 복사하여 새 탭에서 열어주세요:', talkingPhotoUrl);
+                prompt(isEnglish() ? 'Copy this link and open it in a new tab:' : '아래 링크를 복사하여 새 탭에서 열어주세요:', talkingPhotoUrl);
               }
             }
             
@@ -334,9 +344,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               
               // Success message for desktop
               setTimeout(() => {
-                alert('영상 다운로드가 시작되었습니다. 다운로드 폴더를 확인해주세요.');
+                alert(isEnglish() ? 'Download started. Please check your Downloads folder.' : '영상 다운로드가 시작되었습니다. 다운로드 폴더를 확인해주세요.');
               }, 500);
-              
+
             } catch (fetchError) {
               console.warn('Blob download failed, falling back to direct link:', fetchError);
               // Fallback to direct link method (still desktop)
@@ -347,15 +357,15 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
-              
+
               setTimeout(() => {
-                alert('영상 다운로드가 시작되었습니다. 브라우저 설정에 따라 다운로드가 차단되었을 수 있습니다.');
+                alert(isEnglish() ? 'Download started. It may have been blocked by your browser settings.' : '영상 다운로드가 시작되었습니다. 브라우저 설정에 따라 다운로드가 차단되었을 수 있습니다.');
               }, 500);
             }
           }
         } catch (error) {
           console.error('Download failed:', error);
-          alert('다운로드에 실패했습니다. 네트워크 연결을 확인하고 다시 시도해주세요.');
+          alert(isEnglish() ? 'Download failed. Please check your network connection and try again.' : '다운로드에 실패했습니다. 네트워크 연결을 확인하고 다시 시도해주세요.');
         }
       };
 
@@ -363,9 +373,11 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         <div className="text-center">
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-orange-600">
-              {step.scenarioType === 'lottery' ? '복권 당첨 시나리오' : '범죄 용의자 시나리오'}
+              {isEnglish()
+                ? (step.scenarioType === 'lottery' ? 'Lottery Winner Scenario' : 'Crime Suspect Scenario')
+                : (step.scenarioType === 'lottery' ? '복권 당첨 시나리오' : '범죄 용의자 시나리오')}
             </h4>
-            <VideoDisplay 
+            <VideoDisplay
               videoUrl={talkingPhotoUrl}
               aspectRatio="9:16"
               unmuted={true}
@@ -384,28 +396,28 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span>영상 다운로드</span>
+                <span>{isEnglish() ? 'Download Video' : '영상 다운로드'}</span>
               </button>
             </div>
             <p className="text-sm text-slate-600 italic">
-              이는 AI 기술을 사용해 생성된 영상입니다. 
+              {isEnglish() ? 'This video was generated using AI technology.' : '이는 AI 기술을 사용해 생성된 영상입니다.'}
             </p>
           </div>
         </div>
       );
     } catch (error) {
       console.error('❌ Error processing faceswap scenario:', error);
-      
+
       // Show more specific error information
-      let errorMessage = '시나리오 생성 중 오류가 발생했습니다.';
+      let errorMessage = isEnglish() ? 'An error occurred while generating the scenario.' : '시나리오 생성 중 오류가 발생했습니다.';
       if (error instanceof Error) {
         errorMessage += ` (${error.message})`;
       }
-      
+
       return (
         <div className="text-red-500 p-4 bg-red-50 rounded-lg">
           <div className="font-medium">{errorMessage}</div>
-          <div className="text-sm mt-2">콘솔을 확인하여 자세한 오류 정보를 확인하세요.</div>
+          <div className="text-sm mt-2">{isEnglish() ? 'Check the console for detailed error information.' : '콘솔을 확인하여 자세한 오류 정보를 확인하세요.'}</div>
         </div>
       );
     }
@@ -430,7 +442,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   const processVoiceCallScenario = async (step: ModuleStep) => {
     try {
       if (!userData) {
-        return <div className="text-red-500">사용자 데이터가 불완전합니다.</div>;
+        return <div className="text-red-500">{isEnglish() ? 'Incomplete user data.' : '사용자 데이터가 불완전합니다.'}</div>;
       }
 
       // Always use pre-generated audio from database
@@ -460,15 +472,17 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         console.error('🔍 accident_call_audio_url:', userData?.accident_call_audio_url);
         return (
           <div className="text-yellow-500 p-4 bg-yellow-50 rounded-lg">
-            <div className="font-medium">시나리오 음성을 준비 중입니다.</div>
+            <div className="font-medium">{isEnglish() ? 'Preparing scenario audio.' : '시나리오 음성을 준비 중입니다.'}</div>
             <div className="text-sm mt-2">
-              {step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 생성 중입니다. 잠시 후 다시 시도해주세요.
+              {isEnglish()
+                ? `${step.scenarioType === 'investment_call' ? 'Investment scam' : 'Accident report'} audio is being generated. Please try again shortly.`
+                : `${step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 생성 중입니다. 잠시 후 다시 시도해주세요.`}
             </div>
-            <button 
+            <button
               onClick={refreshUserData}
               className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
             >
-              새로고침
+              {isEnglish() ? 'Refresh' : '새로고침'}
             </button>
           </div>
         );
@@ -483,16 +497,16 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
               </div>
-              <p className="text-lg font-semibold">친구</p>
-              
+              <p className="text-lg font-semibold">{isEnglish() ? 'Friend' : '친구'}</p>
+
               {/* Voice visualization during call */}
               <div className="py-4">
                 <VoiceVisualization />
-                <p className="text-xs text-gray-400 mt-3">통화 중...</p>
+                <p className="text-xs text-gray-400 mt-3">{isEnglish() ? 'On call...' : '통화 중...'}</p>
               </div>
-              
-              <audio 
-                controls 
+
+              <audio
+                controls
                 autoPlay
                 className="w-full mt-4"
                 src={audioData}
@@ -513,21 +527,21 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                   console.log(`🔄 Audio loading started for ${step.scenarioType}`);
                 }}
               />
-              <p className="text-xs text-gray-400">당신의 복제된 목소리로 재생됩니다</p>
+              <p className="text-xs text-gray-400">{isEnglish() ? 'Playing with your cloned voice' : '당신의 복제된 목소리로 재생됩니다'}</p>
             </div>
           </div>
         </div>
       );
     } catch (error) {
       console.error('Error processing voice call scenario:', error);
-      return <div className="text-red-500">음성 통화 시나리오 생성 중 오류가 발생했습니다.</div>;
+      return <div className="text-red-500">{isEnglish() ? 'An error occurred while generating the voice call scenario.' : '음성 통화 시나리오 생성 중 오류가 발생했습니다.'}</div>;
     }
   };
 
   const processVideoCallScenario = async (step: ModuleStep) => {
     try {
       if (!userData) {
-        return <div className="text-red-500">사용자 데이터가 불완전합니다.</div>;
+        return <div className="text-red-500">{isEnglish() ? 'Incomplete user data.' : '사용자 데이터가 불완전합니다.'}</div>;
       }
 
       // Always use pre-generated audio from database
@@ -557,15 +571,17 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         console.error('🔍 accident_call_audio_url:', userData?.accident_call_audio_url);
         return (
           <div className="text-yellow-500 p-4 bg-yellow-50 rounded-lg">
-            <div className="font-medium">시나리오 음성을 준비 중입니다.</div>
+            <div className="font-medium">{isEnglish() ? 'Preparing scenario audio.' : '시나리오 음성을 준비 중입니다.'}</div>
             <div className="text-sm mt-2">
-              {step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 생성 중입니다. 잠시 후 다시 시도해주세요.
+              {isEnglish()
+                ? `${step.scenarioType === 'investment_call' ? 'Investment scam' : 'Accident report'} audio is being generated. Please try again shortly.`
+                : `${step.scenarioType === 'investment_call' ? '투자 사기' : '사고 신고'} 음성이 생성 중입니다. 잠시 후 다시 시도해주세요.`}
             </div>
-            <button 
+            <button
               onClick={refreshUserData}
               className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
             >
-              새로고침
+              {isEnglish() ? 'Refresh' : '새로고침'}
             </button>
           </div>
         );
@@ -580,16 +596,16 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
               </div>
-              <p className="text-lg font-semibold">가족</p>
-              
+              <p className="text-lg font-semibold">{isEnglish() ? 'Family' : '가족'}</p>
+
               {/* Voice visualization during call */}
               <div className="py-4">
                 <VoiceVisualization />
-                <p className="text-xs text-gray-400 mt-3">통화 중...</p>
+                <p className="text-xs text-gray-400 mt-3">{isEnglish() ? 'On call...' : '통화 중...'}</p>
               </div>
-              
-              <audio 
-                controls 
+
+              <audio
+                controls
                 autoPlay
                 className="w-full mt-4"
                 src={audioData}
@@ -610,14 +626,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                   console.log(`🔄 Audio loading started for ${step.scenarioType}`);
                 }}
               />
-              <p className="text-xs text-gray-400">당신의 복제된 목소리로 재생됩니다</p>
+              <p className="text-xs text-gray-400">{isEnglish() ? 'Playing with your cloned voice' : '당신의 복제된 목소리로 재생됩니다'}</p>
             </div>
           </div>
         </div>
       );
     } catch (error) {
       console.error('Error processing video call scenario:', error);
-      return <div className="text-red-500">영상 통화 시나리오 생성 중 오류가 발생했습니다.</div>;
+      return <div className="text-red-500">{isEnglish() ? 'An error occurred while generating the video call scenario.' : '영상 통화 시나리오 생성 중 오류가 발생했습니다.'}</div>;
     }
   };
 
@@ -830,7 +846,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     if (!currentStep) return null;
 
     if (isLoadingStep) {
-      return <div className="flex justify-center py-12"><LoadingSpinner text="로딩 중..." /></div>;
+      return <div className="flex justify-center py-12"><LoadingSpinner text={isEnglish() ? 'Loading...' : '로딩 중...'} /></div>;
     }
 
     if (stepError) {
@@ -862,7 +878,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             onVideoEnd={handleVideoEnd}
           />
           <p className="text-sm text-slate-600 italic">
-            이 영상은 AI 기술로 만들어진 가짜 영상입니다.
+            {isEnglish() ? 'This video is an AI-generated fake.' : '이 영상은 AI 기술로 만들어진 가짜 영상입니다.'}
           </p>
         </div>
       );
@@ -872,7 +888,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
     switch (currentStep.type) {
       case 'quiz':
         const quizQuestions = currentStep.quizId ? QUIZZES[currentStep.quizId] : null;
-        if (!quizQuestions) return <p className="text-red-500 text-lg">퀴즈를 찾을 수 없습니다.</p>;
+        if (!quizQuestions) return <p className="text-red-500 text-lg">{isEnglish() ? 'Quiz not found.' : '퀴즈를 찾을 수 없습니다.'}</p>;
         return <QuizComponent 
           questions={quizQuestions} 
           onQuizComplete={handleQuizComplete} 
@@ -885,23 +901,23 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
         />;
       
       case 'faceswap_scenario':
-        console.log('🎭 Rendering faceswap_scenario:', { 
-          hasInteractiveContent: !!interactiveContent, 
+        console.log('🎭 Rendering faceswap_scenario:', {
+          hasInteractiveContent: !!interactiveContent,
           isLoadingStep,
-          interactiveContentType: typeof interactiveContent 
+          interactiveContentType: typeof interactiveContent
         });
         return (
           <div className="text-center">
             {interactiveContent ? interactiveContent : (
               <div className="text-slate-700 text-lg">
                 <LoadingSpinner size="lg" />
-                <p className="mt-4">AI 시나리오 생성 중...</p>
-                <p className="text-sm text-slate-500 mt-2">이 작업은 최대 2분까지 소요될 수 있습니다.</p>
+                <p className="mt-4">{isEnglish() ? 'Generating AI scenario...' : 'AI 시나리오 생성 중...'}</p>
+                <p className="text-sm text-slate-500 mt-2">{isEnglish() ? 'This may take up to 2 minutes.' : '이 작업은 최대 2분까지 소요될 수 있습니다.'}</p>
               </div>
             )}
           </div>
         );
-      
+
       case 'voice_call_scenario':
         return (
           <div className="text-center">
@@ -909,14 +925,14 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               <div className="bg-gray-900 text-white p-8 rounded-xl max-w-sm mx-auto">
                 <div className="text-center">
                   <LoadingSpinner size="lg" />
-                  <p className="text-lg font-semibold mt-4">음성 통화 시뮬레이션</p>
-                  <p className="text-sm mt-2">음성 생성 중...</p>
+                  <p className="text-lg font-semibold mt-4">{isEnglish() ? 'Voice Call Simulation' : '음성 통화 시뮬레이션'}</p>
+                  <p className="text-sm mt-2">{isEnglish() ? 'Generating audio...' : '음성 생성 중...'}</p>
                 </div>
               </div>
             )}
           </div>
         );
-      
+
       case 'video_call_scenario':
         return (
           <div className="text-center">
@@ -924,8 +940,8 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
               <div className="bg-gray-900 text-white p-8 rounded-xl max-w-md mx-auto">
                 <div className="text-center">
                   <LoadingSpinner size="lg" />
-                  <p className="text-lg font-semibold mt-4">영상 통화 시뮬레이션</p>
-                  <p className="text-sm mt-2">딥페이크 영상 생성 중...</p>
+                  <p className="text-lg font-semibold mt-4">{isEnglish() ? 'Video Call Simulation' : '영상 통화 시뮬레이션'}</p>
+                  <p className="text-sm mt-2">{isEnglish() ? 'Generating deepfake video...' : '딥페이크 영상 생성 중...'}</p>
                 </div>
               </div>
             )}
@@ -1013,9 +1029,9 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
                       variant="primary"
                     />
                   )} */}
-                  <ContinueButton 
-                    onClick={handleContinueWithPreload} 
-                    text={currentStepIndex === steps.length - 1 ? "모듈 완료" : "계속"}
+                  <ContinueButton
+                    onClick={handleContinueWithPreload}
+                    text={currentStepIndex === steps.length - 1 ? (isEnglish() ? 'Complete Module' : '모듈 완료') : (isEnglish() ? 'Continue' : '계속')}
                     showAnimation={videoEnded}
                   />
                 </div>
@@ -1023,7 +1039,7 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
             </>
           ) : (
                <div className="min-h-[200px] flex items-center justify-center">
-                  <LoadingSpinner text="모듈 준비 중..." />
+                  <LoadingSpinner text={isEnglish() ? 'Preparing module...' : '모듈 준비 중...'} />
                </div>
           )}
         </Card>

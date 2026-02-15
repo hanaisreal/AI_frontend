@@ -3,6 +3,7 @@ import Button from './Button.tsx';
 import Card from './Card.tsx';
 import LoadingSpinner from './LoadingSpinner.tsx';
 import * as apiService from '../services/apiService.ts';
+import { isEnglish } from '../lang';
 
 // Global cache to prevent duplicate API calls
 const audioCache = new Map<string, Promise<string>>();
@@ -113,7 +114,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       }
 
       if (!voiceId) {
-        setError('사용자 음성이 필요합니다. 음성 등록을 완료해주세요.');
+        setError(isEnglish() ? 'User voice is required. Please complete voice registration.' : '사용자 음성이 필요합니다. 음성 등록을 완료해주세요.');
         return;
       }
 
@@ -213,7 +214,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         }
       } catch (err) {
         if (!isCancelled) {
-          setError('음성 생성에 실패했습니다. 다시 시도해주세요.');
+          setError(isEnglish() ? 'Failed to generate voice. Please try again.' : '음성 생성에 실패했습니다. 다시 시도해주세요.');
           setAudioUrl(null);
         }
       } finally {
@@ -312,7 +313,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       audioRef.current.pause();
     } else {
       audioRef.current.play().catch(err => {
-        setError('음성 재생에 실패했습니다.');
+        setError(isEnglish() ? 'Failed to play audio.' : '음성 재생에 실패했습니다.');
       });
     }
   }, [audioUrl, isLoading, isPlaying, onEnd]);
@@ -501,7 +502,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       }
       setIsPlaying(true); // Set playing state immediately
       audioRef.current.play().catch(err => {
-        setError('음성 재생에 실패했습니다.');
+        setError(isEnglish() ? 'Failed to play audio.' : '음성 재생에 실패했습니다.');
         setIsPlaying(false);
       });
     }
@@ -533,7 +534,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
     return (
       <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 mt-8 shadow-lg border-0">
         <div className="text-center">
-          <div className="text-xl text-gray-600 font-medium">계속 진행 중...</div>
+          <div className="text-xl text-gray-600 font-medium">{isEnglish() ? 'Continuing...' : '계속 진행 중...'}</div>
         </div>
       </Card>
     );
@@ -544,7 +545,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
       {isLoading && (
         <div className="flex items-center space-x-4 py-4">
           <LoadingSpinner size="sm" />
-          <span className="text-lg text-gray-600 font-medium">사용자 음성으로 내레이션 생성 중...</span>
+          <span className="text-lg text-gray-600 font-medium">{isEnglish() ? 'Generating narration with your voice...' : '사용자 음성으로 내레이션 생성 중...'}</span>
         </div>
       )}
       
@@ -552,7 +553,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
         <div className="flex items-center justify-between py-4 bg-red-50 rounded-2xl px-4">
           <span className="text-lg text-red-600 font-medium">{error}</span>
           <Button onClick={handleRetry} variant="ghost" size="sm">
-            다시 시도
+            {isEnglish() ? 'Try Again' : '다시 시도'}
           </Button>
         </div>
       )}
@@ -619,7 +620,7 @@ const NarrationPlayer = forwardRef<any, NarrationPlayerProps>(({
                           />
                         </svg>
                         <span className="text-gray-800 group-hover:text-orange-600 font-semibold text-base transition-colors">
-                          다시듣기
+                          {isEnglish() ? 'Replay' : '다시듣기'}
                         </span>
                       </div>
                     </button>

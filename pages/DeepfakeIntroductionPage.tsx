@@ -5,7 +5,7 @@ import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import ContinueButton from '../components/ContinueButton.tsx';
 import VideoDisplay from '../components/VideoDisplay.tsx';
 import { Page, UserData } from '../types.ts';
-import { SCRIPTS, DEEPFAKE_PEOPLE_DATA, DEEPFAKE_IDENTIFICATION_VIDEO_URL, UI_TEXT } from '../lang';
+import { SCRIPTS, DEEPFAKE_PEOPLE_DATA, DEEPFAKE_IDENTIFICATION_VIDEO_URL, UI_TEXT, isEnglish } from '../lang';
 import * as apiService from '../services/apiService.ts';
 import { scheduleNarrationPreload } from '../utils/narrationPreloader.ts';
 
@@ -132,7 +132,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       content: (
         <div className="text-center">
           <p className="text-gray-600 text-lg mb-6">
-            이 영상이 진짜인지 AI로 생성된 가짜 영상인지 판단해보세요.
+            {isEnglish() ? 'Determine whether this video is real or AI-generated.' : '이 영상이 진짜인지 AI로 생성된 가짜 영상인지 판단해보세요.'}
           </p>
           <VideoDisplay 
             videoUrl={DEEPFAKE_PEOPLE_DATA[0].videoUrl}
@@ -146,44 +146,44 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
           {!userGuess && (
             <div className="mt-8 mb-8 p-6 bg-gradient-to-r from-blue-50 to-red-50 rounded-xl border-2 border-gray-200 shadow-lg">
               <h4 className="text-xl font-bold text-gray-800 mb-4 text-center">
-                이 영상이 진짜일까요, 가짜일까요?
+                {isEnglish() ? 'Is this video real or fake?' : '이 영상이 진짜일까요, 가짜일까요?'}
               </h4>
               <p className="text-gray-600 text-center mb-6">
-                영상을 보고 판단해보세요
+                {isEnglish() ? 'Watch and decide' : '영상을 보고 판단해보세요'}
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <button 
+                <button
                   onClick={() => setUserGuess('real')}
                   className="px-12 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-xl font-bold hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                 >
                   <span>✓</span>
-                  <span>진짜</span>
+                  <span>{isEnglish() ? 'Real' : '진짜'}</span>
                 </button>
-                <button 
+                <button
                   onClick={() => setUserGuess('fake')}
                   className="px-12 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-xl font-bold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                 >
                   <span>✗</span>
-                  <span>가짜</span>
+                  <span>{isEnglish() ? 'Fake' : '가짜'}</span>
                 </button>
               </div>
             </div>
           )}
-          
+
           {userGuess && (
             <div className="mt-6 mb-8 p-6 rounded-xl border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 shadow-lg">
               <div className="flex items-center justify-center space-x-3 mb-4">
                 <span className="text-2xl">🤔</span>
                 <p className="text-xl font-bold text-orange-800">
-                  선택 완료!
+                  {isEnglish() ? 'Selection complete!' : '선택 완료!'}
                 </p>
               </div>
               <p className="text-lg font-semibold text-center text-gray-700 mb-3">
-                과연 진짜 <span className={`px-3 py-1 rounded-lg font-bold text-white ${userGuess === 'fake' ? 'bg-red-500' : 'bg-blue-500'}`}>
-                  {userGuess === 'fake' ? '가짜' : '진짜'}
-                </span> 일까요?
+                {isEnglish() ? 'Is it really ' : '과연 진짜 '}<span className={`px-3 py-1 rounded-lg font-bold text-white ${userGuess === 'fake' ? 'bg-red-500' : 'bg-blue-500'}`}>
+                  {userGuess === 'fake' ? (isEnglish() ? 'fake' : '가짜') : (isEnglish() ? 'real' : '진짜')}
+                </span>{isEnglish() ? '?' : ' 일까요?'}
               </p>
-              <p className="text-base text-orange-700 text-center font-medium">정답을 확인하려면 계속하기를 눌러주세요</p>
+              <p className="text-base text-orange-700 text-center font-medium">{isEnglish() ? 'Press Continue to see the answer' : '정답을 확인하려면 계속하기를 눌러주세요'}</p>
             </div>
           )}
         </div>
@@ -203,7 +203,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       content: (
         <div className="text-center">
           <p className="text-gray-600 text-lg mb-6">
-          첫 번째 영상과 비교해서 어떤 차이점이 있는지 관찰해보세요.
+          {isEnglish() ? 'Observe the differences compared to the first video.' : '첫 번째 영상과 비교해서 어떤 차이점이 있는지 관찰해보세요.'}
           </p>
           <VideoDisplay 
             videoUrl={DEEPFAKE_PEOPLE_DATA[1].videoUrl}
@@ -217,44 +217,44 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
           {!userGuess && (
             <div className="mt-8 mb-8 p-6 bg-gradient-to-r from-blue-50 to-red-50 rounded-xl border-2 border-gray-200 shadow-lg">
               <h4 className="text-xl font-bold text-gray-800 mb-4 text-center">
-                이 영상은 어떻게 생각하세요?
+                {isEnglish() ? 'What do you think about this video?' : '이 영상은 어떻게 생각하세요?'}
               </h4>
               <p className="text-gray-600 text-center mb-6">
-                첫 번째 영상과 비교하며 차이점을 찾아보세요
+                {isEnglish() ? 'Compare with the first video and find the differences' : '첫 번째 영상과 비교하며 차이점을 찾아보세요'}
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <button 
+                <button
                   onClick={() => setUserGuess('real')}
                   className="px-12 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-xl font-bold hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                 >
                   <span>✓</span>
-                  <span>진짜</span>
+                  <span>{isEnglish() ? 'Real' : '진짜'}</span>
                 </button>
-                <button 
+                <button
                   onClick={() => setUserGuess('fake')}
                   className="px-12 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-xl font-bold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                 >
                   <span>✗</span>
-                  <span>가짜</span>
+                  <span>{isEnglish() ? 'Fake' : '가짜'}</span>
                 </button>
               </div>
             </div>
           )}
-          
+
           {userGuess && (
             <div className="mt-6 mb-8 p-6 rounded-xl border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 shadow-lg">
               <div className="flex items-center justify-center space-x-3 mb-4">
                 <span className="text-2xl">🤔</span>
                 <p className="text-xl font-bold text-orange-800">
-                  선택 완료!
+                  {isEnglish() ? 'Selection complete!' : '선택 완료!'}
                 </p>
               </div>
               <p className="text-lg font-semibold text-center text-gray-700 mb-3">
-                과연 진짜 <span className={`px-3 py-1 rounded-lg font-bold text-white ${userGuess === 'fake' ? 'bg-red-500' : 'bg-blue-500'}`}>
-                  {userGuess === 'fake' ? '가짜' : '진짜'}
-                </span> 일까요?
+                {isEnglish() ? 'Is it really ' : '과연 진짜 '}<span className={`px-3 py-1 rounded-lg font-bold text-white ${userGuess === 'fake' ? 'bg-red-500' : 'bg-blue-500'}`}>
+                  {userGuess === 'fake' ? (isEnglish() ? 'fake' : '가짜') : (isEnglish() ? 'real' : '진짜')}
+                </span>{isEnglish() ? '?' : ' 일까요?'}
               </p>
-              <p className="text-base text-orange-700 text-center font-medium">정답을 확인하려면 계속하기를 눌러주세요</p>
+              <p className="text-base text-orange-700 text-center font-medium">{isEnglish() ? 'Press Continue to see the answer' : '정답을 확인하려면 계속하기를 눌러주세요'}</p>
             </div>
           )}
         </div>
@@ -549,7 +549,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
               <h3 className="text-2xl font-bold mb-6 text-orange-600">{currentStepData.title}</h3>
               {currentStepData.content}
               <div className="mt-8 flex justify-center items-center space-x-4">
-                <ContinueButton onClick={handleNext} text="다음" showAnimation={true} />
+                <ContinueButton onClick={handleNext} text={isEnglish() ? 'Next' : '다음'} showAnimation={true} />
               </div>
             </div>
           </Card>
@@ -560,8 +560,8 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
           <Card>
             <div className="text-center">
               <h3 className="text-2xl font-bold mb-4 text-orange-600">{currentStepData.title}</h3>
-              <p className="text-gray-600 mb-6">단계 내용이 준비되지 않았습니다.</p>
-              <ContinueButton onClick={handleNext} text="다음" showAnimation={true} />
+              <p className="text-gray-600 mb-6">{isEnglish() ? 'Step content is not ready.' : '단계 내용이 준비되지 않았습니다.'}</p>
+              <ContinueButton onClick={handleNext} text={isEnglish() ? 'Next' : '다음'} showAnimation={true} />
             </div>
           </Card>
         );

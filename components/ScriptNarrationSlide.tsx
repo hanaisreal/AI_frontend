@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import ContinueButton from './ContinueButton';
 import * as apiService from '../services/apiService';
+import { isEnglish } from '../lang';
 
 interface ScriptNarrationSlideProps {
   script: string;
@@ -125,10 +126,10 @@ const ScriptNarrationSlide: React.FC<ScriptNarrationSlideProps> = ({
       </div>
 
       <div className="flex justify-center items-center">
-        <ContinueButton 
+        <ContinueButton
           onClick={onNext}
           showAnimation={isComplete}
-          text="계속하기"
+          text={isEnglish() ? 'Continue' : '계속하기'}
         />
       </div>
     </div>
