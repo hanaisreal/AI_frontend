@@ -5,7 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PageLayout from '../components/PageLayout.tsx';
 import * as apiService from '../services/apiService.ts'; 
 import { Page } from '../types.ts';
-import { SCRIPTS, NARRATOR_VOICE_ID } from '../constants.tsx';
+import { SCRIPTS, NARRATOR_VOICE_ID, UI_TEXT } from '../lang';
 
 interface CaricatureGenerationPageProps {
   setCurrentPage: (page: Page) => void;

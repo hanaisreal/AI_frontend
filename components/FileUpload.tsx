@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useRef } from 'react';
+import { UI_TEXT } from '../lang';
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -9,9 +10,9 @@ interface FileUploadProps {
   isActive?: boolean; // For highlighting when this field should be filled
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ 
-  onFileSelect, 
-  label = "이미지 업로드", 
+const FileUpload: React.FC<FileUploadProps> = ({
+  onFileSelect,
+  label = UI_TEXT.imageUpload,
   acceptedFileTypes = "image/*",
   previewUrl,
   isActive = false
@@ -44,7 +45,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       >
         <div className="space-y-2 text-center">
           {previewUrl ? (
-            <img src={previewUrl} alt="미리보기" className="mx-auto h-32 w-32 object-cover rounded-md shadow-sm border border-slate-300" />
+            <img src={previewUrl} alt={UI_TEXT.preview} className="mx-auto h-32 w-32 object-cover rounded-md shadow-sm border border-slate-300" />
           ) : (
             <svg className="mx-auto h-16 w-16 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
               <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -52,7 +53,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           )}
           <div className="flex text-base text-slate-600">
             <span className="relative rounded-md font-semibold text-orange-600 hover:text-orange-500">
-              <span>{fileName ? '파일 변경' : '파일 업로드'}</span>
+              <span>{fileName ? UI_TEXT.changeFile : UI_TEXT.uploadFile}</span>
               <input 
                 ref={fileInputRef}
                 id="file-upload" 
@@ -63,12 +64,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 accept={acceptedFileTypes} 
               />
             </span>
-            {!fileName && <p className="pl-1">또는 드래그 앤 드롭</p>}
+            {!fileName && <p className="pl-1">{UI_TEXT.orDragDrop}</p>}
           </div>
           {fileName ? (
             <p className="text-sm text-slate-500">{fileName}</p>
           ) : (
-            <p className="text-sm text-slate-500">PNG, JPG, GIF (iPhone 사진 자동 압축)</p>
+            <p className="text-sm text-slate-500">{UI_TEXT.fileTypes}</p>
           )}
         </div>
       </div>

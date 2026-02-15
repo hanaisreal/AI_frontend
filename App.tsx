@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Page, UserData } from './types.ts';
-import { PLACEHOLDER_USER_IMAGE } from './constants.tsx';
+import { PLACEHOLDER_USER_IMAGE } from './lang';
 import * as apiService from './services/apiService.ts';
 
 // Static imports for pages

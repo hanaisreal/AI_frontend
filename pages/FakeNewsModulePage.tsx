@@ -2,7 +2,7 @@
 import React from 'react';
 import BaseModulePage from './BaseModulePage.tsx';
 import { Page, UserData } from '../types.ts';
-import { FAKE_NEWS_MODULE_STEPS, SCRIPTS } from '../constants.tsx';
+import { FAKE_NEWS_MODULE_STEPS, SCRIPTS, UI_TEXT } from '../lang';
 
 interface FakeNewsModulePageProps {
   setCurrentPage: (page: Page) => void;
@@ -22,7 +22,7 @@ interface FakeNewsModulePageProps {
 const FakeNewsModulePage: React.FC<FakeNewsModulePageProps> = (props) => {
   return (
     <BaseModulePage
-      moduleTitle="가짜 뉴스" // Translated title
+      moduleTitle={UI_TEXT.fakeNewsModule}
       steps={FAKE_NEWS_MODULE_STEPS}
       moduleCompletionMessage={SCRIPTS.module1Complete} // Already translated in constants
       {...props}

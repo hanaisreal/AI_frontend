@@ -3,7 +3,7 @@ import PageLayout from '../components/PageLayout.tsx';
 import Card from '../components/Card.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import { Page } from '../types.ts';
-import { SCRIPTS, NARRATOR_VOICE_ID, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
+import { SCRIPTS, NARRATOR_VOICE_ID, PLACEHOLDER_USER_IMAGE, UI_TEXT } from '../lang';
 
 interface CaricatureGenerationIntroPageProps {
   setCurrentPage: (page: Page) => void;

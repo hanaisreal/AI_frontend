@@ -9,7 +9,7 @@ import ContinueButton from '../components/ContinueButton.tsx';
 import ModuleProgressBar from '../components/ModuleProgressBar.tsx';
 import VideoDisplay from '../components/VideoDisplay.tsx';
 import { Page, ModuleStep, QuizQuestion, UserData } from '../types.ts';
-import { QUIZZES, SCRIPTS, PLACEHOLDER_USER_IMAGE } from '../constants.tsx';
+import { QUIZZES, SCRIPTS, PLACEHOLDER_USER_IMAGE, UI_TEXT } from '../lang';
 import * as apiService from '../services/apiService.ts';
 import { preloadNarration } from '../utils/narrationPreloader.ts';
 

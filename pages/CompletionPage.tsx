@@ -3,7 +3,7 @@ import React from 'react';
 import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import PageLayout from '../components/PageLayout.tsx';
-import { SCRIPTS } from '../constants.tsx';
+import { SCRIPTS, UI_TEXT } from '../lang';
 import { Page } from '../types.ts';
 
 interface CompletionPageProps {
@@ -12,7 +12,7 @@ interface CompletionPageProps {
 
 const CompletionPage: React.FC<CompletionPageProps> = ({ setCurrentPage }) => {
   return (
-    <PageLayout title="프로젝트 완료!">
+    <PageLayout title={UI_TEXT.projectComplete}>
       <Card>
         <div className="text-center">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-24 h-24 text-green-500 mx-auto mb-8">
@@ -21,7 +21,7 @@ const CompletionPage: React.FC<CompletionPageProps> = ({ setCurrentPage }) => {
           <p className="text-xl md:text-2xl text-slate-700 mb-10 leading-relaxed">{SCRIPTS.allModulesComplete}</p>
           <div className="flex justify-center">
             <Button onClick={() => setCurrentPage(Page.Landing)} size="lg" variant="primary">
-              환영 페이지로 돌아가기
+              {UI_TEXT.returnToWelcome}
             </Button>
           </div>
         </div>

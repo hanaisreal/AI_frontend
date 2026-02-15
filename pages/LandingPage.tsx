@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import PageLayout from '../components/PageLayout.tsx';
-import { SCRIPTS, NARRATOR_VOICE_ID } from '../constants.tsx';
+import { SCRIPTS, NARRATOR_VOICE_ID, UI_TEXT } from '../lang';
 import { Page } from '../types.ts';
 import * as apiService from '../services/apiService.ts';
 
@@ -43,7 +43,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setCurrentPage }) => {
   }, []);
 
   return (
-    <PageLayout title="딥페이크란 무엇일까">
+    <PageLayout title={UI_TEXT.landingTitle}>
       <Card>
         <div className="text-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-24 h-24 text-orange-500 mx-auto mb-8">
@@ -53,7 +53,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setCurrentPage }) => {
           <p className="text-xl md:text-2xl text-slate-700 mb-10 leading-relaxed">{SCRIPTS.welcome}</p>
           <div className="flex justify-center">
             <Button onClick={() => setCurrentPage(Page.UserOnboarding)} size="lg" variant="primary">
-              시작하기
+              {UI_TEXT.startButton}
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
               </svg>

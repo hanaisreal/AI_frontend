@@ -5,7 +5,7 @@ import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import ContinueButton from '../components/ContinueButton.tsx';
 import VideoDisplay from '../components/VideoDisplay.tsx';
 import { Page, UserData } from '../types.ts';
-import { SCRIPTS, DEEPFAKE_PEOPLE_DATA, DEEPFAKE_IDENTIFICATION_VIDEO_URL} from '../constants.tsx';
+import { SCRIPTS, DEEPFAKE_PEOPLE_DATA, DEEPFAKE_IDENTIFICATION_VIDEO_URL, UI_TEXT } from '../lang';
 import * as apiService from '../services/apiService.ts';
 import { scheduleNarrationPreload } from '../utils/narrationPreloader.ts';
 

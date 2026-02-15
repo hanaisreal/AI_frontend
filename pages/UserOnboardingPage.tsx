@@ -7,7 +7,7 @@ import PageLayout from '../components/PageLayout.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import * as apiService from '../services/apiService.ts';
 import { Page, UserData } from '../types.ts';
-import { PLACEHOLDER_USER_IMAGE, NARRATOR_VOICE_ID, SCRIPTS } from '../constants.tsx';
+import { PLACEHOLDER_USER_IMAGE, NARRATOR_VOICE_ID, SCRIPTS, UI_TEXT } from '../lang';
 import { scheduleNarrationPreload } from '../utils/narrationPreloader.ts';
 
 
@@ -30,14 +30,10 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   
   // Define step titles
-  const stepTitles = [
-    "환영합니다",
-    "안내 사항",
-    "사용자 정보 입력 및 음성 녹음"
-  ];
-  
+  const stepTitles = UI_TEXT.stepTitles;
+
   const getCurrentTitle = () => {
-    return stepTitles[currentStep] || "사용자 정보 입력";
+    return stepTitles[currentStep] || UI_TEXT.enterInfo;
   };
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
@@ -88,14 +84,13 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
   }, [currentStep]);
 
   const scriptForVoiceRecording = `
-아래 질문들의 답변에 미리 고민을 해보시고 음성녹음 버튼을 클릭한 이후 이어서 답변해주세요.
-총 1분 정도 녹음하시면 됩니다.
+${UI_TEXT.voiceRecordingInstruction}
 
-1. 오늘 기분은 어떠신가요? 이유는요?
-2. 아침은 주로 무엇을 드시나요?
-3. 하루 중 언제가 가장 기분이 좋으세요? 이유는요?
-4. 가장 좋아하는 계절은 언제인가요? 그 이유는 무엇인가요?
-5. 주말에는 주로 무엇을 하며 시간을 보내세요?
+${UI_TEXT.voiceQuestion1}
+${UI_TEXT.voiceQuestion2}
+${UI_TEXT.voiceQuestion3}
+${UI_TEXT.voiceQuestion4}
+${UI_TEXT.voiceQuestion5}
 
 `;
 
@@ -372,33 +367,33 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
         return (
           <Card>
             <p className="text-slate-700 text-lg leading-relaxed mb-8 text-center">
-              인적사항을 입력해주세요. 
+              {UI_TEXT.pleaseEnterInfo}
             </p>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="block text-base font-semibold text-slate-700 mb-2">성함</label>
+                <label htmlFor="name" className="block text-base font-semibold text-slate-700 mb-2">{UI_TEXT.nameLabel}</label>
                 <input type="text" name="name" id="name" value={name} onChange={e => setName(e.target.value)} required 
                        className={getFieldClasses('name')} />
               </div>
               <div>
-                <label htmlFor="age" className="block text-base font-semibold text-slate-700 mb-2">나이</label>
+                <label htmlFor="age" className="block text-base font-semibold text-slate-700 mb-2">{UI_TEXT.ageLabel}</label>
                 <input type="number" name="age" id="age" value={age} onChange={e => setAge(e.target.value)} required
                        className={getFieldClasses('age')} />
               </div>
               <div>
-                <label htmlFor="gender" className="block text-base font-semibold text-slate-700 mb-2">성별</label>
+                <label htmlFor="gender" className="block text-base font-semibold text-slate-700 mb-2">{UI_TEXT.genderLabel}</label>
                 <select name="gender" id="gender" value={gender} onChange={e => setGender(e.target.value)} required
                         className={`${getFieldClasses('gender')} appearance-none`}>
-                  <option value="">선택...</option>
-                  <option value="female">여성</option>
-                  <option value="male">남성</option>
+                  <option value="">{UI_TEXT.selectGender}</option>
+                  <option value="female">{UI_TEXT.female}</option>
+                  <option value="male">{UI_TEXT.male}</option>
                 </select>
               </div>
               
               <div>
-                <FileUpload 
-                  onFileSelect={handleImageSelect} 
-                  label="사진 업로드" 
+                <FileUpload
+                  onFileSelect={handleImageSelect}
+                  label={UI_TEXT.photoUpload} 
                   previewUrl={imagePreviewUrl} 
                   isActive={getCurrentActiveField() === 'image'}
                 />
@@ -416,7 +411,7 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
               {/* Show success message when all fields are completed */}
               {getCurrentActiveField() === null && (
                 <p className="text-lg text-green-600 bg-green-100 p-4 rounded-lg border border-green-300 text-center font-semibold">
-                  제출하기 버튼을 눌러주세요.
+                  {UI_TEXT.pleaseSubmit}
                 </p>
               )}
 
@@ -437,11 +432,11 @@ const UserOnboardingPage: React.FC<UserOnboardingPageProps> = ({
               )}
 
               <p className="text-center text-slate-500 text-sm mt-4">
-                제출 버튼을 누르면, 제공된 정보의 처리에 동의하는 것으로 간주됩니다.
+                {UI_TEXT.submitConsent}
               </p>
               <div className="mt-8 flex justify-center">
                 <Button type="submit" variant="primary" size="lg" disabled={!name.trim() || !age.trim() || !gender || !imageFile || !audioBlob || isLoading}>
-                  {isLoading ? '제출 중...' : '제출하기'}
+                  {isLoading ? UI_TEXT.submitting : UI_TEXT.submitButton}
                 </Button>
               </div>
             </form>

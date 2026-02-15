@@ -2,7 +2,7 @@
 import React from 'react';
 import BaseModulePage from './BaseModulePage.tsx';
 import { Page, UserData } from '../types.ts';
-import { IDENTITY_THEFT_MODULE_STEPS, SCRIPTS } from '../constants.tsx';
+import { IDENTITY_THEFT_MODULE_STEPS, SCRIPTS, UI_TEXT } from '../lang';
 
 interface IdentityTheftModulePageProps {
   setCurrentPage: (page: Page) => void;
@@ -22,7 +22,7 @@ interface IdentityTheftModulePageProps {
 const IdentityTheftModulePage: React.FC<IdentityTheftModulePageProps> = (props) => {
   return (
     <BaseModulePage
-      moduleTitle="신원 도용" // Translated title
+      moduleTitle={UI_TEXT.identityTheftModule}
       steps={IDENTITY_THEFT_MODULE_STEPS}
       moduleCompletionMessage={SCRIPTS.module2Complete} // Already translated in constants
       {...props}

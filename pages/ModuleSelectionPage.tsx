@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import PageLayout from '../components/PageLayout.tsx';
-import { SCRIPTS, NARRATOR_VOICE_ID, FAKE_NEWS_MODULE_STEPS, IDENTITY_THEFT_MODULE_STEPS } from '../constants.tsx';
+import { SCRIPTS, NARRATOR_VOICE_ID, FAKE_NEWS_MODULE_STEPS, IDENTITY_THEFT_MODULE_STEPS, UI_TEXT } from '../lang';
 import { Page, UserData } from '../types.ts';
 import * as apiService from '../services/apiService.ts';
 
@@ -266,8 +266,8 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
           >
             <div className={`w-full flex items-center justify-between p-5 rounded-lg ${module1Completed ? "bg-slate-200 text-slate-600" : ""}`}>
               <div className="text-left">
-                  <h3 className={`text-xl font-semibold ${module1Completed ? "text-slate-700" : "text-white"}`}>가짜 뉴스</h3>
-                  <p className={`text-sm mt-1 ${module1Completed ? "text-slate-500" : "opacity-80 text-white"}`}>조작된 영상에 속는 위험성 이해하기.</p>
+                  <h3 className={`text-xl font-semibold ${module1Completed ? "text-slate-700" : "text-white"}`}>{UI_TEXT.fakeNewsModule}</h3>
+                  <p className={`text-sm mt-1 ${module1Completed ? "text-slate-500" : "opacity-80 text-white"}`}>Understanding the dangers of manipulated videos.</p>
               </div>
               {module1Completed ? (
                    <span className="text-green-600 font-semibold ml-4 text-lg whitespace-nowrap">✓ 완료됨</span>
@@ -289,8 +289,8 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
           >
             <div className={`w-full flex items-center justify-between p-5 rounded-lg ${module2Completed ? "bg-slate-200 text-slate-600" : ""}`}>
               <div className="text-left">
-                  <h3 className={`text-xl font-semibold ${module2Completed ? "text-slate-700" : "text-white"}`}>신원 도용</h3>
-                  <p className={`text-sm mt-1 ${module2Completed ? "text-slate-500" : "opacity-80 text-white"}`}>음성 복제의 위험성 이해하기.</p>
+                  <h3 className={`text-xl font-semibold ${module2Completed ? "text-slate-700" : "text-white"}`}>{UI_TEXT.identityTheftModule}</h3>
+                  <p className={`text-sm mt-1 ${module2Completed ? "text-slate-500" : "opacity-80 text-white"}`}>Understanding the dangers of voice cloning.</p>
               </div>
               {module2Completed ? (
                   <span className="text-green-600 font-semibold ml-4 text-lg whitespace-nowrap">✓ 완료됨</span>

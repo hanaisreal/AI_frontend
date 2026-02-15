@@ -5,7 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner.tsx';
 import PageLayout from '../components/PageLayout.tsx';
 import * as apiService from '../services/apiService.ts';
 import { Page, UserData } from '../types.ts';
-import { SCRIPTS } from '../constants.tsx';
+import { SCRIPTS, UI_TEXT } from '../lang';
 
 interface TalkingPhotoGenerationPageProps {
   setCurrentPage: (page: Page) => void;

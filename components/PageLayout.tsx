@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { UI_TEXT } from '../lang';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -19,7 +20,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({ children, title }) => {
             {children}
         </main>
         <footer className="mt-20 text-center text-gray-500 text-lg">
-            <p className="bg-white/60 backdrop-blur-sm rounded-full px-6 py-3 inline-block">&copy; {new Date().getFullYear()} AI 인식 프로젝트. 교육 목적으로만 사용됩니다.</p>
+            <p className="bg-white/60 backdrop-blur-sm rounded-full px-6 py-3 inline-block">&copy; {new Date().getFullYear()} {UI_TEXT.footer}</p>
         </footer>
       </div>
     </div>
