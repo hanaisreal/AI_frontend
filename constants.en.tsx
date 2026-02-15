@@ -1,7 +1,7 @@
 import { QuizQuestion, ModuleStep, PersonIdentificationData } from './types.ts';
 
 // Voice IDs
-export const NARRATOR_VOICE_ID = "z6Kj0hecH20CdetSElRT"; // Initial narrator voice
+export const NARRATOR_VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Sarah - Mature, Reassuring, Confident
 
 export const SCRIPTS = {
   // Initial narrator voice scripts (using voice ID: z6Kj0hecH20CdetSElRT)
