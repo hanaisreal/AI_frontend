@@ -569,7 +569,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   };
 
   return (
-    <PageLayout title={currentStepData?.title || "딥페이크 기술 소개"}>
+    <PageLayout title={currentStepData?.title || (isEnglish() ? "Introduction to Deepfake Technology" : "딥페이크 기술 소개")}>
       {renderStepContent()}
     </PageLayout>
   );

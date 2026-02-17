@@ -3,7 +3,7 @@ import PageLayout from '../components/PageLayout.tsx';
 import Card from '../components/Card.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import { Page } from '../types.ts';
-import { SCRIPTS, NARRATOR_VOICE_ID, PLACEHOLDER_USER_IMAGE, UI_TEXT } from '../lang';
+import { SCRIPTS, NARRATOR_VOICE_ID, PLACEHOLDER_USER_IMAGE, UI_TEXT, isEnglish } from '../lang';
 
 interface TalkingPhotoGenerationIntroPageProps {
   setCurrentPage: (page: Page) => void;
@@ -21,7 +21,7 @@ const TalkingPhotoGenerationIntroPage: React.FC<TalkingPhotoGenerationIntroPageP
   };
 
   return (
-    <PageLayout title="말하는 캐릭터 만들기">
+    <PageLayout title={isEnglish() ? "Creating a Talking Character" : "말하는 캐릭터 만들기"}>
       <Card>
         <PersonaTransitionSlide
           onNext={handleNext}

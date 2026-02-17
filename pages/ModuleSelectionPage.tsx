@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Button from '../components/Button.tsx';
 import Card from '../components/Card.tsx';
 import PageLayout from '../components/PageLayout.tsx';
-import { SCRIPTS, NARRATOR_VOICE_ID, FAKE_NEWS_MODULE_STEPS, IDENTITY_THEFT_MODULE_STEPS, UI_TEXT } from '../lang';
+import { SCRIPTS, NARRATOR_VOICE_ID, FAKE_NEWS_MODULE_STEPS, IDENTITY_THEFT_MODULE_STEPS, UI_TEXT, isEnglish } from '../lang';
 import { Page, UserData } from '../types.ts';
 import * as apiService from '../services/apiService.ts';
 
@@ -183,7 +183,7 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
   }, []);
   if (module1Completed && module2Completed) {
     return (
-      <PageLayout title="모든 모듈 완료!">
+      <PageLayout title={isEnglish() ? "All Modules Complete!" : "모든 모듈 완료!"}>
         <Card>
           <div className="text-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-20 h-20 text-green-500 mx-auto mb-6">
@@ -192,10 +192,10 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
             <p className="text-xl md:text-2xl text-slate-700 mb-8 leading-relaxed">{SCRIPTS.allModulesComplete}</p>
             <div className="flex justify-center">
               <Button onClick={() => setCurrentPage(Page.Landing)} variant="primary" size="lg">
-                시작으로 돌아가기
+                {isEnglish() ? 'Return to Start' : '시작으로 돌아가기'}
               </Button>
             </div>
-            
+
           </div>
         </Card>
       </PageLayout>
@@ -203,7 +203,7 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
   }
 
   return (
-    <PageLayout title="딥페이크가 어떻게 악용될까?">
+    <PageLayout title={isEnglish() ? "How Can Deepfakes Be Misused?" : "딥페이크가 어떻게 악용될까?"}>
       {/* Hidden audio element for background narration */}
       <audio ref={audioRef} hidden />
       
@@ -226,14 +226,14 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
                 }}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                🎵 설명듣기
+                {isEnglish() ? '🎵 Listen to Explanation' : '🎵 설명듣기'}
               </button>
-              
+
             </div>
           ) : (
             <p className={`text-orange-600 text-lg font-semibold ${
               isAudioPlaying ? 'animate-pulse' : ''
-            }`}>📚 학습하고 싶은 주제를 선택해주세요</p>
+            }`}>{isEnglish() ? '📚 Please select a topic to learn' : '📚 학습하고 싶은 주제를 선택해주세요'}</p>
           )}
         </div>
         
@@ -250,7 +250,7 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
               }}
               className="text-sm text-gray-600 hover:text-gray-800 underline"
             >
-              ⏭️ 오디오 건너뛰기
+              {isEnglish() ? '⏭️ Skip Audio' : '⏭️ 오디오 건너뛰기'}
             </button>
           </div>
         )}
@@ -270,7 +270,7 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
                   <p className={`text-sm mt-1 ${module1Completed ? "text-slate-500" : "opacity-80 text-white"}`}>Understanding the dangers of manipulated videos.</p>
               </div>
               {module1Completed ? (
-                   <span className="text-green-600 font-semibold ml-4 text-lg whitespace-nowrap">✓ 완료됨</span>
+                   <span className="text-green-600 font-semibold ml-4 text-lg whitespace-nowrap">{isEnglish() ? '✓ Completed' : '✓ 완료됨'}</span>
               ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7 ml-4 text-white">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -293,7 +293,7 @@ const ModuleSelectionPage: React.FC<ModuleSelectionPageProps> = ({
                   <p className={`text-sm mt-1 ${module2Completed ? "text-slate-500" : "opacity-80 text-white"}`}>Understanding the dangers of voice cloning.</p>
               </div>
               {module2Completed ? (
-                  <span className="text-green-600 font-semibold ml-4 text-lg whitespace-nowrap">✓ 완료됨</span>
+                  <span className="text-green-600 font-semibold ml-4 text-lg whitespace-nowrap">{isEnglish() ? '✓ Completed' : '✓ 완료됨'}</span>
               ) : (
                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7 ml-4 text-white">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />

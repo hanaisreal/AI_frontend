@@ -3,7 +3,7 @@ import PageLayout from '../components/PageLayout.tsx';
 import Card from '../components/Card.tsx';
 import PersonaTransitionSlide from '../components/PersonaTransitionSlide.tsx';
 import { Page } from '../types.ts';
-import { SCRIPTS, NARRATOR_VOICE_ID, PLACEHOLDER_USER_IMAGE, UI_TEXT } from '../lang';
+import { SCRIPTS, NARRATOR_VOICE_ID, PLACEHOLDER_USER_IMAGE, UI_TEXT, isEnglish } from '../lang';
 
 interface CaricatureGenerationIntroPageProps {
   setCurrentPage: (page: Page) => void;
@@ -19,7 +19,7 @@ const CaricatureGenerationIntroPage: React.FC<CaricatureGenerationIntroPageProps
   };
 
   return (
-    <PageLayout title="캐릭터 생성 준비">
+    <PageLayout title={isEnglish() ? "Preparing Character Creation" : "캐릭터 생성 준비"}>
       <Card>
         <PersonaTransitionSlide
           onNext={handleNext}
