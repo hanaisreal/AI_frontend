@@ -25,7 +25,7 @@ const App: React.FC = () => {
   const [userData, setUserDataState] = useState<UserData | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
   const [userImageUrl, setUserImageUrlState] = useState<string | null>(PLACEHOLDER_USER_IMAGE);
-  // const [userAudioBlob, setUserAudioBlobState] = useState<Blob | null>(null);
+  const [userAudioBlob, setUserAudioBlobState] = useState<Blob | null>(null);
   const [voiceId, setVoiceIdState] = useState<string | null>(null);
   const [caricatureUrl, setCaricatureUrlState] = useState<string | null>(null);
   const [talkingPhotoUrl, setTalkingPhotoUrlState] = useState<string | null>(null);
