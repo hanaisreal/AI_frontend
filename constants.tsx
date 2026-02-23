@@ -140,132 +140,132 @@ export const QUIZZES: { [key: string]: QuizQuestion[] } = {
 
 export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
   // 1. Narrator explains fake news concept
-  { 
-    id: 'fn_intro', 
-    title: "가짜 뉴스의 확산", 
-    type: 'narration', 
+  {
+    id: 'fn_intro',
+    title: "The Spread of Fake News",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsDef,
     requires: ['userCaricature']
   },
-  { 
-    id: 'fn_intro_detailed', 
-    title: "가짜 뉴스란 무엇일까요?", 
-    type: 'narration', 
+  {
+    id: 'fn_intro_detailed',
+    title: "What is Fake News?",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsIntroDetailed,
     requires: ['userCaricature']
   },
   // 2. Narrator introduces case studies
-  { 
-    id: 'fn_case_intro', 
-    title: "딥페이크 뉴스 사례 알아보기", 
-    type: 'narration', 
+  {
+    id: 'fn_case_intro',
+    title: "Learning About Deepfake News Cases",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsCase1, // This is the intro for the first case
-    requires: ['userCaricature'] 
+    requires: ['userCaricature']
   },
   // 4. Case 1: Show video (not Zelensky)
-  { 
-    id: 'fn_case1_video', 
-    title: "사례 1: AI 앵커의 딥페이크 뉴스", 
-    type: 'video_case_study', 
-    videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-3.mov" 
+  {
+    id: 'fn_case1_video',
+    title: "Case 1: AI Anchor Deepfake News",
+    type: 'video_case_study',
+    videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-3.mov"
   },
   // 5. Case 1: Wrap up
-  { 
-    id: 'fn_case1_wrapup', 
-    title: "AI가 만든 가짜 앵커를 발견했나요?", 
-    type: 'narration', 
+  {
+    id: 'fn_case1_wrapup',
+    title: "Did You Spot the Fake AI Anchor?",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsCase1WrapUp,
     requires: ['userCaricature']
   },
   // 6. Case 2: Narration (Zelensky)
-  { 
-    id: 'fn_case2_narration', 
-    title: "정치인 딥페이크 영상 사례", 
-    type: 'narration', 
-    narrationScript: SCRIPTS.fakeNewsCase2, 
+  {
+    id: 'fn_case2_narration',
+    title: "Politician Deepfake Video Case",
+    type: 'narration',
+    narrationScript: SCRIPTS.fakeNewsCase2,
     requires: ['userCaricature']
   },
   // 7. Case 2: Show video (Zelensky)
-  { 
-    id: 'fn_case2_video', 
-    title: "사례 2: 젤렌스키 대통령 가짜 영상", 
-    type: 'video_case_study', 
-    videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/part1_case3.mov" 
+  {
+    id: 'fn_case2_video',
+    title: "Case 2: President Zelensky Fake Video",
+    type: 'video_case_study',
+    videoUrl: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/part1_case3.mov"
   },
   // 8. Case 2: Wrap up
-  { 
-    id: 'fn_case2_wrapup', 
-    title: "딥페이크 영상의 특징 찾기", 
-    type: 'narration', 
+  {
+    id: 'fn_case2_wrapup',
+    title: "Finding Deepfake Video Characteristics",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsCase2WrapUp,
     requires: ['userCaricature']
   },
   // 9. Experience introduction
-  { 
-    id: 'fn_experience_intro', 
-    title: "나의 딥페이크 영상 만들어보기", 
-    type: 'narration', 
+  {
+    id: 'fn_experience_intro',
+    title: "Creating My Own Deepfake Video",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsExperienceIntro,
     requires: ['userCaricature']
   },
   // 10. Scenario 1: Lottery winner faceswap + talking photo
-  { 
-    id: 'fn_scenario1', 
-    title: "내가 복권 1등에 당첨됐다면?", 
-    type: 'faceswap_scenario', 
+  {
+    id: 'fn_scenario1',
+    title: "What If I Won the Lottery?",
+    type: 'faceswap_scenario',
     scenarioType: 'lottery',
-    baseImageMale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case1-male.png", 
-    baseImageFemale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case1-female.png", 
+    baseImageMale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case1-male.png",
+    baseImageFemale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case1-female.png",
     audioScript: SCRIPTS.fakeNewsScenario1Audio, // "1등 당첨돼서 정말 기뻐요!"
     requires: ['userImage', 'userVoice']
   },
   // 11. Transition to negative scenario
-  { 
-    id: 'fn_scenario_transition', 
-    title: "악용될 수 있는 가짜 뉴스", 
-    type: 'narration', 
+  {
+    id: 'fn_scenario_transition',
+    title: "Fake News Can Be Misused",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsScenario1to2,
     requires: ['userCaricature']
   },
   // 12. Scenario 2: Crime suspect faceswap + talking photo
-  { 
-    id: 'fn_scenario2', 
-    title: "내가 범죄 용의자로 몰린다면?", 
-    type: 'faceswap_scenario', 
+  {
+    id: 'fn_scenario2',
+    title: "What If I Became a Crime Suspect?",
+    type: 'faceswap_scenario',
     scenarioType: 'crime',
-    baseImageMale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case2-male.png", 
-    baseImageFemale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case2-female.png", 
+    baseImageMale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case2-male.png",
+    baseImageFemale: "https://d3srmxrzq4dz1v.cloudfront.net/video-url/fakenews-case2-female.png",
     audioScript: SCRIPTS.fakeNewsScenario2Audio, // "찍지 마세요. 죄송합니다…"
     requires: ['userImage', 'userVoice']
   },
   // 13. Wrap up scenarios
-  { 
-    id: 'fn_wrap_up', 
-    title: "딥페이크의 위험성 깨닫기", 
-    type: 'narration', 
+  {
+    id: 'fn_wrap_up',
+    title: "Realizing the Dangers of Deepfakes",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsWrapUp,
     requires: ['userCaricature']
   },
   // 14. Detection tips introduction
-  { 
-    id: 'fn_detection_intro', 
-    title: "가짜 뉴스에 속지 않으려면?", 
-    type: 'narration', 
+  {
+    id: 'fn_detection_intro',
+    title: "How to Avoid Being Fooled by Fake News?",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsDetectionIntro,
     requires: ['userCaricature']
   },
   // 15. Detection tips - general advice
-  { 
-    id: 'fn_detection_general', 
-    title: "출처 확인의 중요성", 
-    type: 'narration', 
+  {
+    id: 'fn_detection_general',
+    title: "The Importance of Verifying Sources",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsDetectionTips,
     requires: ['userCaricature']
   },
   // 16. Detection tips - specific visual cues with content
-  { 
-    id: 'fn_detection_tips', 
-    title: "딥페이크 영상 구별하는 방법", 
+  {
+    id: 'fn_detection_tips',
+    title: "How to Identify Deepfake Videos",
     type: 'info', 
     content: `
      <div class="space-y-4">
@@ -282,120 +282,120 @@ export const FAKE_NEWS_MODULE_STEPS: ModuleStep[] = [
     narrationScript: SCRIPTS.fakeNewsDetectionTips2
   },
   // 17. Quiz intro narration (new step)
-  { 
-    id: 'fn_quiz_intro', 
-    title: "배운 내용 확인하기", 
-    type: 'narration', 
+  {
+    id: 'fn_quiz_intro',
+    title: "Review What You Learned",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsQuizIntro, // Add this to SCRIPTS if not present
     requires: ['userCaricature']
   },
   // 18. Quiz 1 - Deepfake visual detection
-  { 
-    id: 'fn_quiz_1', 
-    title: "딥페이크 기술 이해하기", 
-    type: 'quiz', 
+  {
+    id: 'fn_quiz_1',
+    title: "Understanding Deepfake Technology",
+    type: 'quiz',
     quizId: 'fakeNewsQuiz1'
   },
   // 19. Quiz 2 - Audio-visual synchronization
-  { 
-    id: 'fn_quiz_2', 
-    title: "가짜 뉴스 대응 방법", 
-    type: 'quiz', 
+  {
+    id: 'fn_quiz_2',
+    title: "Responding to Fake News",
+    type: 'quiz',
     quizId: 'fakeNewsQuiz2'
   },
   // 20. Module conclusion
-  { 
-    id: 'fn_conclusion', 
-    title: "가짜 뉴스 모듈 완료", 
-    type: 'narration', 
+  {
+    id: 'fn_conclusion',
+    title: "Fake News Module Complete",
+    type: 'narration',
     narrationScript: SCRIPTS.fakeNewsModuleEnd,
     requires: ['userCaricature']
   }
 ];
 
 export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
-  // 1. 신원 도용 개념 설명
+  // 1. Identity theft concept explanation
   {
     id: 'it_intro',
-    title: '신원 도용이란 무엇일까요?',
+    title: 'What is Identity Theft?',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftIntro,
     requires: ['userCaricature']
   },
-  // 2. 신원 도용의 실제 위험성/통계
+  // 2. Real dangers/statistics of identity theft
   {
     id: 'it_def',
-    title: '딥페이크로 인한 신원 도용 급증',
+    title: 'Rising Identity Theft Due to Deepfakes',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftDef,
     requires: ['userCaricature']
   },
-  // 3. 사례 1: 딥페이크 투자/로맨스 사기 소개
+  // 3. Case 1: Deepfake investment/romance scam intro
   {
     id: 'it_case1_intro',
-    title: '로맨스 스캠 딥페이크 사례',
+    title: 'Romance Scam Deepfake Cases',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftCase1Intro,
     requires: ['userCaricature']
   },
-  // 4. 사례 1: 영상
+  // 4. Case 1: Video
   {
     id: 'it_case1_video',
-    title: '사례 1: 딥페이크 로맨스 스캠',
+    title: 'Case 1: Deepfake Romance Scam',
     type: 'video_case_study',
     videoUrl: 'https://d3srmxrzq4dz1v.cloudfront.net/video-url/identitytheft_case1.mov'
   },
-  // 5. 사례 1 wrap-up
+  // 5. Case 1 wrap-up
   {
     id: 'it_case1_wrapup',
-    title: '실시간 딥페이크의 위험성',
+    title: 'Dangers of Real-Time Deepfakes',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftCase1WrapUp,
     requires: ['userCaricature']
   },
-  // 6. 사례 2: 연예인 주식 추천 영상 소개
+  // 6. Case 2: Celebrity stock recommendation video intro
   {
     id: 'it_case2_intro',
-    title: '연예인 딥페이크 투자 사기',
+    title: 'Celebrity Deepfake Investment Scam',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftCase2,
     requires: ['userCaricature']
   },
-  // 7. 사례 2: 영상
+  // 7. Case 2: Video
   {
     id: 'it_case2_video',
-    title: '사례 2: 송혜교, 조인성 주식 추천',
+    title: 'Case 2: Celebrity Stock Recommendation',
     type: 'video_case_study',
     videoUrl: 'https://d3srmxrzq4dz1v.cloudfront.net/video-url/identitytheft_case1.m4v'
   },
-  // 8. 사례 2 wrap-up
+  // 8. Case 2 wrap-up
   {
     id: 'it_case2_wrapup',
-    title: '연예인 사칭의 정교함',
+    title: 'The Sophistication of Celebrity Impersonation',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftCase2WrapUp,
     requires: ['userCaricature']
   },
-  // 9. 체험 소개
+  // 9. Experience intro
   {
     id: 'it_experience_intro',
-    title: '내 목소리로 사기 당하기',
+    title: 'Getting Scammed With My Voice',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftExperienceIntro,
     requires: ['userCaricature']
   },
-  // 10. 시나리오 1: 투자 사기 음성 소개
+  // 10. Scenario 1: Investment scam voice intro
   {
     id: 'it_scenario1_intro',
-    title: '친구 사칭 투자 사기 전화',
+    title: 'Friend Impersonation Investment Scam Call',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftScenario1Intro,
     requires: ['userCaricature']
   },
-  // 11. 시나리오 1: 투자 사기 음성 체험
+  // 11. Scenario 1: Investment scam voice experience
   {
     id: 'it_scenario1',
-    title: '내 목소리로 투자 사기하기',
+    title: 'Investment Scam With My Voice',
     type: 'voice_call_scenario',
     scenarioType: 'investment_call',
     callType: 'voice',
@@ -403,26 +403,26 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
     audioUrl: 'https://d3srmxrzq4dz1v.cloudfront.net/video-url/voice1.mp3',
     requires: ['userVoice']
   },
-  // 12. 음성 변조 설명
+  // 12. Voice modulation explanation
   {
     id: 'it_scenario1_voice_modulation',
-    title: '실시간 음성 변조 기술',
+    title: 'Real-Time Voice Modulation Technology',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftVoiceModulation,
     requires: ['userCaricature']
   },
-  // 13. 시나리오 2: 사고 긴급 전화 소개
+  // 13. Scenario 2: Emergency accident call intro
   {
     id: 'it_scenario2_intro',
-    title: '가족 사칭 긴급 전화',
+    title: 'Family Impersonation Emergency Call',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftScenario2Intro,
     requires: ['userCaricature']
   },
-  // 14. 시나리오 2: 사고 긴급 전화 체험
+  // 14. Scenario 2: Emergency accident call experience
   {
     id: 'it_scenario2',
-    title: '내 목소리로 가족 속이기',
+    title: 'Deceiving Family With My Voice',
     type: 'video_call_scenario',
     scenarioType: 'accident_call',
     callType: 'video',
@@ -435,23 +435,23 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
   // 15. wrap-up
   {
     id: 'it_scenario_wrap_up',
-    title: '음성 사기의 위험성',
+    title: 'Dangers of Voice Scams',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftWrapUp,
     requires: ['userCaricature']
   },
-  // 16. 대응 방안 소개
+  // 16. Response measures intro
   {
     id: 'it_detection_intro',
-    title: '신원 도용 어떻게 막을까?',
+    title: 'How to Prevent Identity Theft?',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftDetectionIntro,
     requires: ['userCaricature']
   },
-  // 17. 대응 방안/팁
+  // 17. Response measures/tips
   {
     id: 'it_detection_tips',
-    title: '가족 보호하는 3가지 방법',
+    title: '3 Ways to Protect Your Family',
     type: 'info',
     content: `
       <div class="space-y-4">
@@ -465,32 +465,32 @@ export const IDENTITY_THEFT_MODULE_STEPS: ModuleStep[] = [
     `,
     narrationScript: SCRIPTS.identityTheftDetectionTips
   },
-  // 18. 퀴즈 안내
+  // 18. Quiz intro
   {
     id: 'it_quiz_intro',
-    title: '배운 내용 확인하기',
+    title: 'Review What You Learned',
     type: 'narration',
     narrationScript: SCRIPTS.identityQuizIntro,
     requires: ['userCaricature']
   },
-  // 19. 퀴즈 1
+  // 19. Quiz 1
   {
     id: 'it_quiz_1',
-    title: '딥보이스 기술 이해하기',
+    title: 'Understanding Deepvoice Technology',
     type: 'quiz',
     quizId: 'identityTheftQuiz1'
   },
-  // 20. 퀴즈 2
+  // 20. Quiz 2
   {
     id: 'it_quiz_2',
-    title: '신원 도용 방지 방법',
+    title: 'Preventing Identity Theft',
     type: 'quiz',
     quizId: 'identityTheftQuiz2'
   },
-  // 21. 모듈 마무리
+  // 21. Module conclusion
   {
     id: 'it_conclusion',
-    title: '신원 도용 모듈 완료',
+    title: 'Identity Theft Module Complete',
     type: 'narration',
     narrationScript: SCRIPTS.identityTheftModuleEnd,
     requires: ['userCaricature']

@@ -812,34 +812,34 @@ const BaseModulePage: React.FC<BaseModulePageProps> = ({
   // };
 
   const getCurrentProgressSection = (step: ModuleStep) => {
-    if (!step) return "개념";
-    
+    if (!step) return "concept";
+
     // Check step ID patterns to determine section
     const stepId = step.id;
-    
-    // Quiz sections are "퀴즈" (quiz) - includes quiz intro and conclusion steps
+
+    // Quiz sections - includes quiz intro and conclusion steps
     if (stepId.includes('quiz') || stepId.includes('conclusion')) {
-      return "퀴즈";
+      return "quiz";
     }
-    
-    // Detection tips and wrap-up are part of "대응" (countermeasures)
+
+    // Detection tips and wrap-up are part of response (countermeasures)
     if (stepId.includes('detection') || stepId.includes('wrap_up')) {
-      return "대응";
+      return "response";
     }
-    
-    // Experience/scenario sections are "실습" (practice)
-    if (stepId.includes('scenario') || stepId.includes('experience') || 
+
+    // Experience/scenario sections are practice
+    if (stepId.includes('scenario') || stepId.includes('experience') ||
         step.type === 'faceswap_scenario' || step.type === 'voice_call_scenario' || step.type === 'video_call_scenario') {
-      return "실습";
+      return "practice";
     }
-    
-    // Case study sections are "사례" (examples)
+
+    // Case study sections
     if (stepId.includes('case') || step.type === 'video_case_study') {
-      return "사례";
+      return "case";
     }
-    
-    // Everything else (intro, concepts, definitions) are "개념" (concepts)
-    return "개념";
+
+    // Everything else (intro, concepts, definitions)
+    return "concept";
   };
 
   const renderContentForStep = () => {

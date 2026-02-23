@@ -61,35 +61,35 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
   const steps = [
     {
       id: 'video-intro-narration',
-      title: 'AI, 얼마나 똑똑해졌을까요?',
+      title: 'How Smart Has AI Become?',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeIntroStart,
       requires: ['userCaricature'],
     },
     {
       id: 'deepfake-concept',
-      title: '딥페이크 기술이란?',
+      title: 'What is Deepfake Technology?',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeConcept,
       requires: ['userCaricature'],
     },
     {
       id: 'deepvoice-concept',
-      title: '딥보이스 기술이란?',
+      title: 'What is Deepvoice Technology?',
       type: 'narration',
       narrationScript: SCRIPTS.deepvoiceConcept,
       requires: ['userCaricature'],
     },
     {
       id: 'deepfake-transition',
-      title: '딥페이크는 어떻게 만들어질까요?',
+      title: 'How Are Deepfakes Made?',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeVideoIntro,
       requires: ['userCaricature'],
     },
     {
       id: 'concept-video',
-      title: '딥페이크와 딥보이스 기술 영상',
+      title: 'Deepfake & Deepvoice Technology Video',
       type: 'info',
       content: (
         <div className="text-center">
@@ -106,28 +106,28 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     },
     {
       id: 'genv-ai-concept',
-      title: 'AI가 가짜 사람을 만들어내요',
+      title: 'AI Creates Fake People',
       type: 'narration',
       narrationScript: SCRIPTS.genAIConcept,
       requires: ['userCaricature'],
     },
     {
       id: 'deepfake-wrapup',
-      title: '빠르게 발전하는 딥페이크 기술',
+      title: 'Rapidly Advancing Deepfake Technology',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeWrapup,
       requires: ['userCaricature'],
     },
     {
       id: 'quiz-intro-narration',
-      title: '진짜인지 가짜인지 맞혀보세요!',
+      title: 'Guess if it\'s Real or Fake!',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeQuizIntro,
       requires: ['userCaricature'],
     },
     {
       id: 'deepfake-quiz-1',
-      title: '영상 1: 딥페이크 영상일까요?',
+      title: 'Video 1: Is This a Deepfake?',
       type: 'info',
       content: (
         <div className="text-center">
@@ -191,14 +191,14 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     },
     {
       id: 'quiz-feedback-1',
-      title: 'AI가 만든 가짜 앵커였어요!',
+      title: 'It Was a Fake Anchor Made by AI!',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeQuiz1,
       requires: ['userCaricature'],
     },
     {
       id: 'deepfake-quiz-2',
-      title: '영상 2: 딥페이크 영상일까요?',
+      title: 'Video 2: Is This a Deepfake?',
       type: 'info',
       content: (
         <div className="text-center">
@@ -262,14 +262,14 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
     },
     {
       id: 'quiz-feedback-2',
-      title: 'AI가 만든 가짜 유튜버였어요!',
+      title: 'It Was a Fake YouTuber Made by AI!',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeQuiz2,
       requires: ['userCaricature'],
     },
     {
       id: 'quiz-complete-narration',
-      title: '딥페이크는 어떻게 악용될까요?',
+      title: 'How Can Deepfakes Be Misused?',
       type: 'narration',
       narrationScript: SCRIPTS.deepfakeQuizComplete,
       requires: ['userCaricature'],
@@ -298,7 +298,7 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
         !userData?.investment_call_audio_url && 
         !userData?.accident_call_audio_url) {
       console.log('🎤 SECOND NEXT BUTTON: Triggering voice generation (Step 1→2 transition)');
-      console.log('🎤 From "딥페이크 기술이란?" to "딥보이스 기술이란?"');
+      console.log('🎤 From "What is Deepfake Technology?" to "What is Deepvoice Technology?"');
       setVoiceGenerationTriggered(true);
       
       // Trigger voice generation in background
@@ -388,9 +388,9 @@ const DeepfakeIntroductionPage: React.FC<DeepfakeIntroductionPageProps> = ({
       return;
     }
     
-    // ✅ NEW: Trigger scenario generation when user reaches the "AI, 얼마나 똑똑해졌을까요?" step (ONCE ONLY)
-    if (currentStepData?.id === 'video-intro-narration' && 
-        currentStepData?.title === 'AI, 얼마나 똑똑해졌을까요?' && 
+    // ✅ NEW: Trigger scenario generation when user reaches the "How Smart Has AI Become?" step (ONCE ONLY)
+    if (currentStepData?.id === 'video-intro-narration' &&
+        currentStepData?.title === 'How Smart Has AI Become?' && 
         !scenarioGenerationTriggered &&
         !userData?.lottery_video_url && 
         !userData?.crime_video_url) {

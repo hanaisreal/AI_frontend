@@ -13,11 +13,11 @@ const ModuleProgressBar: React.FC<ModuleProgressBarProps> = ({
 }) => {
   // Define the sections for both modules
   const sections = [
-    { id: '개념', label: '개념', icon: '💡' },
-    { id: '사례', label: '사례', icon: '📹' },
-    { id: '실습', label: '실습', icon: '🎭' },
-    { id: '대응', label: '대응', icon: '🛡️' },
-    { id: '퀴즈', label: '퀴즈', icon: '🎯' },
+    { id: 'concept', label: 'Concept', icon: '💡' },
+    { id: 'case', label: 'Case', icon: '📹' },
+    { id: 'practice', label: 'Practice', icon: '🎭' },
+    { id: 'response', label: 'Response', icon: '🛡️' },
+    { id: 'quiz', label: 'Quiz', icon: '🎯' },
   ];
 
   // Find current section index
